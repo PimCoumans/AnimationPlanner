@@ -1,6 +1,7 @@
 # AnimationPlanner
 
 Chain multiple `UIView` animations without endlessly nesting in completion closures.
+Very useful with @warpling‘s `CAMediaTimingFunction` extensions, giving you all the curves.
 
 ```swift
 UIView.animateSteps { sequence in
@@ -10,7 +11,7 @@ UIView.animateSteps { sequence in
             view.transform = CGAffineTransform(scaleX: 1.2, y: 1.2)
         }
         .delay(1)
-        .add(duration: 0.5, options: .curveEaseIn) {
+        .add(duration: 0.5, timingFunction: .quadOut) { // example of custom timing function, see referenced gist
             view.transform = .identity
         }
         .delay(1)
