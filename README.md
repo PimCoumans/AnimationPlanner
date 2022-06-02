@@ -3,7 +3,7 @@
 Chain multiple `UIView` animations without endlessly nesting in completion closures.
 Very useful with @warpling‘s [`CAMediaTimingFunction` extensions](https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c), giving you all the animation curves you need.
 
-## How do you use it?
+## How do I do this?
 Add `AnimationPlanner` to your project (through 📦 SPM preferably) and use the `UIView.animateSteps()` method to start adding steps to the provided sequence, like shown below.
 
 ```swift
