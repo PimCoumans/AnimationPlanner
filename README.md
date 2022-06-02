@@ -3,6 +3,9 @@
 Chain multiple `UIView` animations without endlessly nesting in completion closures.
 Very useful with @warpling‘s [`CAMediaTimingFunction` extensions](https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c), giving you all the animation curves you need.
 
+## How do you use it?
+Add `AnimationPlanner` to your project (through 📦 SPM preferably) and use the `UIView.animateSteps()` method to start adding steps to the provided sequence, like shown below.
+
 ```swift
 UIView.animateSteps { sequence in
     sequence
@@ -34,8 +37,7 @@ UIView.animateSteps { sequence in
 }
 ```
 
-The above code creates the following animation. For more examples see the includes sample app.
-
+The above code creates the following animation. For more examples see the included sample app.
 <p align="center">
     <img src="Assets/sample-app.gif" width="293" height="634" />
 </p>
@@ -69,3 +71,10 @@ let package = Package(
   ]
 )
 ```
+
+## Future stuff
+While this API removes a lot of unwanted nesting in completion closures with traditional `UIView.animate...` calls, it could be tidied even more by using Swift‘s function builders, like we see used in SwiftUI. For a future release I‘m planning to refactor the code make use of that, hopefully making it look and work a little better.
+
+Got any feedback? Please let me know! ✌🏻
+
+https://twitter.com/pimcoumans
