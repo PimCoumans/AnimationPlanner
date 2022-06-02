@@ -34,5 +34,5 @@ UIView.animateSteps { sequence in
 }
 ```
 
-<img src="Assets/sample-app.gif" align="right" />
+<img src="Assets/sample-app.gif" align="right" with="293" />
 Test one two
