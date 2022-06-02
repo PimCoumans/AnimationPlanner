@@ -37,5 +37,5 @@ UIView.animateSteps { sequence in
 The above code creates the following animation
 
 <p align="center">
-    <img src="Assets/sample-app.gif" align="right" width="293" height="634" />
+    <img src="Assets/sample-app.gif" width="293" height="634" />
 </p>
