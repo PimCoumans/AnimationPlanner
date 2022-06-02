@@ -3,6 +3,8 @@
 Chain multiple `UIView` animations without endlessly nesting in completion closures.
 Very useful with @warpling‘s [`CAMediaTimingFunction` extensions ](https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c), giving you all the curves.
 
+
+<img src="Assets/sample-app.gif" align="right" width="146" height="317" />
 ```swift
 UIView.animateSteps { sequence in
     sequence
@@ -33,6 +35,4 @@ UIView.animateSteps { sequence in
     view.removeFromSuperview()
 }
 ```
-
-<img src="Assets/sample-app.gif" align="right" width="293" height="634" />
 Test one two
