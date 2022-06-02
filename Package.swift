@@ -27,5 +27,8 @@ let package = Package(
         .testTarget(
             name: "AnimationPlannerTests",
             dependencies: ["AnimationPlanner"]),
+    ],
+    swiftLanguageVersions: [
+        .v5
     ]
 )
