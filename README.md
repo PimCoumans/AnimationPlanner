@@ -34,7 +34,7 @@ UIView.animateSteps { sequence in
 }
 ```
 
-The above code creates the following animation
+The above code creates the following animation. For more examples see the includes sample app.
 
 <p align="center">
     <img src="Assets/sample-app.gif" width="293" height="634" />
