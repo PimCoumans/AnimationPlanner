@@ -5,6 +5,7 @@ Very useful with @warpling‘s [`CAMediaTimingFunction` extensions ](https://gis
 
 
 <img src="Assets/sample-app.gif" align="right" width="146" height="317" />
+
 ```swift
 UIView.animateSteps { sequence in
     sequence
