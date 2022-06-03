@@ -1,6 +1,6 @@
 # AnimationPlanner
 
-Chain multiple `UIView` animations without endlessly nesting in completion closures.
+Chain multiple `UIView` animations without endlessly nesting in completion closures. Used in some of the more superfluous animation in [OK Video](https://okvideo.app/download).
 Very useful with @warpling‘s [`CAMediaTimingFunction` extensions](https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c), giving you all the animation curves you need.
 
 ## How do I do this?
@@ -46,13 +46,13 @@ The above code creates the following animation. For more examples see the includ
 
 ### Adding AnimationPlanner as a package dependency
 
-1. Go to `File` -> `Add Packages` and select your Project
+1. Go to `File` -> `Add Packages` and select your project
 3. Paste `https://github.com/PimCoumans/AnimationPlanner` in the search bar and click on "Add Package"
 4. Select the target(s) in which you want to use AnimationPlanner
 
 ### Swift Package Manager
 
-Add AnimationPlanner as a package dependency, like shown in the example below:
+Manually AnimationPlanner as a package dependency in `package.swift`, like shown in the example below:
 ```swift
 // swift-tools-version:5.6
 
