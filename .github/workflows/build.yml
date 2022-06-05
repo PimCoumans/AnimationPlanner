@@ -1,15 +1,16 @@
 name: Swift
-
 on: [push]
 
 jobs:
   build:
-
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Build
       run: xcodebuild build -scheme 'AnimationPlanner' -destination 'platform=iOS Simulator,name=iPhone 13'
-    - name: Run tests
-      run: xcodebuild test -scheme AnimationPlanner -destination "platform=iOS Simulator,name=iPhone 13"
+  test:
+    runs-on: macos-lastest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Test
+      run: xcodebuild test -scheme 'AnimationPlanner' -destination 'platform=iOS Simulator,name=iPhone 13'
