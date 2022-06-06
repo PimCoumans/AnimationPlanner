@@ -73,6 +73,18 @@ extension AnimationPlannerTests {
         }
     }
     
+    func testNoopSequenceAnimation() {
+        runAnimationTest { completion, duration, _ in
+            UIView.animateSteps { sequence in
+                sequence.add(duration: duration) {
+                    print("🤫 Do nothing")
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
     /// Sequence animation with one step
     func testBasicAnimation() {
         runAnimationTest { completion, duration, _ in
