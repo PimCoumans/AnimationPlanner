@@ -52,7 +52,7 @@ final class AnimationPlannerTests: XCTestCase {
 
 extension AnimationPlannerTests {
     
-    func testUIViewAnimation() throws {
+    func testUIViewAnimation() {
         runAnimationTest { completion, duration, _ in
             UIView.animate(withDuration: duration) {
                 self.performRandomAnimation()
@@ -62,7 +62,7 @@ extension AnimationPlannerTests {
         }
     }
     
-    func testNoopUIViewAnimation() throws {
+    func testNoopUIViewAnimation() {
         XCTExpectFailure("Noop animations should immediately finish")
         runAnimationTest { completion, duration, _ in
             UIView.animate(withDuration: duration) {
@@ -74,7 +74,7 @@ extension AnimationPlannerTests {
     }
     
     /// Sequence animation with one step
-    func testBasicAnimation() throws {
+    func testBasicAnimation() {
         runAnimationTest { completion, duration, _ in
             UIView.animateSteps { sequence in
                 sequence.add(duration: duration) {
@@ -87,7 +87,7 @@ extension AnimationPlannerTests {
     }
     
     /// Performs a sequence animation with two steps using custom `CAMediaTimingFunction`s
-    func testTimingFunctionAnimation() throws {
+    func testTimingFunctionAnimation() {
         let singleDuration: TimeInterval = randomDuration
         let totalDuration = singleDuration * 2
         
@@ -106,7 +106,7 @@ extension AnimationPlannerTests {
     }
     
     /// Creates multiple steps each of varying durations
-    func testMultipleSteps() throws {
+    func testMultipleSteps() {
         let numberOfSteps: Int = 4
         let durations = randomDurations(amount: numberOfSteps)
         let totalDuration = durations.reduce(0, +)
@@ -125,7 +125,7 @@ extension AnimationPlannerTests {
         }
     }
     
-    func testStepsWithDelay() throws {
+    func testStepsWithDelay() {
         let numberOfSteps: Int = 4
         let animations = zip(
             randomDurations(amount: numberOfSteps),
@@ -150,7 +150,7 @@ extension AnimationPlannerTests {
     }
     
     /// Adds one group with a specific number of animations  which all should be performed simultaneously
-    func testGroup() throws {
+    func testGroup() {
         let numberOfSteps: Int = 8
         let durations = randomDurations(amount: numberOfSteps)
         let longestDuration = durations.max()!
