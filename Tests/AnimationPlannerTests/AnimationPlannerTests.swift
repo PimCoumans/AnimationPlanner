@@ -19,137 +19,180 @@ final class AnimationPlannerTests: XCTestCase {
         view = nil
     }
     
-    func testBasicAnimation() throws {
+    /// Runs your animation logic, waits for completion and fails when expected duration varies from provided duration (allowing for precision)
+    /// - Parameters:
+    ///   - duration: Duration of animimation, or total duration of all animation steps, defaults to random duration
+    ///   - precision: Precision to use when comparing expected duration and time to complete animations
+    ///   - animations: Closure where animations should be performed with completion closure to call when completed
+    ///   - completion: Closure to call when animations have completed
+    ///   - usedDuration: Duration for animation, use this argument when no specific duration is provided
+    ///   - usedPrecision: Precision for duration check, use this argument when no specific precision is provided
+    func runAnimationTest(
+        duration: TimeInterval = randomDuration,
+        precision: TimeInterval = durationPrecision,
+        _ animations: @escaping (
+            _ completion: @escaping (Bool) -> Void,
+            _ usedDuration: TimeInterval,
+            _ usedPrecision: TimeInterval) -> Void
+    ) {
         let finishedExpectation = expectation(description: "Animation finished")
-        let duration: TimeInterval = 2
         let startTime = CACurrentMediaTime()
-        UIView.animateSteps { sequence in
-            sequence.add(duration: duration) {
-                self.performRandomAnimation()
-            }
-        } completion: { finished in
-            XCTAssert(finished, "Animation not finished")
-            assertDifference(startTime: startTime, duration: duration)
-            finishedExpectation.fulfill()
-        }
-        waitForExpectations(timeout: duration + (durationPrecision * 2))
-    }
-    
-    func testTimingFunctionAnimation() throws {
-        let finishedExpectation = expectation(description: "Animation finished")
-        let duration: TimeInterval = randomDuration
-        let startTime = CACurrentMediaTime()
-        UIView.animateSteps { sequence in
-            sequence.add(duration: duration, timingFunction: .quadOut) {
-                self.performRandomAnimation()
-            }
-            .add(duration: duration, timingFunction: .quadIn) {
-                self.performRandomAnimation()
-            }
-        } completion: { finished in
-            XCTAssert(finished, "Animation not finished")
-            assertDifference(startTime: startTime, duration: duration * 2)
-            finishedExpectation.fulfill()
-        }
-        waitForExpectations(timeout: duration * 2 + durationPrecision * 2)
-    }
-    
-    func testMultipleSteps() throws {
-        let finishedExpectation = expectation(description: "Animation finished")
-        var totalDuration: TimeInterval = 0
-        let startTime = CACurrentMediaTime()
-        let numberOfSteps: Int = 4
-        let precision = durationPrecision * TimeInterval(numberOfSteps)
         
-        UIView.animateSteps { sequence in
-            for _ in 0..<numberOfSteps {
-                let duration = self.randomDuration
-                totalDuration += duration
+        let completion: (Bool) -> Void = { finished in
+            XCTAssert(finished, "Animation not finished")
+            assertDifference(startTime: startTime, duration: duration, precision: precision)
+            finishedExpectation.fulfill()
+        }
+        // perform actual animation stuff
+        animations(completion, duration, precision)
+        
+        waitForExpectations(timeout: duration + precision * 2)
+    }
+}
+
+extension AnimationPlannerTests {
+    
+    func testUIViewAnimation() throws {
+        runAnimationTest { completion, duration, _ in
+            UIView.animate(withDuration: duration) {
+                self.performRandomAnimation()
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    func testNoopUIViewAnimation() throws {
+        XCTExpectFailure("Noop animations should immediately finish")
+        runAnimationTest { completion, duration, _ in
+            UIView.animate(withDuration: duration) {
+                print("🤫 Do nothing")
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    /// Sequence animation with one step
+    func testBasicAnimation() throws {
+        runAnimationTest { completion, duration, _ in
+            UIView.animateSteps { sequence in
                 sequence.add(duration: duration) {
                     self.performRandomAnimation()
                 }
+            } completion: { finished in
+                completion(finished)
             }
-        } completion: { finished in
-            XCTAssert(finished, "Animation not finished")
-            assertDifference(startTime: startTime, duration: totalDuration, precision: precision)
-            finishedExpectation.fulfill()
         }
-        waitForExpectations(timeout: totalDuration + (precision * 2))
+    }
+    
+    /// Performs a sequence animation with two steps using custom `CAMediaTimingFunction`s
+    func testTimingFunctionAnimation() throws {
+        let singleDuration: TimeInterval = randomDuration
+        let totalDuration = singleDuration * 2
+        
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            UIView.animateSteps { sequence in
+                sequence.add(duration: singleDuration, timingFunction: .quadOut) {
+                    self.performRandomAnimation()
+                }
+                .add(duration: singleDuration, timingFunction: .quadIn) {
+                    self.performRandomAnimation()
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    /// Creates multiple steps each of varying durations
+    func testMultipleSteps() throws {
+        let numberOfSteps: Int = 4
+        let durations = randomDurations(amount: numberOfSteps)
+        let totalDuration = durations.reduce(0, +)
+        let precision = durationPrecision * TimeInterval(numberOfSteps)
+        
+        runAnimationTest(duration: totalDuration, precision: precision) { completion, _, _ in
+            UIView.animateSteps { sequence in
+                for duration in durations {
+                    sequence.add(duration: duration) {
+                        self.performRandomAnimation()
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
     }
     
     func testStepsWithDelay() throws {
-        let finishedExpectation = expectation(description: "Animation finished")
-        var totalDuration: TimeInterval = 0
-        let startTime = CACurrentMediaTime()
         let numberOfSteps: Int = 4
+        let animations = zip(
+            randomDurations(amount: numberOfSteps),
+            randomDurations(amount: numberOfSteps)
+        ).map({ (delay: $0, duration: $1) })
+        
+        let totalDuration = animations.reduce(TimeInterval(0), { $0 + $1.delay + $1.duration })
         let precision = durationPrecision * TimeInterval(numberOfSteps)
         
-        UIView.animateSteps { sequence in
-            for _ in 0..<numberOfSteps {
-                let duration = self.randomDuration
-                totalDuration += duration
-                sequence.add(duration: duration) {
-                    self.performRandomAnimation()
+        runAnimationTest(duration: totalDuration, precision: precision) { completion, _, _ in
+            UIView.animateSteps { sequence in
+                animations.forEach { delay, duration in
+                    sequence.add(duration: duration) {
+                        self.performRandomAnimation()
+                    }
+                    .delay(delay)
                 }
-                let delay = self.randomDuration
-                totalDuration += delay
-                sequence.delay(delay)
+            } completion: { finished in
+                completion(finished)
             }
-        } completion: { finished in
-            XCTAssert(finished, "Animation not finished")
-            assertDifference(startTime: startTime, duration: totalDuration, precision: precision)
-            finishedExpectation.fulfill()
         }
-        waitForExpectations(timeout: totalDuration + (precision * 2))
     }
     
+    /// Adds one group with a specific number of animations  which all should be performed simultaneously
     func testGroup() throws {
-        let finishedExpectation = expectation(description: "Animation finished")
-        var longestDuration: TimeInterval = 0
-        let startTime = CACurrentMediaTime()
         let numberOfSteps: Int = 8
+        let durations = randomDurations(amount: numberOfSteps)
+        let longestDuration = durations.max()!
         
-        UIView.animateSteps { sequence in
-            sequence.addGroup { group in
-                for _ in 0..<numberOfSteps {
-                    let duration = self.randomDuration
-                    longestDuration = max(longestDuration, duration)
+        runAnimationTest(duration: longestDuration) { completion, _, _ in
+            UIView.animateSteps { sequence in
+                sequence.addGroup { group in
+                    for duration in durations {
+                        group.animate(duration: duration) {
+                            self.performRandomAnimationOnNewView()
+                        }
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    /// Adds one group with a specific number of animations  which all should be performed simultaneously,
+    /// but using a the simplified `UIView.animateGroup` method
+    func testSimpleGroup() {
+        let numberOfSteps: Int = 8
+        let durations = randomDurations(amount: numberOfSteps)
+        let longestDuration = durations.max()!
+        
+        runAnimationTest(duration: longestDuration) { completion, _, _ in
+            UIView.animateGroup { group in
+                for duration in durations {
                     group.animate(duration: duration) {
                         self.performRandomAnimationOnNewView()
                     }
                 }
+            } completion: { finished in
+                completion(finished)
             }
-        } completion: { finished in
-            XCTAssert(finished, "Animation not finished")
-            assertDifference(startTime: startTime, duration: longestDuration)
-            finishedExpectation.fulfill()
         }
-        waitForExpectations(timeout: longestDuration * 2)
     }
     
-    func testSimpleGroup() {
-        let finishedExpectation = expectation(description: "Animation finished")
-        var longestDuration: TimeInterval = 0
-        let startTime = CACurrentMediaTime()
-        let numberOfSteps: Int = 8
-        
-        UIView.animateGroup { group in
-            for _ in 0..<numberOfSteps {
-                let duration = self.randomDuration
-                longestDuration = max(longestDuration, duration)
-                group.animate(duration: duration) {
-                    self.performRandomAnimationOnNewView()
-                }
-            }
-        } completion: { finished in
-            XCTAssert(finished, "Animation not finished")
-            assertDifference(startTime: startTime, duration: longestDuration)
-            finishedExpectation.fulfill()
-        }
-        
-        waitForExpectations(timeout: longestDuration + (durationPrecision * 2))
-    }
-    
+    /// Creates a pretty complex animation with mutliple groups each containing multiple sequences
+    /// Groups can contain sequences that perform their animations in sequence, but each sequence
+    /// is running at the same time in each group
     func testSequenceGroup() {        
         let finishedExpectation = expectation(description: "Animation finished")
         var totalDuration: TimeInterval = 0
@@ -211,13 +254,17 @@ private let durationPrecision: TimeInterval = 0.05
 private func assertDifference(startTime: CFTimeInterval, duration: TimeInterval, precision: TimeInterval = durationPrecision) {
     let finishedTime = CACurrentMediaTime() - startTime
     let difference = finishedTime - duration
-    XCTAssert(abs(difference) < precision, "Animation completion time too far off (by \(difference) seconds (precision \(precision)")
+    XCTAssert(abs(difference) < precision, "Animation completion time too far off (by \(difference) seconds (precision \(precision))")
     print("** DIFFERENCE: \(difference), (precision: \(precision))")
 }
 
-extension AnimationPlannerTests {
+private extension AnimationPlannerTests {
     
-    var randomDuration: TimeInterval { TimeInterval.random(in: 0.2...0.8) }
+    class var randomDuration: TimeInterval { TimeInterval.random(in: 0.2...0.8) }
+    var randomDuration: TimeInterval { Self.randomDuration }
+    
+    class func randomDurations(amount: Int) -> [TimeInterval] { (0..<amount).map({ _ in randomDuration }) }
+    func randomDurations(amount: Int) -> [TimeInterval] { Self.randomDurations(amount: amount) }
     
     func performRandomAnimation() {
         performRandomAnimation(on: view!)
