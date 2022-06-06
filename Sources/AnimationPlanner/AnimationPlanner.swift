@@ -323,12 +323,28 @@ fileprivate extension UIView {
         }
         
         let remainingSteps = animatableSteps.dropFirst()
+        let startTime = CACurrentMediaTime()
         
-        // Actually perform animation for first step to animate
-        // with the accumulated delay of possible previous delay steps
+        // Actually perform animations for first remaining step,
+        // delaying for the accumulated delay of possible previous delay steps
         step.animate(withDelay: cummulativeDelay) { finished in
             guard finished else {
                 completion?(finished)
+                return
+            }
+            
+            let actualDuration = CACurrentMediaTime() - startTime
+            let difference = (step.duration + cummulativeDelay) - actualDuration
+            let oneFrameDifference: TimeInterval = 1/60
+            
+            guard difference <= 0.1 || actualDuration > oneFrameDifference else {
+                // UIView animation probably wasn‘t executed because no actual animatable
+                // properties were changed in animation closure. Just wait out remaining time
+                // before moving over to the next step.
+                let waitTime = max(0, difference - oneFrameDifference) // reduce a frame to be safe
+                DispatchQueue.main.asyncAfter(deadline: .now() + waitTime) {
+                    animate(remainingSteps: Array(remainingSteps), completion: completion)
+                }
                 return
             }
             // Recursively call this class method again with the remaining steps
