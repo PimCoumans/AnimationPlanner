@@ -22,7 +22,7 @@ public class AnimationSequence {
         /// - Parameter duration: Duration of the delay in seconds
         case delay(duration: TimeInterval)
         
-        /// An animation step that results in a `UIView.animate()` call with all the necessary options
+        /// An animation step that results in a `UIView.animate()` call with all the necessary parameters
         /// - Parameter duration: Duration of the animation
         /// - Parameter delay: Delay for the animation, only used in some specific cases
         /// - Parameter options: Animation options, when `.repeats` make sure to set a limit or any subsequent next step might not be executed
@@ -33,6 +33,21 @@ public class AnimationSequence {
             delay: TimeInterval,
             options: UIView.AnimationOptions = [],
             timingFunction: CAMediaTimingFunction? = nil,
+            animations: () -> Void)
+        
+        /// An spring-based animation step that results in the appropriate `UIView.animate()` call with all the necessary parameters
+        /// - Parameter duration: Duration of the animation
+        /// - Parameter delay: Delay for the animation, only used in some specific cases
+        /// - Parameter dampingRatio: Daming ratio for the spring animation
+        /// - Parameter velocity: Relative initial velocity for the spring animation
+        /// - Parameter options: Animation options, when `.repeats` make sure to set a limit or any subsequent next step might not be executed
+        /// - Parameter animations: Closure in which values to animate should be changed
+        case springAnimation(
+            duration: TimeInterval,
+            delay: TimeInterval,
+            dampingRatio: CGFloat,
+            velocity: CGFloat,
+            options: UIView.AnimationOptions = [],
             animations: () -> Void)
         
         /// Step that contains group of animation steps, all of which should be performed simultaniously
@@ -72,7 +87,7 @@ private protocol Animatable {
 
 extension AnimationSequence {
     
-    /// Adds an animation to the sequence with all the expected animation options, adding the ability to use a timing function for the interpolation.
+    /// Adds an animation to the sequence with all the expected animation parameters, adding the ability to use a timing function for the interpolation.
     ///
     /// Adding each steps can by done in a chain, as this method returns `Self`
     /// - Note: Adding a timing function will wrap the animation in a `CATransaction` commit
@@ -90,6 +105,31 @@ extension AnimationSequence {
     ) -> Self {
         steps.append(
             .animation(duration: duration, delay: 0, options: options, timingFunction: timingFunction, animations: animations)
+        )
+        return self
+    }
+    
+    /// Adds a spring-based animation to the animation sequence with all the expected animation parameters.
+    ///
+    /// Adding each step in the sequence can by done in a chain, as this method returns `Self`
+    /// - Parameters:
+    ///   - duration: Amount of time (in seconds)  the animation should last
+    ///   - delay: Amount of time (in seconds) the animation should wait to start
+    ///   - dampingRatio: Ratio for damping of spring animation (between 0 and 1)
+    ///   - velocity: Initial velocity of spring animation (1 being full 'distance' in one second)
+    ///   - options: Options to use for the animation
+    ///   - animations: Closure in which values to animate should be changed
+    /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
+    @discardableResult public func addSpring(
+        duration: TimeInterval,
+        delay: TimeInterval = 0,
+        damping dampingRatio: CGFloat,
+        initialVelocity velocity: CGFloat,
+        options: UIView.AnimationOptions = [],
+        animations: @escaping () -> Void
+    ) -> Self {
+        steps.append(
+            .springAnimation(duration: duration, delay: delay, dampingRatio: dampingRatio, velocity: velocity, animations: animations)
         )
         return self
     }
@@ -140,6 +180,31 @@ extension AnimationSequence {
             return self
         }
         
+        /// Adds a spring-based animation to the animation group with all the available options.
+        ///
+        /// Adding each part in the group can by done in a chain, as this method returns `Self`
+        /// - Parameters:
+        ///   - duration: Amount of time (in seconds)  the animation should last
+        ///   - delay: Amount of time (in seconds) the animation should wait to start
+        ///   - dampingRatio: Ratio for damping of spring animation (between 0 and 1)
+        ///   - velocity: Initial velocity of spring animation (1 being full 'distance' in one second)
+        ///   - options: Options to use for the animation
+        ///   - animations: Closure in which values to animate should be changed
+        /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
+        @discardableResult public func animateSpring(
+            duration: TimeInterval,
+            delay: TimeInterval = 0,
+            damping dampingRatio: CGFloat,
+            initialVelocity velocity: CGFloat,
+            options: UIView.AnimationOptions = [],
+            animations: @escaping () -> Void
+        ) -> Self {
+            self.animations.append(
+                .springAnimation(duration: duration, delay: delay, dampingRatio: dampingRatio, velocity: velocity, animations: animations)
+            )
+            return self
+        }
+        
         /// Adds an animation sequence to the animation group
         ///
         /// Adding each part in the group can by done in a chain, as this method returns `Self`
@@ -181,7 +246,7 @@ extension AnimationSequence.Step: Animatable {
     /// Full duration for each step type, uses longest duration of animations in a group
     public var duration: TimeInterval {
         switch self {
-        case .animation(let duration, let delay, _, _, _):
+        case .animation(let duration, let delay, _, _, _), .springAnimation(let duration, let delay, _, _, _, _):
             return duration + delay
         case .delay(let delay):
             return delay
@@ -229,6 +294,16 @@ extension AnimationSequence.Step: Animatable {
             } else {
                 createAnimations(completion)
             }
+        case .springAnimation(let duration, let animationDelay, let dampingRatio, let velocity, let options, let animations):
+            UIView.animate(
+                withDuration: duration,
+                delay: delay + animationDelay,
+                usingSpringWithDamping: dampingRatio,
+                initialSpringVelocity: velocity,
+                options: options,
+                animations: animations,
+                completion: completion
+            )
         case .group(let steps as [Animatable]):
             let sortedSteps = Array(steps.sorted(by: { $0.duration < $1.duration }))
             guard let longestStep = sortedSteps.last else {
