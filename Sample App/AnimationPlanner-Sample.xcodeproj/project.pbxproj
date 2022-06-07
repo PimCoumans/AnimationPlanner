@@ -27,7 +27,7 @@
 		3EF52D652848AEC8000F8222 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3EF52D682848AEC8000F8222 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3EF52D6A2848AEC8000F8222 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		3EF52D772848B070000F8222 /* AnimationPlanner */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = AnimationPlanner; path = ../..; sourceTree = "<group>"; };
+		3EF52D772848B070000F8222 /* AnimationPlanner */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = AnimationPlanner; path = ..; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */

@@ -193,7 +193,7 @@ extension AnimationSequence {
         }
         let count = 50
         let maxRadius: CGFloat = 4
-        for index in 0..count {
+        for index in 0..<count {
             let radius = CGFloat(index) / CGFloat(count) * maxRadius
             add(duration: 0.015, timingFunction: .quintInOut) {
                 view.transform = baseTransform
