@@ -4,13 +4,13 @@
  
 # AnimationPlanner
 
-Chain multiple `UIView` animations without endlessly nesting in completion closures. Used in some of the more superfluous animations in the [OK Video](https://okvideo.app/download) app.
+⛓ Chain multiple `UIView` animations without endlessly nesting in completion closures. Used in some of the more superfluous animations in the [OK Video](https://okvideo.app/download) app.
 Very useful with @warpling‘s [`CAMediaTimingFunction` extensions](https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c), giving you all the animation curves you need.
 
-Read the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get you up to speed, or read on on to see a little example.
+📖 Read the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get you up to speed, or read on on to see a little example.
 
 ## How do I do this?
-Add `AnimationPlanner` to your project (only SPM is currently officially supported) and use the `UIView.animateSteps()` method to start adding steps to the provided sequence, like shown below.
+📦 Add `AnimationPlanner` to your project (only SPM is currently officially supported) and use the `UIView.animateSteps()` method to start adding steps to the provided sequence, like shown below.
 
 ```swift
 UIView.animateSteps { sequence in
@@ -48,11 +48,11 @@ The above code creates the following animation. For more examples see the Sample
     <img src="Assets/sample-app.gif" width="293" height="634" />
 </p>
 
-(The example shows the custom extension methods for `CAMediaTimingFunction` mentioned in the intro)
+_**Note:** The example shows the custom extension methods for `CAMediaTimingFunction` mentioned in the intro_
 
 ## Installation
 
-### Adding AnimationPlanner as a package dependency
+### 🛠 Adding AnimationPlanner as a package dependency
 
 1. Go to `File` -> `Add Packages`
 3. Paste `https://github.com/PimCoumans/AnimationPlanner` in the search bar and click on "Add Package"
@@ -70,7 +70,7 @@ Manually add AnimationPlanner as a package dependency in `package.swift`, by upd
 
 And updating your target‘s dependencies property with `dependencies: ["AnimationPlanner"]`
 
-## Future plans
+## 🔮 Future plans
  
 While this API removes a lot of unwanted nesting in completion closures when using traditional `UIView.animate...` calls, a project is never finished and for future versions I have the following plans:
  - Add support for the spring-based animations
