@@ -51,6 +51,7 @@ final class AnimationPlannerTests: XCTestCase {
     }
 }
 
+// MARK: - Direct UIView animations
 extension AnimationPlannerTests {
     
     func testUIViewAnimation() {
@@ -73,6 +74,9 @@ extension AnimationPlannerTests {
             }
         }
     }
+}
+    
+extension AnimationPlannerTests {
     
     func testNoopSequenceAnimation() {
         runAnimationTest { completion, duration, _ in
@@ -91,6 +95,18 @@ extension AnimationPlannerTests {
         runAnimationTest { completion, duration, _ in
             UIView.animateSteps { sequence in
                 sequence.add(duration: duration) {
+                    self.performRandomAnimation()
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    func testBasicSpringAnimation() {
+        runAnimationTest { completion, usedDuration, usedPrecision in
+            UIView.animateSteps { sequence in
+                sequence.addSpring(duration: usedDuration, damping: 0.86, initialVelocity: 0.2) {
                     self.performRandomAnimation()
                 }
             } completion: { finished in
