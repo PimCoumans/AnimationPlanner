@@ -1,49 +1,24 @@
+#if canImport(UIKit)
 import UIKit
 
-public protocol StepAnimatable {
-    
-    /// Start a sequence where you add each step in the `addSteps` closure. Use the provided `Sequence` object
-    /// to add each step which should either be an actual animation or a delay.
-    /// The `completion` closure is executed when the last animation has finished.
-    /// - Parameters:
-    ///   - addSteps: Closure used to add steps to the provided `Sequence` object
-    ///   - completion: Executed when the last animation has finished.
-    static func animateSteps(_ addSteps: (AnimationSequence) -> Void, completion: ((Bool) -> Void)?)
-
-    /// Start a group animation where you add each animation is performed concurrently. Use the provided `Group` object
-    /// to add each animation.
-    /// The `completion` closure is executed when the last animation has finished.
-    /// - Parameters:
-    ///   - addAnimations: Closure used to add animations to the provided `Group` object
-    ///   - completion: Executed when the longest animation has finished.
-    static func animateGroup(_ addAnimations: (AnimationSequence.Group) -> Void, completion: ((Bool) -> Void)?)
-}
-
-private protocol Animatable {
-    var duration: TimeInterval { get }
-    func animate(withDelay delay: TimeInterval, completion: ((Bool) -> Void)?)
-}
-
-/// Prepared for a future update, where this is returned after starting a sequence
-/// so a progress can be polled and the full sequence can be cancelled
-//private class RunningAnimation {
-//    var duration: TimeInterval = 0
-//    private(set) var remainingSteps: [AnimationSequence.Step] = []
-//
-//    /// Should cancel any animations not yet started
-//    func cancel() {
-//
-//    }
-//}
-
+/// This class is used to add steps to your animation sequence. When starting a sequence animation with `UIView.animateSteps(_:completion:)`, a sequence object is made available through the `addSteps` closure, From within this closure each step should be added to the sequence object.
+///
+/// Each method on ``AnimationSequence`` returns a reference to `Self`, enabling the use of chainging each method call.
+///
+/// Setting up your animation should be done with the following methods:
+/// - ``delay(_:)`` adds a delay to the sequence. Delays are cumulative and are applied to the first actual animation to be performend.
+/// -  ``add(duration:options:timingFunction:animations:)`` adds an animation step to the sequence, providing a specific duration and optionally the `UIView.AnimationOptions` options and a `CAMediaTimingFunction` timing function.
+/// - ``addGroup(with:)`` creates a ``Group`` object to which multiple animations can be added that should be performed simultaneously.
+///
+/// - Note: Each animation is created right before it needs to be executed, so referencing values changed in previous steps is possible.
 public class AnimationSequence {
     
     /// All steps currently added to the sequence
     public fileprivate(set) var steps: [Step] = []
     
-    /// A step for each animation in the sequence.
+    /// A step for each animation in the sequence. These steps are created when using the available methods on ``AnimationSequence``.
     public enum Step {
-        /// A step that merely adds a delay, accumulated for the next step with actual animations
+        /// A step that merely adds a delay, accumulated to be applied to the next step with actual animations.
         /// - Parameter duration: Duration of the delay in seconds
         case delay(duration: TimeInterval)
         
@@ -70,9 +45,34 @@ public class AnimationSequence {
     }
 }
 
+/// Extension methods that start an animation sequence, added to `UIView` by default
+public protocol StepAnimatable {
+    
+    /// Start a sequence where you add each step in the `addSteps` closure. Use the provided `Sequence` object
+    /// to add each step which should either be an actual animation or a delay.
+    /// The `completion` closure is executed when the last animation has finished.
+    /// - Parameters:
+    ///   - addSteps: Closure used to add steps to the provided `Sequence` object
+    ///   - completion: Executed when the last animation has finished.
+    static func animateSteps(_ addSteps: (AnimationSequence) -> Void, completion: ((Bool) -> Void)?)
+
+    /// Start a group animation where you add each animation is performed concurrently. Use the provided `Group` object
+    /// to add each animation.
+    /// The `completion` closure is executed when the last animation has finished.
+    /// - Parameters:
+    ///   - addAnimations: Closure used to add animations to the provided `Group` object
+    ///   - completion: Executed when the longest animation has finished.
+    static func animateGroup(_ addAnimations: (AnimationSequence.Group) -> Void, completion: ((Bool) -> Void)?)
+}
+
+private protocol Animatable {
+    var duration: TimeInterval { get }
+    func animate(withDelay delay: TimeInterval, completion: ((Bool) -> Void)?)
+}
+
 extension AnimationSequence {
     
-    /// Adds an animation to the sequence with all the available options.
+    /// Adds an animation to the sequence with all the expected animation options, adding the ability to use a timing function for the interpolation.
     ///
     /// Adding each steps can by done in a chain, as this method returns `Self`
     /// - Note: Adding a timing function will wrap the animation in a `CATransaction` commit
@@ -81,7 +81,7 @@ extension AnimationSequence {
     ///   - options: Options to use for the animation
     ///   - timingFunction: `CAMediaTimingFunction` to use for animation
     ///   - animations: Closure in which values to animate should be changed
-    /// - Returns: Returns self, enabling the use of chaining mulitple calls
+    /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
     @discardableResult public func add(
         duration: TimeInterval,
         options: UIView.AnimationOptions = [],
@@ -97,9 +97,9 @@ extension AnimationSequence {
     /// Adds a delay to the animation sequence
     ///
     /// While this adds an actual step to the sequence, in practice the next step that actually does
-    /// the animation will use the delay of the previous steps (or all previous delays leading up to that step)
+    /// the animation will use the delay of the previous steps (or all previous delays leading up to that step).
     /// - Parameter delay: Duration of the delay
-    /// - Returns: Returns self, enabling the use of chaining mulitple calls
+    /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
     @discardableResult public func delay(_ duration: TimeInterval) -> Self {
         steps.append(
             .delay(duration: duration)
@@ -126,7 +126,7 @@ extension AnimationSequence {
         ///   - options: Options to use for the animation
         ///   - timingFunction: `CAMediaTimingFunction` to use for animation
         ///   - animations: Closure in which values to animate should be changed
-        /// - Returns: Returns self, enabling the use of chaining mulitple calls
+        /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
         @discardableResult public func animate(
             duration: TimeInterval,
             delay: TimeInterval = 0,
@@ -149,7 +149,7 @@ extension AnimationSequence {
         ///   - options: Options to use for the animation
         ///   - timingFunction: `CAMediaTimingFunction` to use for animation
         ///   - animations: Closure in which values to animate should be changed
-        /// - Returns: Returns self, enabling the use of chaining mulitple calls
+        /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
         @discardableResult public func animateSteps(_ addSteps: (AnimationSequence) -> Void) -> Self {
             let sequence = AnimationSequence()
             addSteps(sequence)
@@ -164,7 +164,7 @@ extension AnimationSequence {
     
     /// Adds a group of animations, all of which will be executed add once.
     /// - Parameter addAnimations: Closure used to add animations to the provided `Group` object
-    /// - Returns: Returns self, enabling the use of chaining mulitple calls
+    /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
     @discardableResult public func addGroup(with addAnimations: (Group) -> Void) -> Self {
         let group = Group()
         addAnimations(group)
@@ -264,9 +264,9 @@ extension AnimationSequence: Animatable {
     }
 }
 
-extension UIView: StepAnimatable {
+extension StepAnimatable {
     
-    public class func animateSteps(_ addSteps: (AnimationSequence) -> Void, completion: ((Bool) -> Void)? = nil) {
+    public static func animateSteps(_ addSteps: (AnimationSequence) -> Void, completion: ((Bool) -> Void)? = nil) {
         let sequence = AnimationSequence()
         
         // Call the block with the sequence object,
@@ -285,13 +285,16 @@ extension UIView: StepAnimatable {
     }
 }
 
-fileprivate extension UIView {
+/// Applying ``StepAnimatable``  to `UIView`
+extension UIView: StepAnimatable { }
+
+fileprivate extension StepAnimatable {
     
     /// Recursive method that calls itself with less remaining steps each time
     /// - Parameters:
     ///   - steps: Array of steps that needs to be animated
     ///   - completion: Completion closure to be executed when last step has finished
-    class func animate(remainingSteps steps: [AnimationSequence.Step], startingDelay: TimeInterval = 0, completion: ((Bool) -> Void)? = nil) {
+    static func animate(remainingSteps steps: [AnimationSequence.Step], startingDelay: TimeInterval = 0, completion: ((Bool) -> Void)? = nil) {
         
         var cummulativeDelay: TimeInterval = startingDelay
         
@@ -352,3 +355,4 @@ fileprivate extension UIView {
         }
     }
 }
+#endif
