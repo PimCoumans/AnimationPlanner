@@ -182,6 +182,9 @@ extension ViewController {
 }
 
 extension AnimationSequence {
+    /// Adds a custom shake animation on the provided view
+    /// - Parameter view: View to which the transform should be applied
+    /// - Returns: Extension methods ideally should return `Self` so each method call can be chained
     func shake(_ view: UIView) -> Self {
         var baseTransform: CGAffineTransform = .identity
         add(duration: 0) {
@@ -190,9 +193,9 @@ extension AnimationSequence {
         }
         let count = 50
         let maxRadius: CGFloat = 4
-        let moveButton: (_ index: Int) -> Void = { index in
+        for index in 0..count {
             let radius = CGFloat(index) / CGFloat(count) * maxRadius
-            self.add(duration: 0.015, timingFunction: .quintInOut) {
+            add(duration: 0.015, timingFunction: .quintInOut) {
                 view.transform = baseTransform
                     .translatedBy(
                         x:CGFloat.random(in: -radius...radius),
@@ -200,8 +203,6 @@ extension AnimationSequence {
                     )
             }
         }
-        (0...count).forEach(moveButton)
-//        (0...count).map { count - $0 }.forEach(moveButton)
         return self
     }
 }

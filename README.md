@@ -1,11 +1,16 @@
-[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FPimCoumans%2FAnimationPlanner%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/PimCoumans/AnimationPlanner) [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FPimCoumans%2FAnimationPlanner%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/PimCoumans/AnimationPlanner)
+[![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FPimCoumans%2FAnimationPlanner%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/PimCoumans/AnimationPlanner)
+ [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FPimCoumans%2FAnimationPlanner%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/PimCoumans/AnimationPlanner)
+ 
+ 
 # AnimationPlanner
 
-Chain multiple `UIView` animations without endlessly nesting in completion closures. Used in some of the more superfluous animations in the [OK Video](https://okvideo.app/download) app.
+⛓ Chain multiple `UIView` animations without endlessly nesting in completion closures. Used in some of the more superfluous animations in the [OK Video](https://okvideo.app/download) app.
 Very useful with @warpling‘s [`CAMediaTimingFunction` extensions](https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c), giving you all the animation curves you need.
 
+📖 Read the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get you up to speed, or read on on to see a little example.
+
 ## How do I do this?
-Add `AnimationPlanner` to your project (through 📦 SPM preferably) and use the `UIView.animateSteps()` method to start adding steps to the provided sequence, like shown below.
+📦 Add `AnimationPlanner` to your project (only SPM is currently officially supported) and use the `UIView.animateSteps()` method to start adding steps to the provided sequence, like shown below.
 
 ```swift
 UIView.animateSteps { sequence in
@@ -38,44 +43,40 @@ UIView.animateSteps { sequence in
 }
 ```
 
-The above code creates the following animation. For more examples see the included sample app.
+The above code creates the following animation. For more examples see the Sample App available when cloning the repo.
 <p align="center">
     <img src="Assets/sample-app.gif" width="293" height="634" />
 </p>
 
+_**Note:** The example shows the custom extension methods for `CAMediaTimingFunction` mentioned in the intro_
+
 ## Installation
 
-### Adding AnimationPlanner as a package dependency
+### 🛠 Adding AnimationPlanner as a package dependency
 
-1. Go to `File` -> `Add Packages` and select your project
+1. Go to `File` -> `Add Packages`
 3. Paste `https://github.com/PimCoumans/AnimationPlanner` in the search bar and click on "Add Package"
 4. Select the target(s) in which you want to use AnimationPlanner
 
-### Swift Package Manager
+### 📦 Swift Package Manager
 
-Manually AnimationPlanner as a package dependency in `package.swift`, like shown in the example below:
+Manually add AnimationPlanner as a package dependency in `package.swift`, by updating your package definition with: 
+
 ```swift
-// swift-tools-version:5.6
-
-import PackageDescription
-
-let package = Package(
-  name: "YourProject",
-  platforms: [
-       .iOS(.v12),
-  ],
   dependencies: [
     .package(name: "AnimationPlanner", url: "https://github.com/PimCoumans/AnimationPlanner.git", .branch("main"))
   ],
-  targets: [
-    .target(name: "YourProject", dependencies: ["AnimationPlanner"])
-  ]
-)
 ```
 
-## Future stuff
-While this API removes a lot of unwanted nesting in completion closures with traditional `UIView.animate...` calls, it could be tidied even more by using Swift‘s function builders, like we see used in SwiftUI. For a future release I‘m planning to refactor the code make use of that, hopefully making it look and work a little better.
+And updating your target‘s dependencies property with `dependencies: ["AnimationPlanner"]`
 
-Got any feedback? Please let me know! ✌🏻
+## 🔮 Future plans
+ 
+While this API removes a lot of unwanted nesting in completion closures when using traditional `UIView.animate...` calls, a project is never finished and for future versions I have the following plans:
+ - Add support for the spring-based animations
+ - Tidy the API even more by using Swift‘s builder pattern, like we see used in SwiftUI. In practice this would mean removing one more indent in your code!
+ - Maybe even allow this package to be used with SwiftUI? No idea how that would work.
+ 
+Got any feedback or suggestions? Please let me know! ✌🏻
 
-https://twitter.com/pimcoumans
+→ [twitter.com/pimcoumans](https://twitter.com/pimcoumans)
