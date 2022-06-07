@@ -53,7 +53,7 @@ extension ViewController {
             let view = setInitialSubviewState()
             sequence
                 .delay(0.35) // A delay waits for the given amount of seconds to start the next step
-                .add(duration: 0.5, timingFunction: .quartOut) {
+                .addSpring(duration: 0.5, damping: 0.79, initialVelocity: 0) {
                     view.alpha = 1
                     view.center.y = self.view.bounds.midY
                 }
@@ -64,7 +64,7 @@ extension ViewController {
                     view.backgroundColor = .systemRed
                 }
                 .delay(0.2)
-                .add(duration: 0.12, timingFunction: .backOut) {
+                .addSpring(duration: 0.25, damping: 0.52, initialVelocity: 0) {
                     view.backgroundColor = .systemBlue
                     view.layer.cornerRadius = 0
                     view.transform = .identity
