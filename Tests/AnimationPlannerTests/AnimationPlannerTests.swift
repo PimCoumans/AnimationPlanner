@@ -1,7 +1,6 @@
 import XCTest
 import AnimationPlanner
 
-#if canImport(UIKit)
 final class AnimationPlannerTests: XCTestCase {
     
     var window: UIWindow!
@@ -346,7 +345,6 @@ private extension AnimationPlannerTests {
         }
     }
 }
-#endif
 
 // from @warpling‘s https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c
 extension CAMediaTimingFunction {
