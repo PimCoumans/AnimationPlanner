@@ -73,6 +73,7 @@ And updating your target‘s dependencies property with `dependencies: ["Animati
 ## 🔮 Future plans
  
 While this API removes a lot of unwanted nesting in completion closures when using traditional `UIView.animate...` calls, a project is never finished and for future versions I have the following plans:
+ - Cancel running animation sequences. Current idea is returning a `RunningAnimation` object with a `cancel()` method and information about the state of the animation sequence.
  - Remove usage of inaccurate `DispatchQueue.main.asyncAfter` for manually adding delays where needed.
  - Tidy the API even more by using Swift‘s builder pattern, like we see used in SwiftUI. In practice this would mean removing one more indent in your code!
  - Maybe even allow this package to be used with SwiftUI? No idea how that would work.
