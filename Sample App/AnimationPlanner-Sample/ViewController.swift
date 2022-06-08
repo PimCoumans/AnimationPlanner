@@ -129,7 +129,7 @@ extension ViewController {
                 // Example of using a custom extension (defined further down) for a specific animation
                 .shake(view)
                 .extra {
-                    // An `extra` step performs non-animating setup logic
+                    // An ‘extra’ step performs non-animating setup logic
                     // like adding another view to the mix
                     sneakyCopy = view.sneakyCopy()
                 }

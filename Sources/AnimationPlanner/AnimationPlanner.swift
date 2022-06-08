@@ -8,6 +8,8 @@ import UIKit
 /// Setting up your animation should be done with the following methods:
 /// - ``delay(_:)`` adds a delay to the sequence. Delays are cumulative and are applied to the first actual animation to be performend.
 /// -  ``add(duration:options:timingFunction:animations:)`` adds an animation step to the sequence, providing a specific duration and optionally the `UIView.AnimationOptions` options and a `CAMediaTimingFunction` timing function.
+/// - ``addSpring(duration:delay:damping:initialVelocity:options:animations:)`` adds a spring-based animation step with the expected damping and velocity values.
+/// - ``extra(_:)`` adds an ‘extra’ step to prepare state before or between steps for the next animation or perform side-effects like triggering haptic feedback.
 /// - ``addGroup(with:)`` creates a ``Group`` object to which multiple animations can be added that should be performed simultaneously.
 ///
 /// - Note: Each animation is created right before it needs to be executed, so referencing values changed in previous steps is possible.
@@ -92,7 +94,7 @@ private protocol Animatable {
 
 extension AnimationSequence {
     
-    /// Adds an animation to the sequence with all the expected animation parameters, adding the ability to use a timing function for the interpolation.
+    /// Adds an animation to the sequence with all the expected animation parameters, adding the ability to use a `CAMediaTimingFunction` timing function for the interpolation.
     ///
     /// Adding each steps can by done in a chain, as this method returns `Self`
     /// - Note: Adding a timing function will wrap the animation in a `CATransaction` commit
@@ -117,6 +119,7 @@ extension AnimationSequence {
     /// Adds a spring-based animation to the animation sequence with all the expected animation parameters.
     ///
     /// Adding each step in the sequence can by done in a chain, as this method returns `Self`
+    /// - Note: Timing curves aren‘t available in this method by design, the spring itself should do all the interpolating.
     /// - Parameters:
     ///   - duration: Amount of time (in seconds)  the animation should last
     ///   - delay: Amount of time (in seconds) the animation should wait to start
@@ -221,7 +224,7 @@ extension AnimationSequence {
             return self
         }
         
-        /// Adds an extra step where preparations or side-effects can be handled. Comparable to a 0-duration animation,  without actually being
+        /// Adds an ‘extra’ step where preparations or side-effects can be handled. Comparable to a 0-duration animation,  without actually being
         /// animated in a `UIView` animation closure.
         /// - Parameter delay: Amount of time (in seconds) the handler should wait to be executed
         /// - Parameter handler: Closure exectured at the specific time in the sequence
