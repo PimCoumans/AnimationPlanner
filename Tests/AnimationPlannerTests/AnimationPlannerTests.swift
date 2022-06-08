@@ -1,7 +1,6 @@
 import XCTest
 import AnimationPlanner
 
-#if canImport(UIKit)
 final class AnimationPlannerTests: XCTestCase {
     
     var window: UIWindow!
@@ -133,6 +132,37 @@ extension AnimationPlannerTests {
             }
         }
     }
+}
+
+extension AnimationPlannerTests {
+    
+    /// Uses an `extra` step for the completion handler after delaying for the set random duration
+    func testExtraHandler() {
+        runAnimationTest { completion, usedDuration, usedPrecision in
+            UIView.animateSteps { sequence in
+                sequence
+                    .delay(usedDuration)
+                    .extra {
+                        completion(true)
+                    }
+            }
+        }
+    }
+    
+    /// Uses an `extra` step in a group for the completion handler with a delay for the set random duration
+    func testExtraGroupHandler() {
+        runAnimationTest { completion, usedDuration, usedPrecision in
+            UIView.animateGroup { group in
+                group
+                    .extra(delay: usedDuration) {
+                        completion(true)
+                    }
+            }
+        }
+    }
+}
+
+extension AnimationPlannerTests {
     
     /// Creates multiple steps each of varying durations
     func testMultipleSteps() {
@@ -346,7 +376,6 @@ private extension AnimationPlannerTests {
         }
     }
 }
-#endif
 
 // from @warpling‘s https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c
 extension CAMediaTimingFunction {

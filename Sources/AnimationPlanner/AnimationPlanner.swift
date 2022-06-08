@@ -50,12 +50,17 @@ public class AnimationSequence {
             options: UIView.AnimationOptions = [],
             animations: () -> Void)
         
+        /// A step where preparations or side-effects can be handled. Comparable to a 0-duration animation, without actually being
+        /// animated in a `UIView` animation closure.
+        case extra(delay: TimeInterval, handler: () -> Void)
+        
         /// Step that contains group of animation steps, all of which should be performed simultaniously
         /// - Parameter animations: All the steps to animate at the same time
         case group(animations: [Self])
         
-        /// Only used in animation groups, where an animation in the group can
-        /// be another sequence
+        /// A step holding another animation sequence, only to be used in an animation group
+        /// - Parameters:
+        ///   - sequence: ``AnimationSequence`` object to be added to the group
         case sequence(sequence: AnimationSequence)
     }
 }
@@ -137,13 +142,24 @@ extension AnimationSequence {
     /// Adds a delay to the animation sequence
     ///
     /// While this adds an actual step to the sequence, in practice the next step that actually does
-    /// the animation will use the delay of the previous steps (or all previous delays leading up to that step).
+    /// the animation will use this delay (or all previous delays leading up to that step).
     /// - Parameter delay: Duration of the delay
     /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
     @discardableResult public func delay(_ duration: TimeInterval) -> Self {
         steps.append(
             .delay(duration: duration)
         )
+        return self
+    }
+}
+
+extension AnimationSequence {
+    /// Adds a step where preparations or side-effects can be handled. Comparable to a 0-duration animation, but without actually being
+    /// animated in a `UIView` animation closure.
+    /// - Parameter handler: Closure exectured at the specific time in the sequence
+    /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
+    @discardableResult public func extra(_ handler: @escaping () -> Void) -> Self {
+        steps.append(.extra(delay: 0, handler: handler))
         return self
     }
 }
@@ -205,6 +221,16 @@ extension AnimationSequence {
             return self
         }
         
+        /// Adds an extra step where preparations or side-effects can be handled. Comparable to a 0-duration animation,  without actually being
+        /// animated in a `UIView` animation closure.
+        /// - Parameter delay: Amount of time (in seconds) the handler should wait to be executed
+        /// - Parameter handler: Closure exectured at the specific time in the sequence
+        /// - Returns: Returns `Self`, enabling the use of chaining mulitple calls
+        @discardableResult public func extra(delay: TimeInterval = 0, handler: @escaping () -> Void) -> Self {
+            animations.append(.extra(delay: delay, handler: handler))
+            return self
+        }
+        
         /// Adds an animation sequence to the animation group
         ///
         /// Adding each part in the group can by done in a chain, as this method returns `Self`
@@ -248,7 +274,7 @@ extension AnimationSequence.Step: Animatable {
         switch self {
         case .animation(let duration, let delay, _, _, _), .springAnimation(let duration, let delay, _, _, _, _):
             return duration + delay
-        case .delay(let delay):
+        case .delay(let delay), .extra(let delay, _):
             return delay
         case .group(let steps):
             guard let longestDuration = steps.map({ $0.duration }).max() else {
@@ -268,15 +294,15 @@ extension AnimationSequence.Step: Animatable {
     ///   - delay: Time in seconds to wait to perform the animation
     ///   - completion: Closure to be executed when animation has finished
     fileprivate func animate(
-        withDelay delay: TimeInterval,
+        withDelay leadingDelay: TimeInterval,
         completion: ((Bool) -> Void)?
     ) {
         switch self {
-        case .animation(let duration, let animationDelay, let options, let timingFunction, let animations):
+        case .animation(let duration, let delay, let options, let timingFunction, let animations):
             let createAnimations: (((Bool) -> Void)?) -> Void = { completion in
                 UIView.animate(
                     withDuration: duration,
-                    delay: delay + animationDelay,
+                    delay: leadingDelay + delay,
                     options: options,
                     animations: animations,
                     completion: completion
@@ -294,16 +320,28 @@ extension AnimationSequence.Step: Animatable {
             } else {
                 createAnimations(completion)
             }
-        case .springAnimation(let duration, let animationDelay, let dampingRatio, let velocity, let options, let animations):
+        case .springAnimation(let duration, let delay, let dampingRatio, let velocity, let options, let animations):
             UIView.animate(
                 withDuration: duration,
-                delay: delay + animationDelay,
+                delay: leadingDelay + delay,
                 usingSpringWithDamping: dampingRatio,
                 initialSpringVelocity: velocity,
                 options: options,
                 animations: animations,
                 completion: completion
             )
+        case .extra(let delay, let handler):
+            // Perform handler with the optional delay
+            let perform = {
+                handler()
+                completion?(true)
+            }
+            let peformDelay = leadingDelay + delay
+            if peformDelay > 0 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + peformDelay, execute: perform)
+            } else {
+                perform()
+            }
         case .group(let steps as [Animatable]):
             let sortedSteps = Array(steps.sorted(by: { $0.duration < $1.duration }))
             guard let longestStep = sortedSteps.last else {
@@ -312,14 +350,14 @@ extension AnimationSequence.Step: Animatable {
                 return
             }
             sortedSteps.dropLast().forEach { step in
-                step.animate(withDelay: delay, completion: nil)
+                step.animate(withDelay: leadingDelay, completion: nil)
             }
             // Animate the longest sequence with the completion, so the completion closure
             // is executed when all sequences _should_ be completed
-            longestStep.animate(withDelay: delay, completion: completion)
+            longestStep.animate(withDelay: leadingDelay, completion: completion)
         case .sequence(let sequence):
             sequence.animate(
-                withDelay: delay,
+                withDelay: leadingDelay,
                 completion: completion)
         case .delay(_):
             fatalError("Delay steps should not be animated")
@@ -329,7 +367,7 @@ extension AnimationSequence.Step: Animatable {
 
 extension AnimationSequence: Animatable {
     
-    /// Total duration of sequence
+    /// Total duration of all steps in the sequence combined
     public var duration: TimeInterval {
         steps.reduce(0, { $0 + $1.duration })
     }
@@ -352,7 +390,7 @@ extension StepAnimatable {
         sequence.animate(withDelay: 0, completion: completion)
     }
     
-    public static func animateGroup(_ addAnimations: (AnimationSequence.Group) -> Void, completion: ((Bool) -> Void)?) {
+    public static func animateGroup(_ addAnimations: (AnimationSequence.Group) -> Void, completion: ((Bool) -> Void)? = nil) {
         animateSteps({ sequence in
             // Just add one group step with the addAnimations closure
             sequence.addGroup(with: addAnimations)
