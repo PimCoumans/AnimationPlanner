@@ -123,19 +123,21 @@ extension ViewController {
             
             // Continue the chain again by calling the next step on the sequence object
             sequence
-                .add(duration: 0.01, animations: {
+                .add(duration: 0.01) {
                     view.transform = view.transform.rotated(by: .pi) // reset rotation
-                })
-                .add(duration: 0.01, animations: {
-                    sneakyCopy = view.sneakyCopy()
-                })
+                }
                 // Example of using a custom extension (defined further down) for a specific animation
                 .shake(view)
-                .add(duration: 0.25, timingFunction: .backOut, animations: {
+                .extra {
+                    // An `extra` step performs non-animating setup logic
+                    // like adding another view to the mix
+                    sneakyCopy = view.sneakyCopy()
+                }
+                .add(duration: 0.25, timingFunction: .backOut) {
                     sneakyCopy.isHidden = false
                     sneakyCopy.transform = CGAffineTransform(translationX: 0, y: -view.frame.height - 20)
                     sneakyCopy.backgroundColor = .systemYellow
-                })
+                }
                 .delay(0.35)
                 .add(duration: 1.2, timingFunction: .quartInOut) {
                     view.transform = .identity
