@@ -21,6 +21,7 @@ class ViewController: UIViewController {
         view.addSubview(subview)
     }
 
+    let useNewBuilderAPI: Bool = true
     let performComplexAnimation: Bool = false // Set to true to run a more complex animation
 
     override func viewDidAppear(_ animated: Bool) {
@@ -28,7 +29,11 @@ class ViewController: UIViewController {
         if performComplexAnimation {
             runComplexAnimation()
         } else {
-            runSimpleAnimation()
+            if useNewBuilderAPI {
+                runSimpleBuilderAnimation()
+            } else {
+                runSimpleAnimation()
+            }
         }
     }
 }
@@ -75,6 +80,38 @@ extension ViewController {
                     view.transform = .identity
                     view.frame.origin.y = self.view.bounds.maxY
                 }
+        } completion: { finished in
+            // Just to keep the flow going, let‘s run the animation again
+            self.runSimpleAnimation()
+        }
+    }
+    
+    func runSimpleBuilderAnimation() {
+        let view = setInitialSubviewState()
+        AnimationPlanner.plan {
+            Wait(0.35)
+            AnimateSpring(duration: 0.5, damping: 0.79) {
+                view.alpha = 1
+                view.center.y = self.view.bounds.midY
+            }
+            Wait(0.2)
+            Animate(duration: 0.32) {
+                view.transform = CGAffineTransform(scaleX: 2, y: 2)
+                view.layer.cornerRadius = 40
+                view.backgroundColor = .systemRed
+            }.timingFunction(.quintIn)
+            Wait(0.2)
+            AnimateSpring(duration: 0.25, damping: 0.52) {
+                view.backgroundColor = .systemBlue
+                view.layer.cornerRadius = 0
+                view.transform = .identity
+            }
+            Wait(0.58)
+            Animate(duration: 0.2) {
+                view.alpha = 0
+                view.transform = .identity
+                view.frame.origin.y = self.view.bounds.maxY
+            }.timingFunction(.circIn)
         } completion: { finished in
             // Just to keep the flow going, let‘s run the animation again
             self.runSimpleAnimation()

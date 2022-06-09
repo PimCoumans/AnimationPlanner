@@ -16,7 +16,7 @@ public protocol Animation: Animates, PerformsAnimations, AnimationModifiers {
 /// Animation that can be performed in sequence, meaning each animation starts right after the previous completes
 public protocol SequenceAnimates: Animates { }
 
-/// Animation that should be performed in a group, meaning each animation is performed simultaniously
+/// Animation that can be performed in a group, meaning each animation is performed simultaniously
 public protocol GroupAnimates: Animates { }
 
 /// Performs an animation with for the provided duration in seconds, with an
@@ -33,6 +33,7 @@ public struct Animate: Animation, SequenceAnimates, GroupAnimates {
     }
 }
 
+/// Pauses the sequences for the given amount of seconds
 public struct Wait: SequenceAnimates {
     public let duration: TimeInterval
     
