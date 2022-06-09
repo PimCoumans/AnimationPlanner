@@ -74,7 +74,144 @@ extension AnimationPlannerTests {
         }
     }
 }
+
+// TODO: Seperate all these tests into seperate files
+// MARK: - Test Builder animations
+extension AnimationPlannerTests {
+    func testBuilder() {
+        let totalDuration: TimeInterval = 1
+        let numberOfSteps: TimeInterval = 3
+        let duration = totalDuration / numberOfSteps
+        
+        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
     
+            AnimationPlanner.plan {
+                AnimateSpring(duration: duration, damping: 0.8) {
+                    self.performRandomAnimation()
+                }
+                Wait(duration)
+                Animate(duration: duration) {
+                    self.performRandomAnimation()
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    func testBuilderModifiers() {
+        let totalDuration: TimeInterval = 1
+        let numberOfSteps: TimeInterval = 3
+        let duration = totalDuration / numberOfSteps
+        
+        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+            
+            AnimationPlanner.plan {
+                Animate(duration: duration)
+                    .changes {
+                        self.performRandomAnimation()
+                    }
+                    .spring(damping: 0.8)
+                Wait(duration)
+                Animate(duration: duration) {
+                    self.performRandomAnimation()
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    func testBuilderContainerModifiers() {
+        let totalDuration: TimeInterval = 1
+        let numberOfSteps: TimeInterval = 1
+        let duration = totalDuration / numberOfSteps
+        
+        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+            
+            AnimationPlanner.plan {
+                Animate(duration: duration) {
+                    self.performRandomAnimation()
+                }
+                .spring(damping: 0.82)
+                .options(.allowUserInteraction)
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    func testBuilderGroup() {
+        let totalDuration: TimeInterval = 5
+        let numberOfSteps: TimeInterval = 4
+        let duration = totalDuration / numberOfSteps
+        let delay: TimeInterval = 0.5
+        
+        runAnimationTest(duration: totalDuration + delay) { completion, usedDuration, usedPrecision in
+            
+            AnimationPlanner.plan {
+                Animate(duration: duration) {
+                    self.performRandomAnimation()
+                }
+                Wait(duration)
+                Group {
+                    Animate(duration: duration, changes: {
+                        self.performRandomAnimation()
+                    })
+                    .spring(damping: 0.82)
+                    .delayed(delay)
+                    
+                    Animate(duration: duration) {
+                        self.performRandomAnimation()
+                    }
+                    
+                    Animate(duration: duration, changes: {
+                        self.performRandomAnimation()
+                    })
+                    .delayed(delay)
+                    .spring(damping: 0.82)
+                }
+                Animate(duration: duration) {
+                    self.performRandomAnimation()
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    func testDelayedSpring() {
+        let duration: TimeInterval = 0.5
+        let delay: TimeInterval = 0.25
+        let totalDuration = delay + duration
+        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+            AnimationPlanner.group {
+                AnimateSpring(duration: duration, damping: 0.82) {
+                    self.performRandomAnimation()
+                }.delayed(delay)
+            } completion: { finised in
+                completion(finised)
+            }
+        }
+    }
+    
+    func testSpringedDelay() {
+        let duration: TimeInterval = 0.5
+        let delay: TimeInterval = 0.25
+        let totalDuration = delay + duration
+        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+            AnimationPlanner.group {
+                AnimateDelayed(duration: duration, delay: delay) {
+                    self.performRandomAnimation()
+                }.spring(damping: 0.82)
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+}
+    
+// MARK: - Basic animations
 extension AnimationPlannerTests {
     
     func testNoopSequenceAnimation() {
@@ -134,6 +271,7 @@ extension AnimationPlannerTests {
     }
 }
 
+// MARK: - Extra handler
 extension AnimationPlannerTests {
     
     /// Uses an `extra` step for the completion handler after delaying for the set random duration
@@ -162,6 +300,7 @@ extension AnimationPlannerTests {
     }
 }
 
+// MARK: - Multiple step animations
 extension AnimationPlannerTests {
     
     /// Creates multiple steps each of varying durations
@@ -256,7 +395,7 @@ extension AnimationPlannerTests {
         let finishedExpectation = expectation(description: "Animation finished")
         var totalDuration: TimeInterval = 0
         let startTime = CACurrentMediaTime()
-        let numberOfSteps: Int = 6
+        let numberOfSteps: Int = 2
         let maxNumberOfSequences: Int = 2
         let maxNumberOfSequenceSteps: Int = 2
         
