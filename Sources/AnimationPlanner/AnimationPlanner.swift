@@ -131,7 +131,7 @@ extension AnimationSequence {
         duration: TimeInterval,
         delay: TimeInterval = 0,
         damping dampingRatio: CGFloat,
-        initialVelocity velocity: CGFloat,
+        initialVelocity velocity: CGFloat = 0,
         options: UIView.AnimationOptions = [],
         animations: @escaping () -> Void
     ) -> Self {
