@@ -212,6 +212,88 @@ extension AnimationPlannerTests {
             } completion: { finished in
                 completion(finished)
             }
+            
+        }
+    }
+    
+    func testSequenceCountedLoop() {
+        let duration: TimeInterval = 0.5
+        let numberOfLoops: Int = 4
+        let totalDuration = duration * TimeInterval(numberOfLoops)
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            
+            AnimationPlanner.plan {
+                Loop(numberOfLoops) { index in
+                    Animate(duration: duration / 2) {
+                        self.performRandomAnimation()
+                    }
+                    Animate(duration: duration / 2) {
+                        self.performRandomAnimation()
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+            
+        }
+    }
+    
+    func testSequenceElementLoop() {
+        let numberOfLoops: Int = 4
+        let durations = randomDurations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = durations.reduce(0, +)
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            
+            AnimationPlanner.plan {
+                Loop.through(sequence: durations) { duration in
+                    Animate(duration: duration) {
+                        self.performRandomAnimation()
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+            
+        }
+    }
+    
+    func testGroupCountedLoop() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+        
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            
+            AnimationPlanner.group {
+                Loop(numberOfLoops) { index in
+                    AnimateDelayed(duration: animations[index].duration, delay: animations[index].delay) {
+                        self.performRandomAnimation()
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+            
+        }
+    }
+    
+    func testGroupElementLoop() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+        
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            
+            AnimationPlanner.group {
+                Loop.through(sequence: animations) { animation in
+                    AnimateDelayed(duration: animation.duration, delay: animation.delay) {
+                        self.performRandomAnimation()
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+            
         }
     }
 }
@@ -330,21 +412,18 @@ extension AnimationPlannerTests {
     
     func testStepsWithDelay() {
         let numberOfSteps: Int = 4
-        let animations = zip(
-            randomDurations(amount: numberOfSteps),
-            randomDurations(amount: numberOfSteps)
-        ).map({ (delay: $0, duration: $1) })
+        let animations = randomDelayedAnimations(amount: numberOfSteps)
         
-        let totalDuration = animations.reduce(TimeInterval(0), { $0 + $1.delay + $1.duration })
+        let totalDuration: TimeInterval = animations.reduce(0, { $0 + $1.totalDuration })
         let precision = durationPrecision * TimeInterval(numberOfSteps)
         
         runAnimationTest(duration: totalDuration, precision: precision) { completion, _, _ in
             UIView.animateSteps { sequence in
-                animations.forEach { delay, duration in
-                    sequence.add(duration: duration) {
+                animations.forEach { animation in
+                    sequence.add(duration: animation.duration) {
                         self.performRandomAnimation()
                     }
-                    .delay(delay)
+                    .delay(animation.delay)
                 }
             } completion: { finished in
                 completion(finished)
@@ -363,6 +442,28 @@ extension AnimationPlannerTests {
                 sequence.addGroup { group in
                     for duration in durations {
                         group.animate(duration: duration) {
+                            self.performRandomAnimationOnNewView()
+                        }
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
+    
+    /// Adds one group with a specific number of animations  which all should be performed simultaneously
+    func testGroupWithDelays() {
+        let numberOfSteps: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfSteps)
+        
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+        
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            UIView.animateSteps { sequence in
+                sequence.addGroup { group in
+                    animations.forEach { animation in
+                        group.animate(duration: animation.duration, delay: animation.delay) {
                             self.performRandomAnimationOnNewView()
                         }
                     }
@@ -457,7 +558,7 @@ private let durationPrecision: TimeInterval = 0.05
 private func assertDifference(startTime: CFTimeInterval, duration: TimeInterval, precision: TimeInterval = durationPrecision) {
     let finishedTime = CACurrentMediaTime() - startTime
     let difference = finishedTime - duration
-    XCTAssert(abs(difference) < precision, "Animation completion time too far off (by \(difference) seconds (precision \(precision))")
+    XCTAssert(abs(difference) < precision, "unexpected completion time (difference \(difference) seconds (precision \(precision))")
     print("** DIFFERENCE: \(difference), (precision: \(precision))")
 }
 
@@ -468,6 +569,18 @@ private extension AnimationPlannerTests {
     
     class func randomDurations(amount: Int) -> [TimeInterval] { (0..<amount).map({ _ in randomDuration }) }
     func randomDurations(amount: Int) -> [TimeInterval] { Self.randomDurations(amount: amount) }
+    
+    struct RandomAnimation {
+        let delay: TimeInterval
+        let duration: TimeInterval
+        var totalDuration: TimeInterval { delay + duration }
+    }
+    func randomDelayedAnimations(amount: Int) -> [RandomAnimation] {
+        zip(
+            randomDurations(amount: amount),
+            randomDurations(amount: amount)
+        ).map({ RandomAnimation(delay: $0, duration: $1) })
+    }
     
     func performRandomAnimation() {
         performRandomAnimation(on: view!)
