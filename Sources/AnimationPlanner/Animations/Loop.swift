@@ -26,6 +26,27 @@ extension Loop: SequenceAnimationConvertible where A == SequenceAnimates {
     }
 }
 
+extension Loop: GroupAnimationConvertible where A == GroupAnimates {
+    public func asGroup() -> [GroupAnimates] {
+        animations
+    }
+    
+    public init(
+        for repeatCount: Int,
+        @AnimationBuilder<GroupAnimates> builder: (_ index: Int) -> [GroupAnimates]
+    ) {
+        animations = (0..<repeatCount).flatMap(builder)
+        duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
+    }
+    
+    public static func through<S: Sequence>(
+        sequence: S,
+        @AnimationBuilder<GroupAnimates> builder: (S.Element) -> [GroupAnimates]
+    ) -> [GroupAnimates] {
+        sequence.flatMap(builder)
+    }
+}
+
 extension Sequence {
     public func animateLoop(
         @AnimationBuilder<SequenceAnimates> builder: (Element) -> [SequenceAnimates]
@@ -37,26 +58,5 @@ extension Sequence {
         @AnimationBuilder<GroupAnimates> builder: (Element) -> [GroupAnimates]
     ) -> [GroupAnimates] {
         flatMap(builder)
-    }
-}
-
-extension Loop: GroupAnimationConvertible where A == GroupAnimates {
-    public func asGroup() -> [GroupAnimates] {
-        animations
-    }
-    
-    public init(
-        for repeatCount: Int,
-        @AnimationBuilder<GroupAnimates> builder: (_ index: Int) -> [GroupAnimates]
-    ) { 
-        animations = (0..<repeatCount).flatMap(builder)
-        duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
-    }
-    
-    public static func through<S: Sequence>(
-        sequence: S,
-        @AnimationBuilder<GroupAnimates> builder: (S.Element) -> [GroupAnimates]
-    ) -> [GroupAnimates] {
-        sequence.flatMap(builder)
     }
 }
