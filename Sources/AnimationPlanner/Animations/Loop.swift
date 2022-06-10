@@ -19,10 +19,10 @@ extension Loop: SequenceAnimationConvertible where A == SequenceAnimates {
     }
     
     public static func through<Element>(
-        array: Array<Element>,
+        sequence: [Element],
         @AnimationBuilder<SequenceAnimates> builder: (Element) -> [SequenceAnimates]
     ) -> [SequenceAnimates] {
-        array.flatMap(builder)
+        sequence.flatMap(builder)
     }
 }
 
@@ -33,15 +33,16 @@ extension Loop: GroupAnimationConvertible where A == GroupAnimates {
     
     public init(
         _ repeatCount: Int,
-        @AnimationBuilder<SequenceAnimates> builder: (_ index: Int) -> [GroupAnimates]
+        @AnimationBuilder<GroupAnimates> builder: (_ index: Int) -> [GroupAnimates]
     ) { 
         animations = (0..<repeatCount).flatMap(builder)
         duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
     }
+    
     public static func through<Element>(
-        array: Array<Element>,
+        sequence: [Element],
         @AnimationBuilder<GroupAnimates> builder: (Element) -> [GroupAnimates]
     ) -> [GroupAnimates] {
-        array.flatMap(builder)
+        sequence.flatMap(builder)
     }
 }
