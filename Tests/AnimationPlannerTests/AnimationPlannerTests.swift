@@ -83,7 +83,7 @@ extension AnimationPlannerTests {
         let numberOfSteps: TimeInterval = 3
         let duration = totalDuration / numberOfSteps
         
-        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
     
             AnimationPlanner.plan {
                 AnimateSpring(duration: duration, damping: 0.8) {
@@ -104,7 +104,7 @@ extension AnimationPlannerTests {
         let numberOfSteps: TimeInterval = 3
         let duration = totalDuration / numberOfSteps
         
-        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.plan {
                 Animate(duration: duration)
@@ -127,7 +127,7 @@ extension AnimationPlannerTests {
         let numberOfSteps: TimeInterval = 1
         let duration = totalDuration / numberOfSteps
         
-        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.plan {
                 Animate(duration: duration) {
@@ -138,6 +138,7 @@ extension AnimationPlannerTests {
             } completion: { finished in
                 completion(finished)
             }
+            
         }
     }
     
@@ -145,9 +146,9 @@ extension AnimationPlannerTests {
         let totalDuration: TimeInterval = 5
         let numberOfSteps: TimeInterval = 4
         let duration = totalDuration / numberOfSteps
-        let delay: TimeInterval = 0.5
+        let delay: TimeInterval = 1
         
-        runAnimationTest(duration: totalDuration + delay) { completion, usedDuration, usedPrecision in
+        runAnimationTest(duration: totalDuration + delay) { completion, _, _ in
             
             AnimationPlanner.plan {
                 Animate(duration: duration) {
@@ -159,7 +160,7 @@ extension AnimationPlannerTests {
                         self.performRandomAnimation()
                     })
                     .spring(damping: 0.82)
-                    .delayed(delay)
+                    .delayed(delay / 2)
                     
                     Animate(duration: duration) {
                         self.performRandomAnimation()
@@ -177,6 +178,7 @@ extension AnimationPlannerTests {
             } completion: { finished in
                 completion(finished)
             }
+            
         }
     }
     
@@ -184,7 +186,8 @@ extension AnimationPlannerTests {
         let duration: TimeInterval = 0.5
         let delay: TimeInterval = 0.25
         let totalDuration = delay + duration
-        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            
             AnimationPlanner.group {
                 AnimateSpring(duration: duration, damping: 0.82) {
                     self.performRandomAnimation()
@@ -192,6 +195,7 @@ extension AnimationPlannerTests {
             } completion: { finised in
                 completion(finised)
             }
+            
         }
     }
     
@@ -199,7 +203,8 @@ extension AnimationPlannerTests {
         let duration: TimeInterval = 0.5
         let delay: TimeInterval = 0.25
         let totalDuration = delay + duration
-        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            
             AnimationPlanner.group {
                 AnimateDelayed(duration: duration, delay: delay) {
                     self.performRandomAnimation()

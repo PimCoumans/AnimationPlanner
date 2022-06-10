@@ -1,13 +1,46 @@
 import UIKit
 
-public struct AnimationPlanner {
-    
-    @resultBuilder
-    public struct AnimationBuilder<T> {
-        public static func buildBlock(_ components: T...) -> [T] {
-            return components
-        }
+public protocol SequenceAnimationConvertible {
+    func asSequence() -> [SequenceAnimates]
+}
+
+public protocol GroupAnimationConvertible {
+    func asGroup() -> [GroupAnimates]
+}
+
+extension Loop: GroupAnimationConvertible {
+    public func asGroup() -> [GroupAnimates] { [] }
+}
+
+extension Array: SequenceAnimationConvertible where Element == SequenceAnimates {
+    public func asSequence() -> [SequenceAnimates] { flatMap { $0.asSequence() } }
+}
+
+extension Array: GroupAnimationConvertible where Element == GroupAnimates {
+    public func asGroup() -> [GroupAnimates] { flatMap { $0.asGroup() } }
+}
+
+extension Loop: SequenceAnimationConvertible {//} where Animation: SequenceAnimates {f
+    public func asSequence() -> [SequenceAnimates] { [] }
+}
+
+@resultBuilder
+public struct AnimationBuilder<Animation> { }
+
+extension AnimationBuilder where Animation == SequenceAnimates {
+    public static func buildBlock(_ components: SequenceAnimationConvertible...) -> [SequenceAnimates] {
+        components.flatMap { $0.asSequence() }
     }
+}
+
+extension AnimationBuilder where Animation == GroupAnimates {
+    
+    public static func buildBlock(_ components: GroupAnimationConvertible...) -> [GroupAnimates] {
+        components.flatMap { $0.asGroup() }
+    }
+}
+
+public struct AnimationPlanner {
     
     public static func plan(
         @AnimationBuilder<SequenceAnimates> build: () -> [SequenceAnimates],

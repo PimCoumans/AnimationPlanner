@@ -14,14 +14,24 @@ public protocol Animation: Animates, PerformsAnimations, AnimationModifiers {
 }
 
 /// Animation that can be performed in sequence, meaning each animation starts right after the previous completes
-public protocol SequenceAnimates: Animates { }
+public protocol SequenceAnimates: Animates, SequenceAnimationConvertible { }
+extension SequenceAnimates {
+    public func asSequence() -> [SequenceAnimates] { [self] }
+}
 
 /// Animation that can be performed in a group, meaning each animation is performed simultaniously
-public protocol GroupAnimates: Animates { }
+public protocol GroupAnimates: Animates, GroupAnimationConvertible {
+    var totalDuration: TimeInterval { get }
+}
+
+extension GroupAnimates {
+    public func asGroup() -> [GroupAnimates] { [self] }
+}
 
 /// Performs an animation with for the provided duration in seconds, with an
 public struct Animate: Animation, SequenceAnimates, GroupAnimates {
     public let duration: TimeInterval
+    public var totalDuration: TimeInterval { duration }
     
     public internal(set) var changes: () -> Void
     public internal(set) var options: UIView.AnimationOptions?
@@ -43,7 +53,10 @@ public struct Wait: SequenceAnimates {
 }
 
 public struct Extra: SequenceAnimates, GroupAnimates {
+    
     public let duration: TimeInterval = 0
+    public var totalDuration: TimeInterval { duration }
+    
     public internal(set) var delay: TimeInterval
     public let perform: () -> Void
     
@@ -56,9 +69,11 @@ public struct Extra: SequenceAnimates, GroupAnimates {
 public struct AnimateSpring: AnimationContainer, SequenceAnimates, GroupAnimates {
     
     public internal(set) var animation: Animation
+    public var totalDuration: TimeInterval { duration }
     
     public let dampingRatio: CGFloat
     public let initialVelocity: CGFloat
+    
     
     internal init<T: Animation>(animation: T, dampingRatio: CGFloat, initialVelocity: CGFloat) {
         self.animation = animation
@@ -75,6 +90,9 @@ public struct AnimateSpring: AnimationContainer, SequenceAnimates, GroupAnimates
 public struct AnimateDelayed: AnimationContainer, GroupAnimates {
     
     public internal(set) var animation: Animation
+    public var totalDuration: TimeInterval {
+        delay + animation.duration
+    }
     
     public let delay: TimeInterval
     
