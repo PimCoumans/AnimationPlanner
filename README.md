@@ -10,34 +10,33 @@ Very useful with @warpling‘s [`CAMediaTimingFunction` extensions](https://gist
 📖 Read the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get you up to speed, or read on on to see a little example.
 
 ## How do I do this?
-📦 Add `AnimationPlanner` to your project (only SPM is currently officially supported) and use the `UIView.animateSteps()` method to start adding steps to the provided sequence, like shown below.
+📦 Add `AnimationPlanner` to your project (only SPM is currently officially supported) and use `AnimationPlanner.plan` method to start creating steps for your animation, like shown below.
 
 ```swift
-UIView.animateSteps { sequence in
-    sequence
-        .delay(0.35)
-        .add(duration: 0.5, timingFunction: .quartOut) {
-            view.alpha = 1
-            view.center.y = self.view.bounds.midY
-        }
-        .delay(0.2)
-        .add(duration: 0.32, timingFunction: .quintOut) {
-            view.transform = CGAffineTransform(scaleX: 2, y: 2)
-            view.layer.cornerRadius = 40
-            view.backgroundColor = .systemRed
-        }
-        .delay(0.2)
-        .add(duration: 0.12, timingFunction: .backOut) {
-            view.backgroundColor = .systemBlue
-            view.layer.cornerRadius = 0
-            view.transform = .identity
-        }
-        .delay(0.58)
-        .add(duration: 0.2, timingFunction: .circIn) {
-            view.alpha = 0
-            view.transform = .identity
-            view.frame.origin.y = self.view.bounds.maxY
-        }
+AnimationPlanner.plan {
+    Wait(0.35)
+    AnimateSpring(duration: 0.5, damping: 0.79) {
+        view.alpha = 1
+        view.center.y = self.view.bounds.midY
+    }
+    Wait(0.2)
+    Animate(duration: 0.32) {
+        view.transform = CGAffineTransform(scaleX: 2, y: 2)
+        view.layer.cornerRadius = 40
+        view.backgroundColor = .systemRed
+    }.timingFunction(.quintOut)
+    Wait(0.2)
+    AnimateSpring(duration: 0.25, damping: 0.52) {
+        view.backgroundColor = .systemBlue
+        view.layer.cornerRadius = 0
+        view.transform = .identity
+    }
+    Wait(0.58)
+    Animate(duration: 0.2) {
+        view.alpha = 0
+        view.transform = .identity
+        view.frame.origin.y = self.view.bounds.maxY
+    }.timingFunction(.circIn)
 } completion: { finished in
     view.removeFromSuperview()
 }
