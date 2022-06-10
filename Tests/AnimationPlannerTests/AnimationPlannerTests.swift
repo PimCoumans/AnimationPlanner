@@ -223,7 +223,7 @@ extension AnimationPlannerTests {
         runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.plan {
-                Loop(numberOfLoops) { index in
+                Loop(for: numberOfLoops) { index in
                     Animate(duration: duration / 2) {
                         self.performRandomAnimation()
                     }
@@ -265,7 +265,7 @@ extension AnimationPlannerTests {
         runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.group {
-                Loop(numberOfLoops) { index in
+                Loop(for: numberOfLoops) { index in
                     AnimateDelayed(duration: animations[index].duration, delay: animations[index].delay) {
                         self.performRandomAnimation()
                     }

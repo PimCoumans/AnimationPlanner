@@ -11,7 +11,7 @@ extension Loop: SequenceAnimationConvertible where A == SequenceAnimates {
     }
     
     public init(
-        _ repeatCount: Int,
+        for repeatCount: Int,
         @AnimationBuilder<SequenceAnimates> builder: (_ index: Int) -> [SequenceAnimates]
     ) {
         animations = (0..<repeatCount).flatMap(builder)
@@ -32,7 +32,7 @@ extension Loop: GroupAnimationConvertible where A == GroupAnimates {
     }
     
     public init(
-        _ repeatCount: Int,
+        for repeatCount: Int,
         @AnimationBuilder<GroupAnimates> builder: (_ index: Int) -> [GroupAnimates]
     ) { 
         animations = (0..<repeatCount).flatMap(builder)
