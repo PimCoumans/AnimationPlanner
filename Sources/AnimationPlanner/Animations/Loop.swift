@@ -18,9 +18,9 @@ extension Loop: SequenceAnimationConvertible where A == SequenceAnimates {
         duration = animations.reduce(0, { $0 + $1.duration })
     }
     
-    public static func through<Element>(
-        sequence: [Element],
-        @AnimationBuilder<SequenceAnimates> builder: (Element) -> [SequenceAnimates]
+    public static func through<S: Sequence>(
+        sequence: S,
+        @AnimationBuilder<SequenceAnimates> builder: (S.Element) -> [SequenceAnimates]
     ) -> [SequenceAnimates] {
         sequence.flatMap(builder)
     }
@@ -39,9 +39,9 @@ extension Loop: GroupAnimationConvertible where A == GroupAnimates {
         duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
     }
     
-    public static func through<Element>(
-        sequence: [Element],
-        @AnimationBuilder<GroupAnimates> builder: (Element) -> [GroupAnimates]
+    public static func through<S: Sequence>(
+        sequence: S,
+        @AnimationBuilder<GroupAnimates> builder: (S.Element) -> [GroupAnimates]
     ) -> [GroupAnimates] {
         sequence.flatMap(builder)
     }
