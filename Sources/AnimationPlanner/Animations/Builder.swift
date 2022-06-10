@@ -26,7 +26,6 @@ extension AnimationBuilder where Animation == SequenceAnimates {
 }
 
 extension AnimationBuilder where Animation == GroupAnimates {
-    
     public static func buildBlock(_ components: GroupAnimationConvertible...) -> [GroupAnimates] {
         components.flatMap { $0.asGroup() }
     }
