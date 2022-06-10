@@ -26,6 +26,20 @@ extension Loop: SequenceAnimationConvertible where A == SequenceAnimates {
     }
 }
 
+extension Sequence {
+    public func animateLoop(
+        @AnimationBuilder<SequenceAnimates> builder: (Element) -> [SequenceAnimates]
+    ) -> [SequenceAnimates] {
+        flatMap(builder)
+    }
+    
+    public func animateLoop(
+        @AnimationBuilder<GroupAnimates> builder: (Element) -> [GroupAnimates]
+    ) -> [GroupAnimates] {
+        flatMap(builder)
+    }
+}
+
 extension Loop: GroupAnimationConvertible where A == GroupAnimates {
     public func asGroup() -> [GroupAnimates] {
         animations
