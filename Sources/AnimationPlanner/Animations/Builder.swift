@@ -8,20 +8,12 @@ public protocol GroupAnimationConvertible {
     func asGroup() -> [GroupAnimates]
 }
 
-extension Loop: GroupAnimationConvertible {
-    public func asGroup() -> [GroupAnimates] { [] }
-}
-
 extension Array: SequenceAnimationConvertible where Element == SequenceAnimates {
     public func asSequence() -> [SequenceAnimates] { flatMap { $0.asSequence() } }
 }
 
 extension Array: GroupAnimationConvertible where Element == GroupAnimates {
     public func asGroup() -> [GroupAnimates] { flatMap { $0.asGroup() } }
-}
-
-extension Loop: SequenceAnimationConvertible {//} where Animation: SequenceAnimates {f
-    public func asSequence() -> [SequenceAnimates] { [] }
 }
 
 @resultBuilder
@@ -63,22 +55,18 @@ public struct AnimationPlanner {
 
 fileprivate extension Array where Element == SequenceAnimates {
     func steps() -> [AnimationSequence.Step] {
-        compactMap { animatable in
-            animatable.step
-        }
+        compactMap(\.toStep)
     }
 }
 
 fileprivate extension Array where Element == GroupAnimates {
     func steps() -> [AnimationSequence.Step] {
-        compactMap { animatable in
-            animatable.step
-        }
+        compactMap(\.toStep)
     }
 }
 
 fileprivate extension Animates {
-    var step: AnimationSequence.Step? {
+    var toStep: AnimationSequence.Step? {
         switch self {
         case let container as AnimationContainer:
             return container.parseContainer()
