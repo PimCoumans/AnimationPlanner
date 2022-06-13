@@ -298,10 +298,10 @@ extension ViewController {
                 // A group performs all of its animations at once,
                 // finishing when the longest animation completes
                 // Use a delay for a staggered effect
-                AnimateDelayed(duration: 0.5, delay: 0.2) {
+                AnimateDelayed(delay: 0.2, duration: 0.5) {
                     sneakyCopy.transform = CGAffineTransform(translationX: 0, y: -50).concatenating(sneakyCopy.transform)
                 }.timingFunction(.backOut)
-                AnimateDelayed(duration: 0.2, delay: 0.1) {
+                AnimateDelayed(delay: 0.1, duration: 0.2) {
                     view.layer.borderColor = view.backgroundColor?.cgColor
                     view.layer.borderWidth = 4
                     sneakyCopy.layer.borderColor = sneakyCopy.backgroundColor?.cgColor
@@ -332,8 +332,8 @@ extension ViewController {
     /// Adds a custom shake animation sequence on the provided view
     /// - Parameter view: View to which the transform should be applied
     /// - Returns: Animations to be added to the sequence
-    @AnimationBuilder<SequenceAnimates>
-    func addShakeSequence(shaking view: UIView) -> [SequenceAnimates] {
+    @AnimationBuilder
+    func addShakeSequence(shaking view: UIView) -> [AnimatesInSequence] {
         var baseTransform: CGAffineTransform = .identity
         
         let count = 50
