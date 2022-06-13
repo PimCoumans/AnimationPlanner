@@ -108,11 +108,11 @@ fileprivate extension Animates {
 }
 
 fileprivate extension AnimationContainer {
+    /// Animations conforming to ``AnimationContainer`` can themselves contain a container,
+    /// so when a ``AnimateDelayed`` animation contains a ``AnimateSpring``, the values
+    /// of the spring should not get lost. So we recursively parse each contained animation so no
+    /// values get skipped
     func parseContainer() -> AnimationSequence.Step {
-        var springAnimation: AnimateSpring?
-        var delay: TimeInterval = 0
-        var options: UIView.AnimationOptions = []
-        var timingFunction: CAMediaTimingFunction?
         
         var containedAnimations = [Animation]()
         
@@ -122,26 +122,27 @@ fileprivate extension AnimationContainer {
             animation = (foundAnimation as? AnimationContainer)?.animation
         }
         
-        // Move from first added animation to the last
-        containedAnimations.reversed().forEach { animation in
-            options = animation.options.map { options.union($0) } ?? options
-            timingFunction = animation.timingFunction ?? timingFunction
-            springAnimation = animation as? AnimateSpring ?? springAnimation
-            delay += (animation as? AnimateDelayed)?.delay ?? 0
-        }
+        let springAnimation: AnimateSpring? = containedAnimations
+            .lazy
+            .compactMap { $0 as? AnimateSpring }
+            .first
+        
+        let totalDelay: TimeInterval = containedAnimations
+            .compactMap { $0 as? AnimatesDelayed }
+            .reduce(0, { $0 + $1.delay })
         
         if let springAnimation = springAnimation {
             return .springAnimation(
                 duration: duration,
-                delay: delay,
+                delay: totalDelay,
                 dampingRatio: springAnimation.dampingRatio,
                 velocity: springAnimation.initialVelocity,
-                options: options,
+                options: options ?? [],
                 animations: changes)
         }
         return .animation(
             duration: duration,
-            delay: delay,
+            delay: totalDelay,
             options: options,
             timingFunction: timingFunction,
             animations: changes)

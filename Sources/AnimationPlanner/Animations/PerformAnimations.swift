@@ -39,8 +39,51 @@ extension Animate: PerformsAnimations {
     }
 }
 
+extension AnimationContainer {
+    
+    func containedAnimations<T: Animation>(where predicate: ((T) -> Bool)? = nil) -> [T] {
+        var containedAnimations = [Animation]()
+        
+        var animation: Animation? = self
+        while let foundAnimation = animation {
+            containedAnimations.append(foundAnimation)
+            animation = (foundAnimation as? AnimationContainer)?.animation
+        }
+        
+        return containedAnimations
+            .reversed()
+            .compactMap { $0 as? T }
+            .filter(predicate ?? { _ in true })
+    }
+    
+    func containedAnimation<T: Animation>(where predicate: ((T) -> Bool)? = nil) -> T? {
+        return containedAnimations().first
+    }
+    
+    var springAnimation: AnimateSpring? {
+        containedAnimation()
+    }
+    
+    var totalDelay: TimeInterval {
+        let delayedAnimations: [AnimateDelayed] = containedAnimations()
+        return delayedAnimations.reduce(0, { $0 + $1.delay })
+    }
+}
+
+extension AnimationContainer {
+    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
+        let totalDelay = self.totalDelay
+        if let springAnimation = springAnimation {
+            // Use found spring animation to perform animation with delay
+            springAnimation.animate(delay: leadingDelay + totalDelay, completion: completion)
+        } else {
+            // Pas on to contained animation where eventually ``Animate`` will perform animation
+            animation.animate(delay: leadingDelay + totalDelay, completion: completion)
+        }
+    }
+}
+
 extension AnimateSpring: PerformsAnimations {
-    // FIXME: Make sure animation container with a spring somewhere also creates a spring
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         UIView.animate(
             withDuration: duration,
@@ -51,11 +94,5 @@ extension AnimateSpring: PerformsAnimations {
             animations: animation.changes,
             completion: completion
         )
-    }
-}
-
-extension AnimateDelayed: PerformsAnimations {
-    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        animation.animate(delay: leadingDelay + delay, completion: completion)
     }
 }
