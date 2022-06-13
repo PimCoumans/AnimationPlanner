@@ -5,14 +5,14 @@ public struct Loop<A> {
     public let animations: [A]
 }
 
-extension Loop: SequenceAnimationConvertible where A == SequenceAnimates {
-    public func asSequence() -> [SequenceAnimates] {
+extension Loop: SequenceAnimatesConvertible where A == AnimatesInSequence {
+    public func asSequence() -> [AnimatesInSequence] {
         animations
     }
     
     public init(
         for repeatCount: Int,
-        @AnimationBuilder<SequenceAnimates> builder: (_ index: Int) -> [SequenceAnimates]
+        @AnimationBuilder builder: (_ index: Int) -> [AnimatesInSequence]
     ) {
         animations = (0..<repeatCount).flatMap(builder)
         duration = animations.reduce(0, { $0 + $1.duration })
@@ -20,20 +20,20 @@ extension Loop: SequenceAnimationConvertible where A == SequenceAnimates {
     
     public static func through<S: Sequence>(
         sequence: S,
-        @AnimationBuilder<SequenceAnimates> builder: (S.Element) -> [SequenceAnimates]
-    ) -> [SequenceAnimates] {
+        @AnimationBuilder builder: (S.Element) -> [AnimatesInSequence]
+    ) -> [AnimatesInSequence] {
         sequence.flatMap(builder)
     }
 }
 
-extension Loop: GroupAnimationConvertible where A == GroupAnimates {
-    public func asGroup() -> [GroupAnimates] {
+extension Loop: SimultaneouslyAnimatesConvertible where A == AnimatesSimultaneously {
+    public func asGroup() -> [AnimatesSimultaneously] {
         animations
     }
     
     public init(
         for repeatCount: Int,
-        @AnimationBuilder<GroupAnimates> builder: (_ index: Int) -> [GroupAnimates]
+        @AnimationBuilder builder: (_ index: Int) -> [AnimatesSimultaneously]
     ) {
         animations = (0..<repeatCount).flatMap(builder)
         duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
@@ -41,22 +41,22 @@ extension Loop: GroupAnimationConvertible where A == GroupAnimates {
     
     public static func through<S: Sequence>(
         sequence: S,
-        @AnimationBuilder<GroupAnimates> builder: (S.Element) -> [GroupAnimates]
-    ) -> [GroupAnimates] {
+        @AnimationBuilder builder: (S.Element) -> [AnimatesSimultaneously]
+    ) -> [AnimatesSimultaneously] {
         sequence.flatMap(builder)
     }
 }
 
 extension Sequence {
     public func animateLoop(
-        @AnimationBuilder<SequenceAnimates> builder: (Element) -> [SequenceAnimates]
-    ) -> [SequenceAnimates] {
+        @AnimationBuilder builder: (Element) -> [AnimatesInSequence]
+    ) -> [AnimatesInSequence] {
         flatMap(builder)
     }
     
     public func animateLoop(
-        @AnimationBuilder<GroupAnimates> builder: (Element) -> [GroupAnimates]
-    ) -> [GroupAnimates] {
+        @AnimationBuilder builder: (Element) -> [AnimatesSimultaneously]
+    ) -> [AnimatesSimultaneously] {
         flatMap(builder)
     }
 }

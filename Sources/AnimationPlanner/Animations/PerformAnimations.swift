@@ -4,6 +4,7 @@ import UIKit
  * -- NOT USED YET, WILL BE IN NEXT STEP --
  */
 
+/// Creates actual `UIView` animations for all animation structs
 public protocol PerformsAnimations {
     /// Perform the actual animation
     /// - Parameters:
@@ -39,7 +40,7 @@ extension Animate: PerformsAnimations {
 }
 
 extension AnimateSpring: PerformsAnimations {
-    // TODO: Make sure animation container with a spring somewhere also creates a spring
+    // FIXME: Make sure animation container with a spring somewhere also creates a spring
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         UIView.animate(
             withDuration: duration,

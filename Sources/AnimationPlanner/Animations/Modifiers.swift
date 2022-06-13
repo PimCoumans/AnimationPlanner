@@ -1,27 +1,11 @@
 import UIKit
 
-protocol Mutable {
-    func mutate(_ mutator: (inout Self) -> Void) -> Self
-}
-
-extension Mutable {
-    func mutate(_ mutator: (inout Self) -> Void) -> Self {
-       var mutableSelf = self
-       mutator(&mutableSelf)
-       return mutableSelf
-   }
-}
-
-protocol AnimationUpdating {
-    func updateAnimation(_ animation: Animation) -> Self
-}
-
+// Adds modifier functions to animations
 public protocol AnimationModifiers {
     /// Add animation options to the animation
     /// - Parameter options: OptionSet of UIView AnimationOptions
     /// - Note: Using `.repeats` will break expected behavior when used in a sequence
     func options(_ options: UIView.AnimationOptions) -> Self
-    
     
     /// Apply timing function to the animation
     ///
@@ -35,10 +19,56 @@ public protocol AnimationModifiers {
     func changes(_ changes: @escaping () -> Void) -> Self
 }
 
-extension Animate: Mutable { }
+/// Adds spring interpolation to an existing animation
+public protocol SpringModifier {
+    func spring(damping: CGFloat, initialVelocity: CGFloat) -> AnimateSpring
+}
 
-extension Animate: AnimationModifiers {
-    
+extension SpringModifier where Self: Animation {
+    public func spring(damping: CGFloat, initialVelocity: CGFloat = 0) -> AnimateSpring {
+        // By default, all structs conforming `Animation` should be able to animate with a spring
+        AnimateSpring(animation: self, dampingRatio: damping, initialVelocity: initialVelocity)
+    }
+}
+
+// Add a delay to the animation
+public protocol DelayModifier {
+    associatedtype DelayedAnimation: Animates
+    func delayed(_ delay: TimeInterval) -> DelayedAnimation
+}
+
+extension DelayModifier where Self: Animation {
+    public func delayed(_ delay: TimeInterval) -> AnimateDelayed {
+        AnimateDelayed(delay: delay, animation: self)
+    }
+}
+
+extension Animate: AnimationModifiers, SpringModifier, DelayModifier { }
+extension AnimateDelayed: AnimationModifiers, SpringModifier { }
+extension AnimateSpring: AnimationModifiers, DelayModifier { }
+
+extension Extra: DelayModifier {
+    public func delayed(_ delay: TimeInterval) -> ExtraDelayed {
+        ExtraDelayed(delay: delay, perform: perform)
+    }
+}
+
+/* -- Internal animation modifying convenience methods -- */
+
+/// Convenience protocol to let structs to change properties on themself without using `mutating`
+protocol Mutable {
+    mutating func mutate(_ mutator: (inout Self) -> Void) -> Self
+}
+
+extension Mutable {
+    func mutate(_ mutator: (inout Self) -> Void) -> Self {
+       var mutableSelf = self
+       mutator(&mutableSelf)
+       return mutableSelf
+   }
+}
+
+extension Animate: Mutable {
     public func options(_ options: UIView.AnimationOptions) -> Self {
         mutate { $0.options = options }
     }
@@ -50,95 +80,26 @@ extension Animate: AnimationModifiers {
     }
 }
 
-extension Extra: Mutable { }
-public protocol DelayModifier {
-    func delayed(_ delay: TimeInterval) -> Self
-}
-
-extension Extra: DelayModifier {
-    public func delayed(_ delay: TimeInterval) -> Extra {
-        mutate { $0.delay = delay }
-    }
-}
-
-/// Contains an Animation, adding custom behaviour
-public protocol AnimationContainer: Animation {
-    var animation: Animation { get }
-}
-
-extension AnimationContainer {
-    
-    public var duration: TimeInterval {
-        animation.duration
-    }
-    
-    public var changes: () -> Void {
-        return animation.changes
-    }
-    
-    public var options: UIView.AnimationOptions? {
-        return animation.options
-    }
-    
-    public var timingFunction: CAMediaTimingFunction? {
-        return animation.timingFunction
-    }
-}
-
-extension AnimateSpring: Mutable { }
-extension AnimateSpring: AnimationUpdating {
-    func updateAnimation(_ animation: Animation) -> AnimateSpring {
-        mutate { $0.animation = animation }
-    }
-}
-
-extension AnimateDelayed: Mutable { }
-extension AnimateDelayed: AnimationUpdating {
-    func updateAnimation(_ animation: Animation) -> AnimateDelayed {
-        mutate { $0.animation = animation }
-    }
-}
-
-extension AnimationContainer {
-    
-    func castedUpdateAnimation(_ animation: Animation) -> Self {
-        // FIXME: This is gross but gets the job done...
-        (self as? AnimationUpdating)?.updateAnimation(animation) as! Self
-    }
-    
-    public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
-        castedUpdateAnimation(animation.timingFunction(function))
-    }
-    
+extension AnimateSpring: Mutable {
     public func options(_ options: UIView.AnimationOptions) -> Self {
-        castedUpdateAnimation(animation.options(options))
+        mutate { $0.animation = animation.options(options) }
     }
-    
+    public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
+        mutate { $0.animation = animation.timingFunction(function) }
+    }
     public func changes(_ changes: @escaping () -> Void) -> Self {
-        castedUpdateAnimation(animation.changes(changes))
+        mutate { $0.animation = animation.changes(changes) }
     }
 }
 
-public protocol AnimateSpringModifier {
-    func spring(damping: CGFloat, initialVelocity: CGFloat) -> AnimateSpring
-}
-
-extension AnimateSpringModifier where Self: Animation {
-    public func spring(damping: CGFloat, initialVelocity: CGFloat = 0) -> AnimateSpring {
-        AnimateSpring(animation: self, dampingRatio: damping, initialVelocity: initialVelocity)
+extension AnimateDelayed: Mutable {
+    public func options(_ options: UIView.AnimationOptions) -> Self {
+        mutate { $0.animation = animation.options(options) }
+    }
+    public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
+        mutate { $0.animation = animation.timingFunction(function) }
+    }
+    public func changes(_ changes: @escaping () -> Void) -> Self {
+        mutate { $0.animation = animation.changes(changes) }
     }
 }
-
-public protocol AnimateDelayModifier {
-    func delayed(_ delay: TimeInterval) -> AnimateDelayed
-}
-
-extension AnimateDelayModifier where Self: Animation {
-    public func delayed(_ delay: TimeInterval) -> AnimateDelayed {
-        AnimateDelayed(animation: self, delay: delay)
-    }
-}
-
-extension Animate: AnimateSpringModifier, AnimateDelayModifier { }
-extension AnimateDelayed: AnimateSpringModifier { }
-extension AnimateSpring: AnimateDelayModifier { }

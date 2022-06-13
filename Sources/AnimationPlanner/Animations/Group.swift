@@ -1,18 +1,16 @@
 import UIKit
 
-public struct Group: SequenceAnimates {
+public struct Group: AnimatesInSequence {
     
-    let animations: [GroupAnimates]
-    
-    public init(@AnimationBuilder<GroupAnimates> _ build: () -> [GroupAnimates]) {
-        animations = build()
-        let longestAnimation = animations.max { $0.totalDuration < $1.totalDuration }
-    }
-}
-
-extension Group {
+    /// Duration of a simultaneous group is the longest `totalAnimation` (which should include its delay)
     public var duration: TimeInterval {
         let longestAnimation = animations.max { $0.totalDuration < $1.totalDuration }
-        return longestAnimation?.duration ?? 0
+        return longestAnimation?.totalDuration ?? 0
+    }
+    
+    public let animations: [AnimatesSimultaneously]
+    
+    public init(@AnimationBuilder _ build: () -> [AnimatesSimultaneously]) {
+        animations = build()
     }
 }

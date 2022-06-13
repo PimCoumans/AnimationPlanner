@@ -206,7 +206,7 @@ extension AnimationPlannerTests {
         runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.group {
-                AnimateDelayed(duration: duration, delay: delay) {
+                AnimateDelayed(delay: delay, duration: duration) {
                     self.performRandomAnimation()
                 }.spring(damping: 0.82)
             } completion: { finished in
@@ -266,7 +266,7 @@ extension AnimationPlannerTests {
             
             AnimationPlanner.group {
                 Loop(for: numberOfLoops) { index in
-                    AnimateDelayed(duration: animations[index].duration, delay: animations[index].delay) {
+                    AnimateDelayed(delay: animations[index].delay, duration: animations[index].duration) {
                         self.performRandomAnimation()
                     }
                 }
@@ -286,7 +286,7 @@ extension AnimationPlannerTests {
             
             AnimationPlanner.group {
                 Loop.through(sequence: animations) { animation in
-                    AnimateDelayed(duration: animation.duration, delay: animation.delay) {
+                    AnimateDelayed(delay: animation.delay, duration: animation.duration) {
                         self.performRandomAnimation()
                     }
                 }

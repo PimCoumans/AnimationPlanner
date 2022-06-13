@@ -1,40 +1,58 @@
 import UIKit
 
-public protocol SequenceAnimationConvertible {
-    func asSequence() -> [SequenceAnimates]
+public protocol SequenceAnimatesConvertible {
+    func asSequence() -> [AnimatesInSequence]
 }
 
-public protocol GroupAnimationConvertible {
-    func asGroup() -> [GroupAnimates]
+public protocol SimultaneouslyAnimatesConvertible {
+    func asGroup() -> [AnimatesSimultaneously]
 }
 
-extension Array: SequenceAnimationConvertible where Element == SequenceAnimates {
-    public func asSequence() -> [SequenceAnimates] { flatMap { $0.asSequence() } }
+extension Array: SequenceAnimatesConvertible where Element == AnimatesInSequence {
+    public func asSequence() -> [AnimatesInSequence] { flatMap { $0.asSequence() } }
 }
 
-extension Array: GroupAnimationConvertible where Element == GroupAnimates {
-    public func asGroup() -> [GroupAnimates] { flatMap { $0.asGroup() } }
+extension Array: SimultaneouslyAnimatesConvertible where Element == AnimatesSimultaneously {
+    public func asGroup() -> [AnimatesSimultaneously] { flatMap { $0.asGroup() } }
 }
 
 @resultBuilder
-public struct AnimationBuilder<Animation> { }
-
-extension AnimationBuilder where Animation == SequenceAnimates {
-    public static func buildBlock(_ components: SequenceAnimationConvertible...) -> [SequenceAnimates] {
+public struct AnimationBuilder {
+    public static func buildBlock(_ components: SequenceAnimatesConvertible...) -> [AnimatesInSequence] {
         components.flatMap { $0.asSequence() }
+    }
+    
+    public static func buildOptional(_ component: SequenceAnimatesConvertible?) -> [AnimatesInSequence] {
+        component.map { $0.asSequence() } ?? []
+    }
+    public static func buildEither(first component: SequenceAnimatesConvertible) -> [AnimatesInSequence] {
+        component.asSequence()
+    }
+    public static func buildEither(second component: SequenceAnimatesConvertible) -> [AnimatesInSequence] {
+        component.asSequence()
     }
 }
 
-extension AnimationBuilder where Animation == GroupAnimates {
-    public static func buildBlock(_ components: GroupAnimationConvertible...) -> [GroupAnimates] {
+extension AnimationBuilder {
+    public static func buildBlock(_ components: SimultaneouslyAnimatesConvertible...) -> [AnimatesSimultaneously] {
         components.flatMap { $0.asGroup() }
+    }
+    
+    public static func buildOptional(_ component: SimultaneouslyAnimatesConvertible?) -> [AnimatesSimultaneously] {
+        component.map { $0.asGroup() } ?? []
+    }
+    public static func buildEither(first component: SimultaneouslyAnimatesConvertible) -> [AnimatesSimultaneously] {
+        component.asGroup()
+    }
+    public static func buildEither(second component: SimultaneouslyAnimatesConvertible) -> [AnimatesSimultaneously] {
+        component.asGroup()
     }
 }
 
 public struct AnimationPlanner {
     
     public static func plan(
-        @AnimationBuilder<SequenceAnimates> build: () -> [SequenceAnimates],
+        @AnimationBuilder build: () -> [AnimatesInSequence],
         completion: ((Bool) -> Void)? = nil
     ) {
         let sequence = AnimationSequence()
@@ -43,7 +61,7 @@ public struct AnimationPlanner {
     }
     
     public static func group(
-        @AnimationBuilder<GroupAnimates> build: () -> [GroupAnimates],
+        @AnimationBuilder build: () -> [AnimatesSimultaneously],
         completion: ((Bool) -> Void)? = nil
     ) {
         plan(build: {
@@ -52,13 +70,13 @@ public struct AnimationPlanner {
     }
 }
 
-fileprivate extension Array where Element == SequenceAnimates {
+fileprivate extension Array where Element == AnimatesInSequence {
     func steps() -> [AnimationSequence.Step] {
         compactMap(\.toStep)
     }
 }
 
-fileprivate extension Array where Element == GroupAnimates {
+fileprivate extension Array where Element == AnimatesSimultaneously {
     func steps() -> [AnimationSequence.Step] {
         compactMap(\.toStep)
     }
