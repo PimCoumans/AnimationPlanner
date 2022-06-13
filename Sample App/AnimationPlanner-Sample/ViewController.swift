@@ -259,15 +259,15 @@ extension ViewController {
             Loop.through(sequence: (1...loopCount)) { index in
                 let offset = CGFloat(index) / CGFloat(loopCount)
                 let reversed = 1 - offset
-                Animate(duration: 0.2) {
+                Animate(duration: 0.32) {
                     view.transform = CGAffineTransform(
                         rotationAngle: .pi * offset
                     ).scaledBy(
                         x: 1 + offset / 2,
                         y: 1 + offset / 2)
                     view.layer.cornerRadius = initialCornerRadius * reversed
-                }
-                Wait(0.25)
+                }.spring(damping: 0.62)
+                Wait(0.2)
             }
             
             Extra {
