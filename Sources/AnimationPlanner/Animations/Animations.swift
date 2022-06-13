@@ -27,24 +27,18 @@ public struct Wait: AnimatesInSequence {
 /// Perfoms the provided handler in between your actual animations.
 /// Typically used for setting up state before an animation or creating side-effects like haptic feedback.
 public struct Extra: AnimatesExtra, AnimatesInSequence, AnimatesSimultaneously {
-    public var duration: TimeInterval = 0
-    public var totalDuration: TimeInterval = 0
+    public let duration: TimeInterval = 0
+    public var totalDuration: TimeInterval { delay + duration }
+    public let delay: TimeInterval
     
     public var perform: () -> Void
     public init(perform: @escaping () -> Void) {
         self.perform = perform
+        self.delay = 0
     }
 }
 
-/// Perfoms the provided handler after the specified delay.
-/// Typically used for setting up state before an animation or creating side-effects like haptic feedback.
-public struct ExtraDelayed: AnimatesExtra, AnimatesDelayed {
-    public var duration: TimeInterval { delay }
-    public var totalDuration: TimeInterval { duration }
-    public let delay: TimeInterval
-    
-    public let perform: () -> Void
-    
+extension Extra: AnimatesDelayed {
     public init(delay: TimeInterval = 0, perform: @escaping () -> Void) {
         self.delay = delay
         self.perform = perform

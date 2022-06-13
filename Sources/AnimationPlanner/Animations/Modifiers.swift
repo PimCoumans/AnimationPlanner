@@ -48,8 +48,8 @@ extension AnimateDelayed: AnimationModifiers, SpringModifier { }
 extension AnimateSpring: AnimationModifiers, DelayModifier { }
 
 extension Extra: DelayModifier {
-    public func delayed(_ delay: TimeInterval) -> ExtraDelayed {
-        ExtraDelayed(delay: delay, perform: perform)
+    public func delayed(_ delay: TimeInterval) -> Self {
+        Self(delay: delay, perform: perform)
     }
 }
 
