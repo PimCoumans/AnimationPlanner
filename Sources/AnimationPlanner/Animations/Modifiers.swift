@@ -27,7 +27,7 @@ public protocol SpringModifier {
 extension SpringModifier where Self: Animation {
     public func spring(damping: CGFloat, initialVelocity: CGFloat = 0) -> AnimateSpring {
         // By default, all structs conforming `Animation` should be able to animate with a spring
-        AnimateSpring(animation: self, dampingRatio: damping, initialVelocity: initialVelocity)
+        AnimateSpring(dampingRatio: damping, initialVelocity: initialVelocity, animation: self)
     }
 }
 

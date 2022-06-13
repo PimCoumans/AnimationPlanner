@@ -71,7 +71,7 @@ public struct AnimateSpring: AnimationContainer, AnimatesInSequence, AnimatesSim
     public let dampingRatio: CGFloat
     public let initialVelocity: CGFloat
     
-    internal init<T: Animation>(animation: T, dampingRatio: CGFloat, initialVelocity: CGFloat) {
+    internal init(dampingRatio: CGFloat, initialVelocity: CGFloat, animation: Animation) {
         self.animation = animation
         self.dampingRatio = dampingRatio
         self.initialVelocity = initialVelocity
@@ -79,22 +79,20 @@ public struct AnimateSpring: AnimationContainer, AnimatesInSequence, AnimatesSim
     
     public init(duration: TimeInterval, damping: CGFloat, velocity: CGFloat = 0, changes: @escaping () -> Void) {
         let animation = Animate(duration: duration, changes: changes)
-        self.init(animation: animation, dampingRatio: damping, initialVelocity: velocity)
+        self.init(dampingRatio: damping, initialVelocity: velocity, animation: animation)
     }
 }
 
 /// Performs an animation after a delay, only to be used in a context where other animations are run simultaneously
 public struct AnimateDelayed: AnimationContainer, AnimatesDelayed {
     public internal(set) var animation: Animation
-    public var totalDuration: TimeInterval {
-        delay + animation.duration
-    }
+    public var totalDuration: TimeInterval { delay + animation.duration }
     
     public let delay: TimeInterval
     
-    internal init<T: Animation>(delay: TimeInterval, animation: T) {
-        self.delay = delay
+    internal init(delay: TimeInterval, animation: Animation) {
         self.animation = animation
+        self.delay = delay
     }
     
     public init(delay: TimeInterval, duration: TimeInterval, changes: @escaping () -> Void) {
