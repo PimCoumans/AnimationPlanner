@@ -18,7 +18,7 @@ extension Loop: SequenceAnimatesConvertible where A == AnimatesInSequence {
         duration = animations.reduce(0, { $0 + $1.duration })
     }
     
-    public static func through<S: Sequence>(
+    public static func through<S: Swift.Sequence>(
         sequence: S,
         @AnimationBuilder builder: (S.Element) -> [AnimatesInSequence]
     ) -> [AnimatesInSequence] {
@@ -39,7 +39,7 @@ extension Loop: SimultaneouslyAnimatesConvertible where A == AnimatesSimultaneou
         duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
     }
     
-    public static func through<S: Sequence>(
+    public static func through<S: Swift.Sequence>(
         sequence: S,
         @AnimationBuilder builder: (S.Element) -> [AnimatesSimultaneously]
     ) -> [AnimatesSimultaneously] {
@@ -47,7 +47,7 @@ extension Loop: SimultaneouslyAnimatesConvertible where A == AnimatesSimultaneou
     }
 }
 
-extension Sequence {
+extension Swift.Sequence {
     public func animateLoop(
         @AnimationBuilder builder: (Element) -> [AnimatesInSequence]
     ) -> [AnimatesInSequence] {

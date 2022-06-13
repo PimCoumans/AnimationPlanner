@@ -101,9 +101,18 @@ fileprivate extension Animates {
             return .extra(delay: 0, handler: extra.perform)
         case let group as Group:
             return .group(animations: group.animations.steps())
+        case let sequence as Sequence:
+            return .sequence(sequence: AnimationSequence(steps: sequence.animations.steps()))
         default:
             return nil
         }
+    }
+}
+
+fileprivate extension AnimationSequence {
+    convenience init(steps: [Step]) {
+        self.init()
+        self.steps = steps
     }
 }
 

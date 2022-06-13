@@ -14,3 +14,9 @@ public struct Group: AnimatesInSequence {
         animations = build()
     }
 }
+
+extension Group: PerformsAnimations {
+    public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) {
+        // FIXME: Groups don't animate yet
+    }
+}
