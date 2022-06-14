@@ -94,7 +94,7 @@ extension ViewController {
         let view = setInitialSubviewState()
         AnimationPlanner.plan {
             Wait(0.35) // A delay waits for the given amount of seconds to start the next step
-            AnimateSpring(duration: 0.5, damping: 0.79) {
+            AnimateSpring(duration: 0.5, dampingRatio: 0.79) {
                 view.alpha = 1
                 view.center.y = self.view.bounds.midY
             }
@@ -105,7 +105,7 @@ extension ViewController {
                 view.backgroundColor = .systemRed
             }.timingFunction(.quintOut)
             Wait(0.2)
-            AnimateSpring(duration: 0.25, damping: 0.52) {
+            AnimateSpring(duration: 0.25, dampingRatio: 0.52) {
                 view.backgroundColor = .systemBlue
                 view.layer.cornerRadius = 0
                 view.transform = .identity
@@ -256,7 +256,7 @@ extension ViewController {
             
             // Adding mulitple steps can be done through the `Loop` struct
             // or by adding `.animateLoop { }` to any sequence
-            Loop.through(sequence: (1...loopCount)) { index in
+            Loop.through(1...loopCount) { index in
                 let offset = CGFloat(index) / CGFloat(loopCount)
                 let reversed = 1 - offset
                 Animate(duration: 0.32) {
@@ -341,7 +341,7 @@ extension ViewController {
         let values = (0..<count).map { CGFloat($0) / CGFloat(count) }.map { $0 * maxRadius }
         
         Extra { baseTransform = view.transform }
-        Loop.through(sequence: values) { radius in
+        Loop.through(values) { radius in
             Animate(duration: 0.015) {
                 view.transform = baseTransform
                     .translatedBy(
