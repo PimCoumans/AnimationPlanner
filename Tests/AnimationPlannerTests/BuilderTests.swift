@@ -14,7 +14,12 @@ class BuilderTests: AnimationPlannerTests {
     func testContainedAnimations() {
         let animate = Animate(duration: 1)
         let spring = animate.spring(damping: 2)
+        let simplerSpring = AnimateSpring(duration: 1, dampingRatio: 2)
+        XCTAssertEqual(spring.dampingRatio, simplerSpring.dampingRatio)
+        XCTAssertEqual(spring.duration, simplerSpring.totalDuration)
+        
         let delay = spring.delayed(3)
+        XCTAssertEqual(delay.totalDuration, spring.duration + delay.delay)
         
         let options: UIView.AnimationOptions = .allowAnimatedContent
         let editedDelay = delay.options(options)
@@ -25,6 +30,19 @@ class BuilderTests: AnimationPlannerTests {
         XCTAssertEqual(editedDelay.dampingRatio, spring.dampingRatio)
         XCTAssertNotEqual(springed.dampingRatio, spring.dampingRatio)
         XCTAssertEqual(springed.delay, delay.delay)
+        
+        // this is ridiculous
+        let animation = Animate(duration: 1)
+            .delayed(2)
+            .spring(damping: 3)
+            .delayed(4)
+            .spring(damping: 5)
+            .delayed(6)
+            .spring(damping: 7)
+        XCTAssertEqual(animation.delay, 6)
+        XCTAssertEqual(animation.dampingRatio, 7)
+        
+        let exta = Extra(perform: { }).delayed(2)
     }
     
     func testBuilder() {
