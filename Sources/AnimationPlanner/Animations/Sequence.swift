@@ -15,7 +15,7 @@ public struct Sequence: AnimatesSimultaneously {
     
     public init(@AnimationBuilder _ build: () -> [AnimatesInSequence]) {
         self.init(delay: 0, animations: build())
-    }    
+    }
 }
 
 extension Sequence: PerformsAnimations {
