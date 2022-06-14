@@ -1,18 +1,30 @@
 import UIKit
 
-public struct Loop<A> {
+/// Loop through a sequence or for a specified repeat count to easily repeat multiple animation.
+///
+/// Either create a `Loop` with the default initializer where you set `repeatCount` or use the static method ``through(_:animations:)-3pcny`` to loop through an existing array.
+///
+/// ```swift
+/// Loop(for: numberOfLoops) { index in
+///    Animate(duration: 0.2) {
+///        view.frame.origin += 10
+///    }
+///    Wait(0.5)
+/// }
+/// ```
+public struct Loop<Looped> {
     public var duration: TimeInterval
-    public let animations: [A]
+    public let animations: [Looped]
 }
 
-extension Loop: AnimatesInSequenceConvertible where A == AnimatesInSequence {
+extension Loop: SequenceAnimatesConvertible where Looped == AnimatesInSequence {
     public func asSequence() -> [AnimatesInSequence] {
         animations
     }
     
     public init(
         for repeatCount: Int,
-        @AnimationBuilder builder: (_ index: Int) -> [AnimatesInSequence]
+        @AnimationBuilder animations builder: (_ index: Int) -> [AnimatesInSequence]
     ) {
         animations = (0..<repeatCount).flatMap(builder)
         duration = animations.reduce(0, { $0 + $1.duration })
@@ -20,20 +32,20 @@ extension Loop: AnimatesInSequenceConvertible where A == AnimatesInSequence {
     
     public static func through<S: Swift.Sequence>(
         _ sequence: S,
-        @AnimationBuilder builder: (S.Element) -> [AnimatesInSequence]
+        @AnimationBuilder animations builder: (S.Element) -> [AnimatesInSequence]
     ) -> [AnimatesInSequence] {
         sequence.flatMap(builder)
     }
 }
 
-extension Loop: SimultaneouslyAnimatesConvertible where A == AnimatesSimultaneously {
+extension Loop: SimultaneouslyAnimatesConvertible where Looped == AnimatesSimultaneously {
     public func asGroup() -> [AnimatesSimultaneously] {
         animations
     }
     
     public init(
         for repeatCount: Int,
-        @AnimationBuilder builder: (_ index: Int) -> [AnimatesSimultaneously]
+        @AnimationBuilder animations builder: (_ index: Int) -> [AnimatesSimultaneously]
     ) {
         animations = (0..<repeatCount).flatMap(builder)
         duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
@@ -41,7 +53,7 @@ extension Loop: SimultaneouslyAnimatesConvertible where A == AnimatesSimultaneou
     
     public static func through<S: Swift.Sequence>(
         _ sequence: S,
-        @AnimationBuilder builder: (S.Element) -> [AnimatesSimultaneously]
+        @AnimationBuilder animations builder: (S.Element) -> [AnimatesSimultaneously]
     ) -> [AnimatesSimultaneously] {
         sequence.flatMap(builder)
     }
@@ -49,13 +61,13 @@ extension Loop: SimultaneouslyAnimatesConvertible where A == AnimatesSimultaneou
 
 extension Swift.Sequence {
     public func mapAnimations(
-        @AnimationBuilder builder: (Element) -> [AnimatesInSequence]
+        @AnimationBuilder animations builder: (Element) -> [AnimatesInSequence]
     ) -> [AnimatesInSequence] {
         flatMap(builder)
     }
     
     public func mapAnimations(
-        @AnimationBuilder builder: (Element) -> [AnimatesSimultaneously]
+        @AnimationBuilder animations builder: (Element) -> [AnimatesSimultaneously]
     ) -> [AnimatesSimultaneously] {
         flatMap(builder)
     }

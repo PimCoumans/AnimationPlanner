@@ -1,14 +1,78 @@
 import UIKit
 
-public protocol AnimatesInSequenceConvertible {
+/// Result builder through which either sequence or group animations can be created. Add `@AnimationBuilder` to a closure or method to provide your own animations, providing it returns an array of either ``AnimatesInSequence`` or ``AnimatesSimultaneously``, or both.
+@resultBuilder
+public struct AnimationBuilder { }
+
+/// Chain multiple `UIView` animations with a declarative syntax, describing each step along the way. Start a new sequence animation by typing `AnimationPlanner.plan`.
+///
+/// To get started,  read <doc:typical-implementation> and get up to speed on how to use AnimationPlanner, or start planing your animation by using either of the following static methods:
+/// - ``plan(animations:completion:)`` create a sequence animation where all animations are performed in order.
+/// - ``group(animations:completion:)`` create a group animation where all animations are performed simultaneously.
+public struct AnimationPlanner {
+    
+    /// Start a new animation sequence where animations added will be performed in order, meaning a subsequent animation starts right after the previous finishes.
+    ///
+    /// ```swift
+    /// AnimationPlanner.plan {
+    ///     Animate(duration: 0.25) { view.backgroundColor = .systemRed }
+    ///     Wait(0.5)
+    ///     Animate(duration: 0.5) {
+    ///         view.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
+    ///     }.spring(damping: 0.68)
+    /// }
+    /// ```
+    /// - Parameters:
+    ///   - animations: Add each animation using this closure. Animation added to a sequence should conform to ``AnimatesSimultaneously``.
+    ///   - completion: Called when the animation sequence has finished
+    public static func plan(
+        @AnimationBuilder animations builder: () -> [AnimatesInSequence],
+        completion: ((Bool) -> Void)? = nil
+    ) {
+        let sequence = AnimationSequence()
+        sequence.steps = builder().steps()
+        sequence.animate(withDelay: 0, completion: completion)
+    }
+    
+    /// Start a new group animation where animations added will be performed simultaneously, meaning all animations run at the same time.
+    ///
+    /// ```swift
+    /// AnimationPlanner.group {
+    ///     Animate(duration: 0.5) {
+    ///         view.frame.origin.y = 0
+    ///     }.delayed(0.15)
+    ///     Animate(duration: 0.3) {
+        ///     view.backgroundColor = .systemBlue
+    ///     }.delayed(0.2)
+    /// }
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - animations: Add each animation using this closure. Animation added to a group should conform to ``AnimatesSimultaneously``.
+    ///   - completion: Called when the animation sequence has finished
+    public static func group(
+        @AnimationBuilder animations builder: () -> [AnimatesSimultaneously],
+        completion: ((Bool) -> Void)? = nil
+    ) {
+        plan(animations: {
+            Group(animations: builder)
+        }, completion: completion)
+    }
+}
+
+// MARK: - Building sequences
+
+/// Provides a way to create a uniform sequence from all animations conforming to ``AnimatesInSequence``
+public protocol SequenceAnimatesConvertible {
     func asSequence() -> [AnimatesInSequence]
 }
 
+/// Provides a way to group toghether animations conforming to ``AnimatesSimultaneously``
 public protocol SimultaneouslyAnimatesConvertible {
     func asGroup() -> [AnimatesSimultaneously]
 }
 
-extension Array: AnimatesInSequenceConvertible where Element == AnimatesInSequence {
+extension Array: SequenceAnimatesConvertible where Element == AnimatesInSequence {
     public func asSequence() -> [AnimatesInSequence] { flatMap { $0.asSequence() } }
 }
 
@@ -16,23 +80,22 @@ extension Array: SimultaneouslyAnimatesConvertible where Element == AnimatesSimu
     public func asGroup() -> [AnimatesSimultaneously] { flatMap { $0.asGroup() } }
 }
 
-@resultBuilder
-public struct AnimationBuilder {
-    public static func buildBlock(_ components: AnimatesInSequenceConvertible...) -> [AnimatesInSequence] {
+extension AnimationBuilder {
+    public static func buildBlock(_ components: SequenceAnimatesConvertible...) -> [AnimatesInSequence] {
         components.flatMap { $0.asSequence() }
     }
     
-    public static func buildArray(_ components: [AnimatesInSequenceConvertible]) -> [AnimatesInSequence] {
+    public static func buildArray(_ components: [SequenceAnimatesConvertible]) -> [AnimatesInSequence] {
         components.flatMap { $0.asSequence() }
     }
     
-    public static func buildOptional(_ component: AnimatesInSequenceConvertible?) -> [AnimatesInSequence] {
+    public static func buildOptional(_ component: SequenceAnimatesConvertible?) -> [AnimatesInSequence] {
         component.map { $0.asSequence() } ?? []
     }
-    public static func buildEither(first component: AnimatesInSequenceConvertible) -> [AnimatesInSequence] {
+    public static func buildEither(first component: SequenceAnimatesConvertible) -> [AnimatesInSequence] {
         component.asSequence()
     }
-    public static func buildEither(second component: AnimatesInSequenceConvertible) -> [AnimatesInSequence] {
+    public static func buildEither(second component: SequenceAnimatesConvertible) -> [AnimatesInSequence] {
         component.asSequence()
     }
 }
@@ -57,26 +120,7 @@ extension AnimationBuilder {
     }
 }
 
-public struct AnimationPlanner {
-    
-    public static func plan(
-        @AnimationBuilder build: () -> [AnimatesInSequence],
-        completion: ((Bool) -> Void)? = nil
-    ) {
-        let sequence = AnimationSequence()
-        sequence.steps = build().steps()
-        sequence.animate(withDelay: 0, completion: completion)
-    }
-    
-    public static func group(
-        @AnimationBuilder build: () -> [AnimatesSimultaneously],
-        completion: ((Bool) -> Void)? = nil
-    ) {
-        plan(build: {
-            Group(build)
-        }, completion: completion)
-    }
-}
+// MARK: - Converting to ``AnimationSequence.Step``
 
 fileprivate extension Array where Element == AnimatesInSequence {
     func steps() -> [AnimationSequence.Step] {
@@ -88,21 +132,6 @@ fileprivate extension Array where Element == AnimatesSimultaneously {
     func steps() -> [AnimationSequence.Step] {
         compactMap(\.toStep)
     }
-}
-
-extension AnimateSpring: Animation where Contained: Animation {
-    public var options: UIView.AnimationOptions? { animation.options }
-    public var timingFunction: CAMediaTimingFunction? { animation.timingFunction }
-    public var changes: () -> Void { animation.changes }
-}
-
-extension AnimateSpring: DelayedAnimates where Contained: DelayedAnimates {
-    public var delay: TimeInterval { animation.delay }
-}
-
-extension AnimateDelayed: SpringAnimates where Contained: SpringAnimates {
-    public var dampingRatio: CGFloat { animation.dampingRatio }
-    public var initialVelocity: CGFloat { animation.initialVelocity }
 }
 
 fileprivate extension Animates {

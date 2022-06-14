@@ -1,5 +1,6 @@
 import UIKit
 
+/// (Used in making animation sequences without needing ``AnimationBuilder``)
 /// This class is used to add steps to your animation sequence. When starting a sequence animation with `UIView.animateSteps(_:completion:)`, a sequence object is made available through the `addSteps` closure, From within this closure each step should be added to the sequence object.
 ///
 /// Each method on ``AnimationSequence`` returns a reference to `Self`, enabling the use of chainging each method call.
@@ -55,7 +56,7 @@ public class AnimationSequence {
         /// animated in a `UIView` animation closure.
         case extra(delay: TimeInterval, handler: () -> Void)
         
-        /// Step that contains group of animation steps, all of which should be performed simultaniously
+        /// Step that contains group of animation steps, all of which should be performed simultaneously
         /// - Parameter animations: All the steps to animate at the same time
         case group(animations: [Self])
         
@@ -168,7 +169,7 @@ extension AnimationSequence {
 
 extension AnimationSequence {
     
-    /// Group of animation steps, all of which should be performed simultaniously
+    /// Group of animation steps, all of which should be performed simultaneously
     public class Group {
         
         /// All animations currently added to the sequence

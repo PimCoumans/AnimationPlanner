@@ -8,7 +8,7 @@ public protocol Animates {
 
 /// Actual animation that can be used to construct `UIView` animation
 public protocol Animation: Animates, PerformsAnimations {
-    /// Changes on views to peform animation with
+    /// Changes on views to perform animation with
     var changes: () -> Void { get }
     /// Animation options to use for UIView animation
     var options: UIView.AnimationOptions? { get }
@@ -16,16 +16,18 @@ public protocol Animation: Animates, PerformsAnimations {
     var timingFunction: CAMediaTimingFunction? { get }
 }
 
-/// Animation that can be performed in a sequence, meaning each animation starts right after the previous completes
-public protocol AnimatesInSequence: Animates, AnimatesInSequenceConvertible { }
+/// Animation that can be performed in a sequence, meaning each subsequent animation starts right after the previous completes
+public protocol AnimatesInSequence: Animates, SequenceAnimatesConvertible { }
+
 extension AnimatesInSequence {
     public func asSequence() -> [AnimatesInSequence] { [self] }
 }
 
-/// Animation that can be performed in a group, meaning each animation is performed simultaneously
+/// Animation that can be used in a ``Group`` and be performed simultaneously, meaning all animations run at the same time.
 public protocol AnimatesSimultaneously: Animates, SimultaneouslyAnimatesConvertible {
     var totalDuration: TimeInterval { get }
 }
+
 extension AnimatesSimultaneously {
     public func asGroup() -> [AnimatesSimultaneously] { [self] }
 }

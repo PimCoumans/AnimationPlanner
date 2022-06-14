@@ -1,31 +1,49 @@
 import UIKit
 
-// Adds modifier functions to animations
+/// Adds modifier methods to animations, providing a way to update multiple properties with chained successive method calls.
 public protocol AnimationModifiers: Animation {
-    /// Add animation options to the animation
+    /// Set the `UIView.AnimationOptions` for the animation. Will append new options to any existing options.
+    ///
     /// - Parameter options: OptionSet of UIView AnimationOptions
     /// - Note: Using `.repeats` will break expected behavior when used in a sequence
     func options(_ options: UIView.AnimationOptions) -> Self
     
-    /// Apply timing function to the animation
+    /// Sets a `CAMediaTimingFunction` for the animation. Overwrites possible previously set functions.
     ///
-    /// Overrides any animation curves set with ``options(_:)``
+    /// Overrides any animation curves previously set with ``timingFunction(_:)``
+    /// - Note: Timing functions are ignored when applied to an animation using spring interpolation (``AnimateSpring``)
     /// - Parameter function: Custom CAMediaTimingFunction or any of the avaialble static extensions
     func timingFunction(_ function: CAMediaTimingFunction) -> Self
     
-    /// Add or update the changes made during the animation
-    /// - Parameter changes: Change your `UIView` properties in this closure
-    /// - Note: This replaces any previous animations set
+    /// Sets the ``Animation/changes`` to be performed for your animation. Could be used when it‘s convenient to add your animation changes at a later state, e.g., after applying other modifiers to your ``Animate`` struct.
+    /// - Parameter changes: Change properties to animate in this closure
+    /// - Note: This replaces any previous animation changes set
     func changes(_ changes: @escaping () -> Void) -> Self
 }
 
-extension Animate: AnimationModifiers { }
+extension Animate: AnimationModifiers {
+    public func options(_ options: UIView.AnimationOptions) -> Self {
+        // Update options by creating a union of existing options
+        mutate { $0.options = $0.options?.union(options) ?? options }
+    }
+    public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
+        mutate { $0.timingFunction = function}
+    }
+    public func changes(_ changes: @escaping () -> Void) -> Animate {
+        mutate { $0.changes = changes }
+    }}
 
 // MARK: - Spring modifiers
 
 /// Adds spring interpolation to an existing animation
 public protocol SpringModifier {
     associatedtype SpringedAnimation: Animation
+    
+    /// Creates a spring-based animation with the expected damping and velocity values. Timing curves are ignored with spring animations as the spring itself should do all the interpolating.
+    /// - Parameters:
+    ///   - damping: Value between 0 and 1, same as damping ratio used for `UIView`-based spring animations
+    ///   - initialVelocity: Relative velocity of animation, defined as full extend of animation per second
+    /// - Returns: ``AnimateSpring``-contained animation appending spring values to the modified animation
     func spring(damping: CGFloat, initialVelocity: CGFloat) -> AnimateSpring<SpringedAnimation>
 }
 
@@ -46,9 +64,13 @@ extension Animate: SpringModifier { }
 
 // MARK: - Delay modifiers
 
-// Add a delay to the animation
+/// Adds a delay to an existing animation
 public protocol DelayModifier {
+    /// Blarp
     associatedtype DelayedAnimation: Animates
+    /// Adds a delay to your animation. Only available in a ``Group`` context where animations should be performed simultaneously.
+    /// - Parameter delay: Delay in seconds to add to your animation.
+    /// - Returns: `AnimateDelayed`-contained animation adding a delay the modified animation
     func delayed(_ delay: TimeInterval) -> AnimateDelayed<DelayedAnimation>
 }
 
@@ -80,17 +102,7 @@ extension Mutable {
    }
 }
 
-extension Animate: Mutable {
-    public func options(_ options: UIView.AnimationOptions) -> Self {
-        mutate { $0.options = options }
-    }
-    public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
-        mutate { $0.timingFunction = function}
-    }
-    public func changes(_ changes: @escaping () -> Void) -> Animate {
-        mutate { $0.changes = changes }
-    }
-}
+extension Animate: Mutable { }
 
 extension AnimateSpring: Mutable { }
 extension AnimateSpring: AnimationModifiers where Contained: AnimationModifiers {
