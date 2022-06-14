@@ -17,7 +17,7 @@ The most often used animation types are listed below.
 
 ### Examples
 
-- <doc:typical-implementation>
+- <doc:creating-basic-animation-sequence>
 
 ### Animation creation
 

@@ -6,7 +6,7 @@ public struct AnimationBuilder { }
 
 /// Chain multiple `UIView` animations with a declarative syntax, describing each step along the way. Start a new sequence animation by typing `AnimationPlanner.plan`.
 ///
-/// To get started,  read <doc:typical-implementation> and get up to speed on how to use AnimationPlanner, or start planing your animation by using either of the following static methods:
+/// To get started,  read <doc:creating-basic-animation-sequence> and get up to speed on how to use AnimationPlanner, or start planing your animation by using either of the following static methods:
 /// - ``plan(animations:completion:)`` create a sequence animation where all animations are performed in order.
 /// - ``group(animations:completion:)`` create a group animation where all animations are performed simultaneously.
 public struct AnimationPlanner {
