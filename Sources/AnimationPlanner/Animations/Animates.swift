@@ -16,13 +16,13 @@ public protocol Animation: Animates, PerformsAnimations {
     var timingFunction: CAMediaTimingFunction? { get }
 }
 
-/// Animation that can be performed in sequence, meaning each animation starts right after the previous completes
+/// Animation that can be performed in a sequence, meaning each animation starts right after the previous completes
 public protocol AnimatesInSequence: Animates, SequenceAnimatesConvertible { }
 extension AnimatesInSequence {
     public func asSequence() -> [AnimatesInSequence] { [self] }
 }
 
-/// Animation that can be performed in a simultaneously, meaning each animation is performed simultaniously
+/// Animation that can be performed in a group, meaning each animation is performed simultaneously
 public protocol AnimatesSimultaneously: Animates, SimultaneouslyAnimatesConvertible {
     var totalDuration: TimeInterval { get }
 }
