@@ -1,6 +1,6 @@
 import UIKit
 
-public struct Sequence: AnimatesDelayed, AnimatesSimultaneously {
+public struct Sequence: AnimatesSimultaneously {
     public let duration: TimeInterval
     public var totalDuration: TimeInterval { delay + duration }
     
@@ -18,14 +18,8 @@ public struct Sequence: AnimatesDelayed, AnimatesSimultaneously {
     }
 }
 
-extension Sequence: DelayModifier {
-    public func delayed(_ delay: TimeInterval) -> Self {
-        return Self.init(delay: delay, animations: animations)
-    }
-}
-
 extension Sequence: PerformsAnimations {
     public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) {
-        // FIXME: Groups don't animate yet
+        // FIXME: Sequences don't animate yet
     }
 }

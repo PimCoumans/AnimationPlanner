@@ -22,6 +22,10 @@ public struct AnimationBuilder {
         components.flatMap { $0.asSequence() }
     }
     
+    public static func buildArray(_ components: [SequenceAnimatesConvertible]) -> [AnimatesInSequence] {
+        components.flatMap { $0.asSequence() }
+    }
+    
     public static func buildOptional(_ component: SequenceAnimatesConvertible?) -> [AnimatesInSequence] {
         component.map { $0.asSequence() } ?? []
     }
@@ -35,6 +39,10 @@ public struct AnimationBuilder {
 
 extension AnimationBuilder {
     public static func buildBlock(_ components: SimultaneouslyAnimatesConvertible...) -> [AnimatesSimultaneously] {
+        components.flatMap { $0.asGroup() }
+    }
+    
+    public static func buildArray(_ components: [SimultaneouslyAnimatesConvertible]) -> [AnimatesSimultaneously] {
         components.flatMap { $0.asGroup() }
     }
     
@@ -82,23 +90,49 @@ fileprivate extension Array where Element == AnimatesSimultaneously {
     }
 }
 
+extension Spring: Animation where Contained: Animation {
+    public var options: UIView.AnimationOptions? { animation.options }
+    public var timingFunction: CAMediaTimingFunction? { animation.timingFunction }
+    public var changes: () -> Void { animation.changes }
+}
+
+extension Spring: AnimatesDelayed where Contained: AnimatesDelayed {
+    public var delay: TimeInterval { animation.delay }
+}
+
+extension Delayed: SpringAnimates where Contained: SpringAnimates {
+    public var dampingRatio: CGFloat { animation.dampingRatio }
+    public var initialVelocity: CGFloat { animation.initialVelocity }
+}
+
 fileprivate extension Animates {
     var toStep: AnimationSequence.Step? {
+        var delay: TimeInterval = 0
+        if let delayed = self as? AnimatesDelayed {
+            // Grab delay if animation has a delay
+            delay = delayed.delay
+        }
         switch self {
-        case let container as AnimationContainer:
-            return container.parseContainer()
+        case let spring as SpringAnimates & Animation:
+            return .springAnimation(
+                duration: spring.duration,
+                delay: delay,
+                dampingRatio: spring.dampingRatio,
+                velocity: spring.initialVelocity,
+                options: spring.options,
+                animations: spring.changes)
+        case let extra as AnimatesExtra:
+            return .extra(delay: delay, handler: extra.perform)
         case let animation as Animation:
             return .animation(
                 duration: animation.duration,
-                delay: 0,
+                delay: delay,
                 options: animation.options,
                 timingFunction: animation.timingFunction,
                 animations: animation.changes
             )
         case let delay as Wait:
             return .delay(duration: delay.duration)
-        case let extra as Extra:
-            return .extra(delay: 0, handler: extra.perform)
         case let group as Group:
             return .group(animations: group.animations.steps())
         case let sequence as Sequence:
@@ -113,47 +147,5 @@ fileprivate extension AnimationSequence {
     convenience init(steps: [Step]) {
         self.init()
         self.steps = steps
-    }
-}
-
-fileprivate extension AnimationContainer {
-    /// Animations conforming to ``AnimationContainer`` can themselves contain a container,
-    /// so when a ``AnimateDelayed`` animation contains a ``AnimateSpring``, the values
-    /// of the spring should not get lost. So we recursively parse each contained animation so no
-    /// values get skipped
-    func parseContainer() -> AnimationSequence.Step {
-        
-        var containedAnimations = [Animation]()
-        
-        var animation: Animation? = self
-        while let foundAnimation = animation {
-            containedAnimations.append(foundAnimation)
-            animation = (foundAnimation as? AnimationContainer)?.animation
-        }
-        
-        let springAnimation: AnimateSpring? = containedAnimations
-            .lazy
-            .compactMap { $0 as? AnimateSpring }
-            .first
-        
-        let totalDelay: TimeInterval = containedAnimations
-            .compactMap { $0 as? AnimatesDelayed }
-            .reduce(0, { $0 + $1.delay })
-        
-        if let springAnimation = springAnimation {
-            return .springAnimation(
-                duration: duration,
-                delay: totalDelay,
-                dampingRatio: springAnimation.dampingRatio,
-                velocity: springAnimation.initialVelocity,
-                options: options ?? [],
-                animations: changes)
-        }
-        return .animation(
-            duration: duration,
-            delay: totalDelay,
-            options: options,
-            timingFunction: timingFunction,
-            animations: changes)
     }
 }

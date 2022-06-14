@@ -1,5 +1,7 @@
 import AnimationPlanner
 import Foundation
+import UIKit
+import XCTest
 
 class BuilderTests: AnimationPlannerTests {
     
@@ -9,6 +11,22 @@ class BuilderTests: AnimationPlannerTests {
      as the old-style tests.
      */
     
+    func testContainedAnimations() {
+        let animate = Animate(duration: 1)
+        let spring = animate.spring(damping: 2)
+        let delay = spring.delayed(3)
+        
+        let options: UIView.AnimationOptions = .allowAnimatedContent
+        let editedDelay = delay.options(options)
+        let containedAnimation = editedDelay.animation.animation
+        let springed = editedDelay.spring(damping: 4)
+        
+        XCTAssertEqual(editedDelay.options, containedAnimation.options)
+        XCTAssertEqual(editedDelay.dampingRatio, spring.dampingRatio)
+        XCTAssertNotEqual(springed.dampingRatio, spring.dampingRatio)
+        XCTAssertEqual(springed.delay, delay.delay)
+    }
+    
     func testBuilder() {
         let totalDuration: TimeInterval = 1
         let numberOfSteps: TimeInterval = 3
@@ -17,13 +35,14 @@ class BuilderTests: AnimationPlannerTests {
         runAnimationTest(duration: totalDuration) { completion, _, _ in
     
             AnimationPlanner.plan {
-                AnimateSpring(duration: duration, damping: 0.8) {
+                Animate(duration: duration) {
                     self.performRandomAnimation()
                 }
                 Wait(duration)
                 Animate(duration: duration) {
                     self.performRandomAnimation()
                 }
+                .spring(damping: 0.8)
             } completion: { finished in
                 completion(finished)
             }
@@ -47,6 +66,7 @@ class BuilderTests: AnimationPlannerTests {
                 Animate(duration: duration) {
                     self.performRandomAnimation()
                 }
+                .options(.allowAnimatedContent)
             } completion: { finished in
                 completion(finished)
             }
@@ -120,9 +140,11 @@ class BuilderTests: AnimationPlannerTests {
         runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.group {
-                AnimateSpring(duration: duration, damping: 0.82) {
+                Animate(duration: duration) {
                     self.performRandomAnimation()
-                }.delayed(delay)
+                }
+                .spring(damping: 0.82)
+                .delayed(delay)
             } completion: { finised in
                 completion(finised)
             }
@@ -137,9 +159,11 @@ class BuilderTests: AnimationPlannerTests {
         runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.group {
-                AnimateDelayed(delay: delay, duration: duration) {
+                Animate(duration: duration) {
                     self.performRandomAnimation()
-                }.spring(damping: 0.82)
+                }
+                .delayed(delay)
+                .spring(damping: 0.82)
             } completion: { finished in
                 completion(finished)
             }
@@ -176,7 +200,26 @@ class BuilderTests: AnimationPlannerTests {
         runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.plan {
-                Loop.through(sequence: durations) { duration in
+                Loop.through(durations) { duration in
+                    Animate(duration: duration) {
+                        self.performRandomAnimation()
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+            
+        }
+    }
+    
+    func testSequenceForLoop() {
+        let numberOfLoops: Int = 4
+        let durations = randomDurations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = durations.reduce(0, +)
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            
+            AnimationPlanner.plan {
+                for duration in durations {
                     Animate(duration: duration) {
                         self.performRandomAnimation()
                     }
@@ -197,9 +240,9 @@ class BuilderTests: AnimationPlannerTests {
             
             AnimationPlanner.group {
                 Loop(for: numberOfLoops) { index in
-                    AnimateDelayed(delay: animations[index].delay, duration: animations[index].duration) {
+                    Animate(duration: animations[index].duration) {
                         self.performRandomAnimation()
-                    }
+                    }.delayed(animations[index].delay)
                 }
             } completion: { finished in
                 completion(finished)
@@ -216,10 +259,30 @@ class BuilderTests: AnimationPlannerTests {
         runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.group {
-                Loop.through(sequence: animations) { animation in
-                    AnimateDelayed(delay: animation.delay, duration: animation.duration) {
+                Loop.through(animations) { animation in
+                    Animate(duration: animation.duration) {
                         self.performRandomAnimation()
-                    }
+                    }.delayed(animation.delay)
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+            
+        }
+    }
+    
+    func testGroupForLoop() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+        
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            
+            AnimationPlanner.group {
+                for animation in animations {
+                    Animate(duration: animation.duration) {
+                        self.performRandomAnimation()
+                    }.delayed(animation.delay)
                 }
             } completion: { finished in
                 completion(finished)

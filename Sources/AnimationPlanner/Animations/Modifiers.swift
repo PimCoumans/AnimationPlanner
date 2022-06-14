@@ -21,35 +21,41 @@ public protocol AnimationModifiers {
 
 /// Adds spring interpolation to an existing animation
 public protocol SpringModifier {
-    func spring(damping: CGFloat, initialVelocity: CGFloat) -> AnimateSpring
+    associatedtype SpringedAnimation: Animation
+    func spring(damping: CGFloat, initialVelocity: CGFloat) -> Spring<SpringedAnimation>
 }
 
 extension SpringModifier where Self: Animation {
-    public func spring(damping: CGFloat, initialVelocity: CGFloat = 0) -> AnimateSpring {
+    public func spring(damping: CGFloat, initialVelocity: CGFloat = 0) -> Spring<Self> {
         // By default, all structs conforming `Animation` should be able to animate with a spring
-        AnimateSpring(dampingRatio: damping, initialVelocity: initialVelocity, animation: self)
+        Spring(dampingRatio: damping, initialVelocity: initialVelocity, animation: self)
     }
 }
 
 // Add a delay to the animation
 public protocol DelayModifier {
     associatedtype DelayedAnimation: Animates
-    func delayed(_ delay: TimeInterval) -> DelayedAnimation
+    func delayed(_ delay: TimeInterval) -> Delayed<DelayedAnimation>
 }
 
-extension DelayModifier where Self: Animation {
-    public func delayed(_ delay: TimeInterval) -> AnimateDelayed {
-        AnimateDelayed(delay: delay, animation: self)
+extension DelayModifier where Self: AnimatesSimultaneously {
+    public func delayed(_ delay: TimeInterval) -> Delayed<Self> {
+        // By default, all structs conforming to `AnimatesSimultaneously` should be able to animate with a delay
+        Delayed(delay: delay, animation: self)
     }
 }
 
 extension Animate: AnimationModifiers, SpringModifier, DelayModifier { }
-extension AnimateDelayed: AnimationModifiers, SpringModifier { }
-extension AnimateSpring: AnimationModifiers, DelayModifier { }
+extension Delayed: SpringModifier where Contained: Animation {
+    public func spring(damping: CGFloat, initialVelocity: CGFloat) -> Spring<Contained> {
+        Spring(dampingRatio: damping, initialVelocity: initialVelocity, animation: animation)
+    }
+}
+extension Spring: DelayModifier { }
 
 extension Extra: DelayModifier {
-    public func delayed(_ delay: TimeInterval) -> Self {
-        Self(delay: delay, perform: perform)
+    public func delayed(_ delay: TimeInterval) -> Delayed<Self> {
+        Delayed(delay: delay, animation: self)
     }
 }
 
@@ -80,7 +86,11 @@ extension Animate: Mutable {
     }
 }
 
-extension AnimateSpring: Mutable {
+extension Spring: Mutable { }
+extension Spring: AnimationModifiers where Contained: AnimationModifiers {
+    func modifyAnimation(_ handler: (AnimationModifiers) -> Contained) -> Self {
+        mutate { $0.animation = handler(animation) }
+    }
     public func options(_ options: UIView.AnimationOptions) -> Self {
         mutate { $0.animation = animation.options(options) }
     }
@@ -92,7 +102,8 @@ extension AnimateSpring: Mutable {
     }
 }
 
-extension AnimateDelayed: Mutable {
+extension Delayed: Mutable { }
+extension Delayed: AnimationModifiers where Contained: Animation & AnimationModifiers {
     public func options(_ options: UIView.AnimationOptions) -> Self {
         mutate { $0.animation = animation.options(options) }
     }

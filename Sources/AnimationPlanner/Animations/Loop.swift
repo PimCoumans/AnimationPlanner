@@ -19,7 +19,7 @@ extension Loop: SequenceAnimatesConvertible where A == AnimatesInSequence {
     }
     
     public static func through<S: Swift.Sequence>(
-        sequence: S,
+        _ sequence: S,
         @AnimationBuilder builder: (S.Element) -> [AnimatesInSequence]
     ) -> [AnimatesInSequence] {
         sequence.flatMap(builder)
@@ -40,7 +40,7 @@ extension Loop: SimultaneouslyAnimatesConvertible where A == AnimatesSimultaneou
     }
     
     public static func through<S: Swift.Sequence>(
-        sequence: S,
+        _ sequence: S,
         @AnimationBuilder builder: (S.Element) -> [AnimatesSimultaneously]
     ) -> [AnimatesSimultaneously] {
         sequence.flatMap(builder)
@@ -48,13 +48,13 @@ extension Loop: SimultaneouslyAnimatesConvertible where A == AnimatesSimultaneou
 }
 
 extension Swift.Sequence {
-    public func animateLoop(
+    public func mapAnimations(
         @AnimationBuilder builder: (Element) -> [AnimatesInSequence]
     ) -> [AnimatesInSequence] {
         flatMap(builder)
     }
     
-    public func animateLoop(
+    public func mapAnimations(
         @AnimationBuilder builder: (Element) -> [AnimatesSimultaneously]
     ) -> [AnimatesSimultaneously] {
         flatMap(builder)

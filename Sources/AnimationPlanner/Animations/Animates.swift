@@ -7,7 +7,7 @@ public protocol Animates {
 }
 
 /// Actual animation that can be used to construct `UIView` animation
-public protocol Animation: Animates, PerformsAnimations, AnimationModifiers {
+public protocol Animation: Animates, PerformsAnimations {
     /// Changes on views to peform animation with
     var changes: () -> Void { get }
     /// Animation options to use for UIView animation
@@ -30,12 +30,25 @@ extension AnimatesSimultaneously {
     public func asGroup() -> [AnimatesSimultaneously] { [self] }
 }
 
+/// Adds a delay to the animation
+public protocol AnimatesDelayed: AnimatesSimultaneously {
+    var delay: TimeInterval { get }
+}
+
+/// Performs an animation with spring-based parameters
+public protocol SpringAnimates: Animates {
+    var dampingRatio: CGFloat { get }
+    var initialVelocity: CGFloat { get }
+}
+
 /// Perfoms the provided handler in between your actual animations.
 /// Typically used for setting up state before an animation or creating side-effects like haptic feedback.
 public protocol AnimatesExtra: Animates {
     var perform: () -> Void { get }
 }
-
-public protocol AnimatesDelayed: AnimatesSimultaneously {
-    var delay: TimeInterval { get }
+extension AnimatesExtra {
+    public var duration: TimeInterval { 0 }
+}
+extension AnimatesExtra where Self: AnimatesSimultaneously {
+    public var totalDuration: TimeInterval { duration }
 }

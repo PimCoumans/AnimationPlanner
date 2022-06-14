@@ -28,29 +28,20 @@ public struct Wait: AnimatesInSequence {
 /// Typically used for setting up state before an animation or creating side-effects like haptic feedback.
 public struct Extra: AnimatesExtra, AnimatesInSequence, AnimatesSimultaneously {
     public let duration: TimeInterval = 0
-    public var totalDuration: TimeInterval { delay + duration }
-    public let delay: TimeInterval
     
     public var perform: () -> Void
     public init(perform: @escaping () -> Void) {
-        self.perform = perform
-        self.delay = 0
-    }
-}
-
-extension Extra: AnimatesDelayed {
-    public init(delay: TimeInterval = 0, perform: @escaping () -> Void) {
-        self.delay = delay
         self.perform = perform
     }
 }
 
 /// Adds custom behaviour on top of the contained animation. Forwards all required `Animation` properties to the contained animation
-public protocol AnimationContainer: Animation {
-    var animation: Animation { get }
+public protocol AnimationContainer {
+    associatedtype Contained: Animates
+    var animation: Contained { get }
 }
 
-extension AnimationContainer {
+extension AnimationContainer where Contained: Animation {
     public var duration: TimeInterval { animation.duration }
     public var changes: () -> Void { animation.changes }
     public var options: UIView.AnimationOptions? { animation.options }
@@ -58,39 +49,37 @@ extension AnimationContainer {
 }
 
 /// Performs an animation with spring dampening applied, using the same values as UIView spring animations
-public struct AnimateSpring: AnimationContainer, AnimatesInSequence, AnimatesSimultaneously {
-    public internal(set) var animation: Animation
+public struct Spring<T: Animation>: SpringAnimates, AnimationContainer, AnimatesSimultaneously {
+    public internal(set) var animation: T
     public var totalDuration: TimeInterval { duration }
     
     public let dampingRatio: CGFloat
     public let initialVelocity: CGFloat
     
-    internal init(dampingRatio: CGFloat, initialVelocity: CGFloat, animation: Animation) {
+    internal init(dampingRatio: CGFloat, initialVelocity: CGFloat, animation: T) {
         self.animation = animation
         self.dampingRatio = dampingRatio
         self.initialVelocity = initialVelocity
     }
-    
-    public init(duration: TimeInterval, damping: CGFloat, velocity: CGFloat = 0, changes: @escaping () -> Void) {
-        let animation = Animate(duration: duration, changes: changes)
-        self.init(dampingRatio: damping, initialVelocity: velocity, animation: animation)
+}
+
+extension Spring: AnimatesInSequence, SequenceAnimatesConvertible where Contained: AnimatesInSequence {
+    public func asSequence() -> [AnimatesInSequence] {
+        [self]
     }
 }
 
 /// Performs an animation after a delay, only to be used in a context where other animations are run simultaneously
-public struct AnimateDelayed: AnimationContainer, AnimatesDelayed {
-    public internal(set) var animation: Animation
+public struct Delayed<T: Animates>: AnimationContainer, AnimatesDelayed, AnimatesSimultaneously {
+    
+    public internal(set) var animation: T
+    public var duration: TimeInterval { animation.duration }
     public var totalDuration: TimeInterval { delay + animation.duration }
     
     public let delay: TimeInterval
     
-    internal init(delay: TimeInterval, animation: Animation) {
+    internal init(delay: TimeInterval, animation: T) {
         self.animation = animation
         self.delay = delay
-    }
-    
-    public init(delay: TimeInterval, duration: TimeInterval, changes: @escaping () -> Void) {
-        let animation = Animate(duration: duration, changes: changes)
-        self.init(delay: delay, animation: animation)
     }
 }
