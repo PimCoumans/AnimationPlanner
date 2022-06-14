@@ -1,6 +1,6 @@
 import UIKit
 
-public protocol SequenceAnimatesConvertible {
+public protocol AnimatesInSequenceConvertible {
     func asSequence() -> [AnimatesInSequence]
 }
 
@@ -8,7 +8,7 @@ public protocol SimultaneouslyAnimatesConvertible {
     func asGroup() -> [AnimatesSimultaneously]
 }
 
-extension Array: SequenceAnimatesConvertible where Element == AnimatesInSequence {
+extension Array: AnimatesInSequenceConvertible where Element == AnimatesInSequence {
     public func asSequence() -> [AnimatesInSequence] { flatMap { $0.asSequence() } }
 }
 
@@ -18,21 +18,21 @@ extension Array: SimultaneouslyAnimatesConvertible where Element == AnimatesSimu
 
 @resultBuilder
 public struct AnimationBuilder {
-    public static func buildBlock(_ components: SequenceAnimatesConvertible...) -> [AnimatesInSequence] {
+    public static func buildBlock(_ components: AnimatesInSequenceConvertible...) -> [AnimatesInSequence] {
         components.flatMap { $0.asSequence() }
     }
     
-    public static func buildArray(_ components: [SequenceAnimatesConvertible]) -> [AnimatesInSequence] {
+    public static func buildArray(_ components: [AnimatesInSequenceConvertible]) -> [AnimatesInSequence] {
         components.flatMap { $0.asSequence() }
     }
     
-    public static func buildOptional(_ component: SequenceAnimatesConvertible?) -> [AnimatesInSequence] {
+    public static func buildOptional(_ component: AnimatesInSequenceConvertible?) -> [AnimatesInSequence] {
         component.map { $0.asSequence() } ?? []
     }
-    public static func buildEither(first component: SequenceAnimatesConvertible) -> [AnimatesInSequence] {
+    public static func buildEither(first component: AnimatesInSequenceConvertible) -> [AnimatesInSequence] {
         component.asSequence()
     }
-    public static func buildEither(second component: SequenceAnimatesConvertible) -> [AnimatesInSequence] {
+    public static func buildEither(second component: AnimatesInSequenceConvertible) -> [AnimatesInSequence] {
         component.asSequence()
     }
 }
@@ -90,17 +90,17 @@ fileprivate extension Array where Element == AnimatesSimultaneously {
     }
 }
 
-extension Spring: Animation where Contained: Animation {
+extension AnimateSpring: Animation where Contained: Animation {
     public var options: UIView.AnimationOptions? { animation.options }
     public var timingFunction: CAMediaTimingFunction? { animation.timingFunction }
     public var changes: () -> Void { animation.changes }
 }
 
-extension Spring: AnimatesDelayed where Contained: AnimatesDelayed {
+extension AnimateSpring: DelayedAnimates where Contained: DelayedAnimates {
     public var delay: TimeInterval { animation.delay }
 }
 
-extension Delayed: SpringAnimates where Contained: SpringAnimates {
+extension AnimateDelayed: SpringAnimates where Contained: SpringAnimates {
     public var dampingRatio: CGFloat { animation.dampingRatio }
     public var initialVelocity: CGFloat { animation.initialVelocity }
 }
@@ -108,7 +108,7 @@ extension Delayed: SpringAnimates where Contained: SpringAnimates {
 fileprivate extension Animates {
     var toStep: AnimationSequence.Step? {
         var delay: TimeInterval = 0
-        if let delayed = self as? AnimatesDelayed {
+        if let delayed = self as? DelayedAnimates {
             // Grab delay if animation has a delay
             delay = delayed.delay
         }

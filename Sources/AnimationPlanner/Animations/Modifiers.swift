@@ -1,7 +1,7 @@
 import UIKit
 
 // Adds modifier functions to animations
-public protocol AnimationModifiers {
+public protocol AnimationModifiers: Animation {
     /// Add animation options to the animation
     /// - Parameter options: OptionSet of UIView AnimationOptions
     /// - Note: Using `.repeats` will break expected behavior when used in a sequence
@@ -19,45 +19,51 @@ public protocol AnimationModifiers {
     func changes(_ changes: @escaping () -> Void) -> Self
 }
 
+extension Animate: AnimationModifiers { }
+
+// MARK: - Spring modifiers
+
 /// Adds spring interpolation to an existing animation
 public protocol SpringModifier {
     associatedtype SpringedAnimation: Animation
-    func spring(damping: CGFloat, initialVelocity: CGFloat) -> Spring<SpringedAnimation>
+    func spring(damping: CGFloat, initialVelocity: CGFloat) -> AnimateSpring<SpringedAnimation>
 }
 
 extension SpringModifier where Self: Animation {
-    public func spring(damping: CGFloat, initialVelocity: CGFloat = 0) -> Spring<Self> {
+    public func spring(damping: CGFloat, initialVelocity: CGFloat = 0) -> AnimateSpring<Self> {
         // By default, all structs conforming `Animation` should be able to animate with a spring
-        Spring(dampingRatio: damping, initialVelocity: initialVelocity, animation: self)
+        AnimateSpring(dampingRatio: damping, initialVelocity: initialVelocity, animation: self)
     }
 }
+
+extension AnimateDelayed: SpringModifier where Contained: Animation {
+    public func spring(damping: CGFloat, initialVelocity: CGFloat) -> AnimateSpring<Contained> {
+        AnimateSpring(dampingRatio: damping, initialVelocity: initialVelocity, animation: animation)
+    }
+}
+
+extension Animate: SpringModifier { }
+
+// MARK: - Delay modifiers
 
 // Add a delay to the animation
 public protocol DelayModifier {
     associatedtype DelayedAnimation: Animates
-    func delayed(_ delay: TimeInterval) -> Delayed<DelayedAnimation>
+    func delayed(_ delay: TimeInterval) -> AnimateDelayed<DelayedAnimation>
 }
 
 extension DelayModifier where Self: AnimatesSimultaneously {
-    public func delayed(_ delay: TimeInterval) -> Delayed<Self> {
+    public func delayed(_ delay: TimeInterval) -> AnimateDelayed<Self> {
         // By default, all structs conforming to `AnimatesSimultaneously` should be able to animate with a delay
-        Delayed(delay: delay, animation: self)
+        AnimateDelayed(delay: delay, animation: self)
     }
 }
 
-extension Animate: AnimationModifiers, SpringModifier, DelayModifier { }
-extension Delayed: SpringModifier where Contained: Animation {
-    public func spring(damping: CGFloat, initialVelocity: CGFloat) -> Spring<Contained> {
-        Spring(dampingRatio: damping, initialVelocity: initialVelocity, animation: animation)
-    }
-}
-extension Spring: DelayModifier { }
+extension Animate: DelayModifier { }
 
-extension Extra: DelayModifier {
-    public func delayed(_ delay: TimeInterval) -> Delayed<Self> {
-        Delayed(delay: delay, animation: self)
-    }
-}
+extension AnimateSpring: DelayModifier { }
+
+extension Extra: DelayModifier { }
 
 /* -- Internal animation modifying convenience methods -- */
 
@@ -86,8 +92,8 @@ extension Animate: Mutable {
     }
 }
 
-extension Spring: Mutable { }
-extension Spring: AnimationModifiers where Contained: AnimationModifiers {
+extension AnimateSpring: Mutable { }
+extension AnimateSpring: AnimationModifiers where Contained: AnimationModifiers {
     func modifyAnimation(_ handler: (AnimationModifiers) -> Contained) -> Self {
         mutate { $0.animation = handler(animation) }
     }
@@ -102,8 +108,8 @@ extension Spring: AnimationModifiers where Contained: AnimationModifiers {
     }
 }
 
-extension Delayed: Mutable { }
-extension Delayed: AnimationModifiers where Contained: Animation & AnimationModifiers {
+extension AnimateDelayed: Mutable { }
+extension AnimateDelayed: AnimationModifiers where Contained: Animation & AnimationModifiers {
     public func options(_ options: UIView.AnimationOptions) -> Self {
         mutate { $0.animation = animation.options(options) }
     }

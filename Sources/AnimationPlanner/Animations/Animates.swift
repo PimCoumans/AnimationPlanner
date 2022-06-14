@@ -17,7 +17,7 @@ public protocol Animation: Animates, PerformsAnimations {
 }
 
 /// Animation that can be performed in a sequence, meaning each animation starts right after the previous completes
-public protocol AnimatesInSequence: Animates, SequenceAnimatesConvertible { }
+public protocol AnimatesInSequence: Animates, AnimatesInSequenceConvertible { }
 extension AnimatesInSequence {
     public func asSequence() -> [AnimatesInSequence] { [self] }
 }
@@ -31,7 +31,7 @@ extension AnimatesSimultaneously {
 }
 
 /// Adds a delay to the animation
-public protocol AnimatesDelayed: AnimatesSimultaneously {
+public protocol DelayedAnimates: AnimatesSimultaneously {
     var delay: TimeInterval { get }
 }
 

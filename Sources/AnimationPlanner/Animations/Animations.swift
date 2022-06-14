@@ -9,7 +9,7 @@ public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
     public internal(set) var options: UIView.AnimationOptions?
     public internal(set) var timingFunction: CAMediaTimingFunction?
     
-    public init(duration: TimeInterval, changes: @escaping () -> Void = { }) {
+    public init(duration: TimeInterval, changes: @escaping () -> Void = {}) {
         self.duration = duration
         self.changes = changes
     }
@@ -49,7 +49,7 @@ extension AnimationContainer where Contained: Animation {
 }
 
 /// Performs an animation with spring dampening applied, using the same values as UIView spring animations
-public struct Spring<T: Animation>: SpringAnimates, AnimationContainer, AnimatesSimultaneously {
+public struct AnimateSpring<T: Animation>: SpringAnimates, AnimationContainer, AnimatesSimultaneously {
     public internal(set) var animation: T
     public var totalDuration: TimeInterval { duration }
     
@@ -63,14 +63,26 @@ public struct Spring<T: Animation>: SpringAnimates, AnimationContainer, Animates
     }
 }
 
-extension Spring: AnimatesInSequence, SequenceAnimatesConvertible where Contained: AnimatesInSequence {
+extension AnimateSpring where T == Animate {
+    public init(
+        duration: TimeInterval,
+        dampingRatio: CGFloat,
+        initialVelocity: CGFloat = 0,
+        changes: @escaping () -> Void = {}
+    ) {
+        let animation = Animate(duration: duration, changes: changes)
+        self.init(dampingRatio: dampingRatio, initialVelocity: initialVelocity, animation: animation)
+    }
+}
+
+extension AnimateSpring: AnimatesInSequence, AnimatesInSequenceConvertible where Contained: AnimatesInSequence {
     public func asSequence() -> [AnimatesInSequence] {
         [self]
     }
 }
 
 /// Performs an animation after a delay, only to be used in a context where other animations are run simultaneously
-public struct Delayed<T: Animates>: AnimationContainer, AnimatesDelayed, AnimatesSimultaneously {
+public struct AnimateDelayed<T: Animates>: AnimationContainer, DelayedAnimates, AnimatesSimultaneously {
     
     public internal(set) var animation: T
     public var duration: TimeInterval { animation.duration }
@@ -81,5 +93,16 @@ public struct Delayed<T: Animates>: AnimationContainer, AnimatesDelayed, Animate
     internal init(delay: TimeInterval, animation: T) {
         self.animation = animation
         self.delay = delay
+    }
+}
+
+extension AnimateDelayed where T == Animate {
+    public init(
+        delay: TimeInterval,
+        duration: TimeInterval,
+        changes: @escaping () -> Void = {}
+    ) {
+        let animation = Animate(duration: duration, changes: changes)
+        self.init(delay: delay, animation: animation)
     }
 }

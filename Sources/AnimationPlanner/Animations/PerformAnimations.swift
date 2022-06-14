@@ -53,9 +53,9 @@ extension Extra: PerformsAnimations {
     }
 }
 
-extension Spring: PerformsAnimations {
+extension AnimateSpring: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        let delay = (self as? AnimatesDelayed)?.delay ?? 0
+        let delay = (self as? DelayedAnimates)?.delay ?? 0
         UIView.animate(
             withDuration: duration,
             delay: leadingDelay + delay,
@@ -68,7 +68,7 @@ extension Spring: PerformsAnimations {
     }
 }
 
-extension Delayed: Animation, PerformsAnimations where Contained: Animation {
+extension AnimateDelayed: Animation, PerformsAnimations where Contained: Animation {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         animation.animate(delay: delay + leadingDelay, completion: completion)
     }

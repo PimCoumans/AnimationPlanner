@@ -5,7 +5,7 @@ public struct Loop<A> {
     public let animations: [A]
 }
 
-extension Loop: SequenceAnimatesConvertible where A == AnimatesInSequence {
+extension Loop: AnimatesInSequenceConvertible where A == AnimatesInSequence {
     public func asSequence() -> [AnimatesInSequence] {
         animations
     }
