@@ -48,7 +48,7 @@ public class AnimationSequence {
             delay: TimeInterval,
             dampingRatio: CGFloat,
             velocity: CGFloat,
-            options: UIView.AnimationOptions = [],
+            options: UIView.AnimationOptions? = [],
             animations: () -> Void)
         
         /// A step where preparations or side-effects can be handled. Comparable to a 0-duration animation, without actually being
@@ -328,7 +328,7 @@ extension AnimationSequence.Step: Animatable {
                 delay: leadingDelay + delay,
                 usingSpringWithDamping: dampingRatio,
                 initialSpringVelocity: velocity,
-                options: options,
+                options: options ?? [],
                 animations: animations,
                 completion: completion
             )
