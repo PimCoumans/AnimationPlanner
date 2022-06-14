@@ -290,4 +290,25 @@ class BuilderTests: AnimationPlannerTests {
             
         }
     }
+    
+    func testGroupSequence() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+        
+        runAnimationTest(duration: totalDuration) { completion, usedDuration, usedPrecision in
+            AnimationPlanner.group {
+                for animation in animations {
+                    Sequence {
+                        Wait(animation.delay)
+                        Animate(duration: animation.duration) {
+                            self.performRandomAnimation()
+                        }
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+        }
+    }
 }
