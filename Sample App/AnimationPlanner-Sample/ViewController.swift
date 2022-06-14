@@ -21,23 +21,14 @@ class ViewController: UIViewController {
         view.addSubview(subview)
     }
 
-    let useNewBuilderAPI: Bool = true
-    let performComplexAnimation: Bool = false // Set to true to run a more complex animation
+    let performComplexAnimation: Bool = true // Set to true to run a more complex animation
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if useNewBuilderAPI {
-            if performComplexAnimation {
-                runComplexBulderAnimation()
-            } else {
-                runSimpleBuilderAnimation()
-            }
+        if performComplexAnimation {
+            runComplexBulderAnimation()
         } else {
-            if performComplexAnimation {
-                runComplexAnimation()
-            } else {
-                runSimpleAnimation()
-            }
+            runSimpleBuilderAnimation()
         }
     }
 }
@@ -55,39 +46,6 @@ extension ViewController {
         subview.layer.borderWidth = 0
         subview.layer.borderColor = nil
         return subview
-    }
-    
-    func runSimpleAnimation() {
-        UIView.animateSteps { sequence in
-            let view = setInitialSubviewState()
-            sequence
-                .delay(0.35) // A delay waits for the given amount of seconds to start the next step
-                .addSpring(duration: 0.5, damping: 0.79) {
-                    view.alpha = 1
-                    view.center.y = self.view.bounds.midY
-                }
-                .delay(0.2)
-                .add(duration: 0.32, timingFunction: .quintOut) {
-                    view.transform = CGAffineTransform(scaleX: 2, y: 2)
-                    view.layer.cornerRadius = 40
-                    view.backgroundColor = .systemRed
-                }
-                .delay(0.2)
-                .addSpring(duration: 0.25, damping: 0.52) {
-                    view.backgroundColor = .systemBlue
-                    view.layer.cornerRadius = 0
-                    view.transform = .identity
-                }
-                .delay(0.58)
-                .add(duration: 0.2, timingFunction: .circIn) {
-                    view.alpha = 0
-                    view.transform = .identity
-                    view.frame.origin.y = self.view.bounds.maxY
-                }
-        } completion: { finished in
-            // Just to keep the flow going, let‘s run the animation again
-            self.runSimpleAnimation()
-        }
     }
     
     func runSimpleBuilderAnimation() {
@@ -119,106 +77,6 @@ extension ViewController {
         } completion: { finished in
             // Just to keep the flow going, let‘s run the animation again
             self.runSimpleBuilderAnimation()
-        }
-    }
-    
-    func runComplexAnimation() {
-        
-        var sneakyCopy: UIView! // Don‘t worry, you‘ll see later
-        
-        UIView.animateSteps { sequence in
-            let quarterHeight = view.bounds.height / 4
-            let view = setInitialSubviewState()
-            
-            sequence
-                .delay(0.2)
-                .add(duration: 1, timingFunction: .quartOut) {
-                    view.alpha = 1
-                    view.center.y = quarterHeight
-                }
-                .delay(0.2)
-                .add(duration: 0.35, timingFunction: .backOut) {
-                    view.transform = view.transform.scaledBy(x: 0.9, y: 0.9)
-                    view.layer.cornerRadius = 40
-                }
-                .add(duration: 1, timingFunction: .cubicInOut) {
-                    view.frame.origin.y += quarterHeight
-                    view.transform = .identity
-                }
-                .delay(0.32)
-            
-            // Adding multiple steps from a loop is pretty straightforward
-            (1...4).map({ CGFloat($0) / 4 }).forEach { offset in
-                let reversed = 1 - offset
-                let initialCornerRadius = view.layer.cornerRadius
-                sequence.add(duration: 0.2, timingFunction: .backOut) {
-                    view.transform = CGAffineTransform(
-                        rotationAngle: .pi * offset
-                    ).scaledBy(
-                        x: 1 + offset / 2,
-                        y: 1 + offset / 2)
-                    view.layer.cornerRadius = initialCornerRadius * reversed
-                }
-                .delay(0.25)
-            }
-            
-            // Continue the chain again by calling the next step on the sequence object
-            sequence
-                .add(duration: 0.01) {
-                    view.transform = view.transform.rotated(by: .pi) // reset rotation
-                }
-                // Example of using a custom extension (defined further down) for a specific animation
-                .shake(view)
-                .extra {
-                    // An ‘extra’ step performs non-animating setup logic
-                    // like adding another view to the mix
-                    sneakyCopy = view.sneakyCopy()
-                }
-                .add(duration: 0.25, timingFunction: .backOut) {
-                    sneakyCopy.isHidden = false
-                    sneakyCopy.transform = CGAffineTransform(translationX: 0, y: -view.frame.height - 20)
-                    sneakyCopy.backgroundColor = .systemYellow
-                }
-                .delay(0.35)
-                .add(duration: 1.2, timingFunction: .quartInOut) {
-                    view.transform = .identity
-                    let offset = view.frame.origin.y + quarterHeight
-                    view.frame.origin = CGPoint(x: view.frame.minX - (view.frame.width / 2) - 10, y: offset)
-                    sneakyCopy.frame = view.frame.offsetBy(dx: view.frame.width + 20, dy: 0)
-                    view.backgroundColor = .systemPink
-                }
-                .delay(0.5)
-                .addGroup { group in
-                    // A group performs all of its animations at once,
-                    // finishing when the longest animation completes
-                    // Use a delay for a staggered effect
-                    group.animate(duration: 0.5, delay: 0.2, timingFunction: .backOut) {
-                        sneakyCopy.transform = CGAffineTransform(translationX: 0, y: -50).concatenating(sneakyCopy.transform)
-                    }
-                    .animate(duration: 0.2, delay: 0.1, timingFunction: .cubicOut) {
-                        view.layer.borderColor = view.backgroundColor?.cgColor
-                        view.layer.borderWidth = 4
-                        sneakyCopy.layer.borderColor = sneakyCopy.backgroundColor?.cgColor
-                        sneakyCopy.layer.borderWidth = 4
-                    }
-                    .animate(duration: 1) {
-                        let viewColor = view.backgroundColor
-                        view.backgroundColor = sneakyCopy.backgroundColor
-                        sneakyCopy.backgroundColor = viewColor
-                    }
-                }
-                .delay(0.32)
-                .add(duration: 0.5, timingFunction: .quintIn) {
-                    view.alpha = 0
-                    sneakyCopy?.alpha = 0
-                    // you can use values set in previous animations
-                    // as the animations are created after the previous animation completes
-                    view.transform = view.transform.translatedBy(x: 0, y: quarterHeight)
-                    sneakyCopy?.transform = view.transform.translatedBy(x: 0, y: quarterHeight)
-                }
-        } completion: { finished in
-            // Let‘s watch that again, shall we?
-            self.runComplexAnimation()
         }
     }
     
@@ -271,8 +129,10 @@ extension ViewController {
             }
             
             Extra {
-                view.transform = view.transform.rotated(by: .pi) // reset rotation
+                // reset rotation
+                view.transform = view.transform.rotated(by: .pi)
             }
+            
             // Example of using a custom method (defined further down) for a specific animation
             addShakeSequence(shaking: view)
             Extra {
