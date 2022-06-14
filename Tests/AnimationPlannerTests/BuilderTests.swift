@@ -12,8 +12,11 @@ class BuilderTests: AnimationPlannerTests {
      */
     
     func testContainedAnimations() {
-        let animate = Animate(duration: 1)
-        let spring = animate.spring(damping: 2)
+        let animation = Animate(duration: 1) {
+            self.performRandomAnimation()
+        }
+        let spring = animation.spring(damping: 2)
+        
         let simplerSpring = AnimateSpring(duration: 1, dampingRatio: 2)
         XCTAssertEqual(spring.dampingRatio, simplerSpring.dampingRatio)
         XCTAssertEqual(spring.duration, simplerSpring.totalDuration)
@@ -31,18 +34,15 @@ class BuilderTests: AnimationPlannerTests {
         XCTAssertNotEqual(springed.dampingRatio, spring.dampingRatio)
         XCTAssertEqual(springed.delay, delay.delay)
         
-        // this is ridiculous
-        let animation = Animate(duration: 1)
+        let ridiculousAnimation = Animate(duration: 1)
             .delayed(2)
             .spring(damping: 3)
             .delayed(4)
             .spring(damping: 5)
             .delayed(6)
             .spring(damping: 7)
-        XCTAssertEqual(animation.delay, 6)
-        XCTAssertEqual(animation.dampingRatio, 7)
-        
-        let exta = Extra(perform: { }).delayed(2)
+        XCTAssertEqual(ridiculousAnimation.delay, 6)
+        XCTAssertEqual(ridiculousAnimation.dampingRatio, 7)
     }
     
     func testBuilder() {
