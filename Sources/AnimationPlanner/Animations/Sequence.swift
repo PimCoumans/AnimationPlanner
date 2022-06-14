@@ -15,11 +15,12 @@ public struct Sequence: AnimatesSimultaneously {
     
     public init(@AnimationBuilder _ build: () -> [AnimatesInSequence]) {
         self.init(delay: 0, animations: build())
-    }
+    }    
 }
 
 extension Sequence: PerformsAnimations {
     public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) {
-        // FIXME: Sequences don't animate yet
+        // FIXME: Sequences don't animate yet, should be implemeted in Phase 2
+        fatalError("Sequence animation not yet implemented")
     }
 }
