@@ -1,14 +1,15 @@
 import UIKit
 
-/// Result builder through which either sequence or group animations can be created. Add `@AnimationBuilder` to a closure or method to provide your own animations, providing it returns an array of either ``AnimatesInSequence`` or ``AnimatesSimultaneously``, or both.
+/// Result builder through which either sequence or group animations can be created. Add `@AnimationBuilder` to a closure or method to provide your own animations.
+/// The result of your builder function should be an `Array` of either ``AnimatesInSequence`` or ``AnimatesSimultaneously``.
 @resultBuilder
 public struct AnimationBuilder { }
 
 /// Chain multiple `UIView` animations with a declarative syntax, describing each step along the way. Start a new sequence animation by typing `AnimationPlanner.plan`.
 ///
-/// To get started,  read <doc:creating-basic-animation-sequence> and get up to speed on how to use AnimationPlanner, or start planing your animation by using either of the following static methods:
-/// - ``plan(animations:completion:)`` create a sequence animation where all animations are performed in order.
-/// - ``group(animations:completion:)`` create a group animation where all animations are performed simultaneously.
+/// To get started,  read <doc:creating-basic-animation-sequence> and get up to speed on how to use AnimationPlanner. Or begin planning your animation by using either of the following static methods:
+/// - ``plan(animations:completion:)`` start a sequence animation where all animations are performed in order.
+/// - ``group(animations:completion:)`` start a group animation where all animations are performed simultaneously.
 public struct AnimationPlanner {
     
     /// Start a new animation sequence where animations added will be performed in order, meaning a subsequent animation starts right after the previous finishes.
@@ -42,7 +43,7 @@ public struct AnimationPlanner {
     ///         view.frame.origin.y = 0
     ///     }.delayed(0.15)
     ///     Animate(duration: 0.3) {
-        ///     view.backgroundColor = .systemBlue
+    ///         view.backgroundColor = .systemBlue
     ///     }.delayed(0.2)
     /// }
     /// ```

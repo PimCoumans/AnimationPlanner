@@ -6,15 +6,15 @@
 
 ⛓ Chain multiple `UIView` animations without endlessly nesting in completion closures. Used in some of the more superfluous animations in the [OK Video](https://okvideo.app/download) app.
 
-📖 Read the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get you up to speed, or read on on to see a little example.
+📖 Read the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get you up to speed, or read on to see a little example.
 
 ## How do I do this?
-📦 Add `AnimationPlanner` to your project (only SPM is currently officially supported) and use `AnimationPlanner.plan` method to start creating steps for your animation, like shown below.
+📦 Add `AnimationPlanner` to your project (only SPM is currently officially supported) and start typing `AnimationPlanner.plan` to embark on your animation journey, like what‘s happening in the code below.
 
 ```swift
 AnimationPlanner.plan {
     Wait(0.35)
-    AnimateSpring(duration: 0.5, damping: 0.79) {
+    Animate(duration: 0.32, timingFunction: .quintOut) {
         view.alpha = 1
         view.center.y = self.view.bounds.midY
     }

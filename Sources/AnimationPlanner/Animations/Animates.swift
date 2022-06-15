@@ -12,7 +12,7 @@ public protocol Animation: Animates, PerformsAnimations {
     var changes: () -> Void { get }
     /// Animation options to use for UIView animation
     var options: UIView.AnimationOptions? { get }
-    /// Timing function to apply to animation (will use CATransaction wrapped animations)
+    /// Timing function to apply to animation. Leads to the `UIView` animation being performed in a `CATransaction` wrapped animation
     var timingFunction: CAMediaTimingFunction? { get }
 }
 

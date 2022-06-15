@@ -1,6 +1,7 @@
 import UIKit
 
-/// Performs an animation with for the provided duration in seconds, with an
+/// Performs an animation with the provided duration in seconds. Includes properties to set `UIView.AnimationOptions` and
+/// even a `CAMediaTimingFunction` to apply to the interpolation of the animated values changed in the ``changes`` closure.
 public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
     public let duration: TimeInterval
     public var totalDuration: TimeInterval { duration }
