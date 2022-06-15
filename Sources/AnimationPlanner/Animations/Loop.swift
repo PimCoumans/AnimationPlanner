@@ -15,6 +15,27 @@ import UIKit
 public struct Loop<Looped> {
     public var duration: TimeInterval
     public let animations: [Looped]
+    
+    fileprivate init(
+        repeatCount: Int,
+        @AnimationBuilder builder: (_ index: Int) -> [Looped]
+    ) {
+        self.animations = (0..<repeatCount).flatMap(builder)
+        
+        if Looped.self == AnimatesInSequence.self, let animations = animations as? [AnimatesInSequence] {
+            duration = animations.reduce(0, { $0 + $1.duration })
+        } else if Looped.self == AnimatesSimultaneously.self, let animations = animations as? [AnimatesSimultaneously] {
+            duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
+        } else {
+            fatalError("Animations provided through Loop don’t comform to any animatable type")
+        }
+    }
+    
+    fileprivate static func map<S: Swift.Sequence>(
+        _ sequence: S,
+        @AnimationBuilder with builder: (S.Element) -> [Looped]
+    ) -> [Looped] {
+        sequence.flatMap(builder)
 }
 
 extension Loop: SequenceAnimatesConvertible where Looped == AnimatesInSequence {
@@ -26,15 +47,12 @@ extension Loop: SequenceAnimatesConvertible where Looped == AnimatesInSequence {
         for repeatCount: Int,
         @AnimationBuilder animations builder: (_ index: Int) -> [AnimatesInSequence]
     ) {
-        animations = (0..<repeatCount).flatMap(builder)
-        duration = animations.reduce(0, { $0 + $1.duration })
     }
     
     public static func through<S: Swift.Sequence>(
         _ sequence: S,
         @AnimationBuilder animations builder: (S.Element) -> [AnimatesInSequence]
     ) -> [AnimatesInSequence] {
-        sequence.flatMap(builder)
     }
 }
 
@@ -43,6 +61,9 @@ extension Loop: SimultaneouslyAnimatesConvertible where Looped == AnimatesSimult
         animations
     }
     
+    /// Creates a new Loop that repeats for the given amount of times.
+    /// - Parameters:
+    ///   - repeatCount: How many times the loop should repeat. The index of each loop is provided as a argument in the `animations` closure
     public init(
         for repeatCount: Int,
         @AnimationBuilder animations builder: (_ index: Int) -> [AnimatesSimultaneously]
@@ -51,6 +72,8 @@ extension Loop: SimultaneouslyAnimatesConvertible where Looped == AnimatesSimult
         duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
     }
     
+    /// - Parameters:
+    ///   - sequence: Sequence to loop through, each element will be handled in the `animations` closure
     public static func through<S: Swift.Sequence>(
         _ sequence: S,
         @AnimationBuilder animations builder: (S.Element) -> [AnimatesSimultaneously]

@@ -11,14 +11,17 @@ public struct Group: AnimatesInSequence {
     /// All animations added to the group
     public let animations: [AnimatesSimultaneously]
     
-    var longestAnimation: AnimatesSimultaneously? {
-        return animations.max { $0.totalDuration < $1.totalDuration }
+    let longestAnimation: AnimatesSimultaneously?
+    
+    internal init(animations: [AnimatesSimultaneously]) {
+        self.animations = animations
+        self.longestAnimation = self.animations.max { $0.totalDuration < $1.totalDuration }
     }
     
     /// Creates a new `Group` providing a way to perform multiple animations simultaneously, meaning all animations run at the same time.
     /// - Parameter animations: Add each animation from within this closure. Animations added to a group should conform to ``AnimatesSimultaneously``.
     public init(@AnimationBuilder animations builder: () -> [AnimatesSimultaneously]) {
-        animations = builder()
+        self.init(animations: builder())
     }
 }
 
