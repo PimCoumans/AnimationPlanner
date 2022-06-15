@@ -1,10 +1,33 @@
 # ``AnimationPlanner``
 
-Chain multiple `UIView` animations with a declarative syntax, describing each step along the way.
+Chain multiple `UIView` animations with a clear declarative syntax, describing each step along the way. AnimationPlanner allows you to easily create all your animations in the same indentation level using a convenient API leveraging Swift result builders.
 
 ## Overview
 
-Start your animation with ``AnimationPlanner/AnimationPlanner/plan(animations:completion:)`` to begin your animation sequence. From within the `animations` closure you can add your animations.
+Start by typing `AnimationPlanner.plan` and begin creating your animation sequence. Within the `animations` closure you can provide all of your animations.
+
+> Note: Any animation created with AnimationPlanner can use a `CAMediaTimingFunction` animation curve with its animations. This framework provides numerous presets (like `.quintOut`) through an custom extension.
+
+### Example
+
+```swift
+AnimationPlanner.plan {
+    Animate(duration: 0.32) {
+        view.transform = CGAffineTransform(scaleX: 2, y: 2)
+        view.layer.cornerRadius = 40
+        view.backgroundColor = .systemRed
+    }.timingFunction(.quintOut)
+    Wait(0.2)
+    AnimateSpring(duration: 0.25, damping: 0.52) {
+        view.backgroundColor = .systemBlue
+        view.layer.cornerRadius = 0
+        view.transform = .identity
+    }
+}
+```
+
+See ``AnimationPlanner/AnimationPlanner/plan(animations:completion:)`` on ``AnimationPlanner`` for more info on beginning your animation sequence.
+
 The most often used animation types are listed below.
 
 | Animation   | Description                                                                                         |
@@ -19,16 +42,25 @@ The most often used animation types are listed below.
 
 - <doc:creating-basic-animation-sequence>
 
-### Animation creation
+### Starting your animations
 
 - ``AnimationPlanner/AnimationPlanner/plan(animations:completion:)``
 - ``AnimationPlanner/AnimationPlanner/group(animations:completion:)``
 
+### Animation structs
+
+- ``Animate``
+- ``Wait``
+- ``AnimateSpring``
+- ``AnimateDelayed``
+- ``Extra``
+
 ### Animation modifiers methods
 
-To change the way the animation is performed, a spring animation or a delay can be added through the a spring and delay modifiers.
+To change the way an animation is performed, the spring and delay modifiers can add specific behavior to your ``Animate`` struct.
 
-Spring and delay animations can also be created as seperate structs by using the initializers of ``AnimateSpring`` or ``AnimateDelayed``.
+Spring and delay animations can also be created as seperate structs by using the initializers of ``AnimateSpring`` or ``AnimateDelayed``
+as described above.
 
 - ``SpringModifier/spring(damping:initialVelocity:)-33bwh``
 - ``DelayModifier/delayed(_:)-7lnka``
@@ -51,5 +83,13 @@ Animate(duration: 0.5) { view.transform = .identity }
 ### Grouped animation
 
 To perform multiple animations simultaneously, a `Group` can be created in which animations can be contained.
+
 - ``Group``
 - ``Sequence``
+
+### Loop
+
+Iterating over a sequence of repeating animations for a specific amount of time can be done using `for element in sequence {` but also through
+the ``Loop`` struct.
+
+- ``Loop``

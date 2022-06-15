@@ -6,7 +6,7 @@ public protocol Animates {
     var duration: TimeInterval { get }
 }
 
-/// Actual animation that can be used to construct `UIView` animation
+/// Actual animation that can be used to construct `UIView` animations
 public protocol Animation: Animates, PerformsAnimations {
     /// Changes on views to perform animation with
     var changes: () -> Void { get }

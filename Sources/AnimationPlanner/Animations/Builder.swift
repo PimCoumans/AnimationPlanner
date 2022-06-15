@@ -5,11 +5,15 @@ import UIKit
 @resultBuilder
 public struct AnimationBuilder { }
 
-/// Chain multiple `UIView` animations with a declarative syntax, describing each step along the way. Start a new sequence animation by typing `AnimationPlanner.plan`.
+/// Chain multiple `UIView` animations with a clear declarative syntax, describing each step along the way.
+/// Start by typing `AnimationPlanner.plan` and  provide all of your animations from the `animations` closure.
 ///
-/// To get started,  read <doc:creating-basic-animation-sequence> and get up to speed on how to use AnimationPlanner. Or begin planning your animation by using either of the following static methods:
+/// Begin planning your animation by using either of the following static methods:
 /// - ``plan(animations:completion:)`` start a sequence animation where all animations are performed in order.
 /// - ``group(animations:completion:)`` start a group animation where all animations are performed simultaneously.
+///
+/// - Tip:  To get started,  read <doc:creating-basic-animation-sequence> and get up to speed on how to use AnimationPlanner,
+/// or go through the whole documentation on ``AnimationPlanner`` to get an overview of all the available functionalities.
 public struct AnimationPlanner {
     
     /// Start a new animation sequence where animations added will be performed in order, meaning a subsequent animation starts right after the previous finishes.

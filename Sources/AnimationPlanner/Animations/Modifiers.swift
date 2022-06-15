@@ -2,7 +2,7 @@ import UIKit
 
 /// Adds modifier methods to animations, providing a way to update multiple properties with chained successive method calls.
 ///
-/// Call each method right after creation your animation. All animations conforming to `AnimationModifier` should at least implement the following methods:
+/// Each method can be called on your animation. All animations conforming to `AnimationModifiers` should at least implement the following methods:
 /// - ``options(_:)``: Set the `UIView.AnimationOptions` for the animation. Will append new options to any existing options.
 /// - ``timingFunction(_:)``: Sets a `CAMediaTimingFunction` for the animation. Overwrites possible previously set functions.
 /// - ``changes(_:)``: Sets the ``Animation/changes`` to be performed for your animation.
