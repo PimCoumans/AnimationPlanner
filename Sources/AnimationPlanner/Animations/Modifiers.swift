@@ -1,6 +1,11 @@
 import UIKit
 
 /// Adds modifier methods to animations, providing a way to update multiple properties with chained successive method calls.
+///
+/// Call each method right after creation your animation. All animations conforming to `AnimationModifier` should at least implement the following methods:
+/// - ``options(_:)``: Set the `UIView.AnimationOptions` for the animation. Will append new options to any existing options.
+/// - ``timingFunction(_:)``: Sets a `CAMediaTimingFunction` for the animation. Overwrites possible previously set functions.
+/// - ``changes(_:)``: Sets the ``Animation/changes`` to be performed for your animation.
 public protocol AnimationModifiers: Animation {
     /// Set the `UIView.AnimationOptions` for the animation. Will append new options to any existing options.
     ///
@@ -11,7 +16,12 @@ public protocol AnimationModifiers: Animation {
     /// Sets a `CAMediaTimingFunction` for the animation. Overwrites possible previously set functions.
     ///
     /// Overrides any animation curves previously set with ``timingFunction(_:)``
-    /// - Note: Timing functions are ignored when applied to an animation using spring interpolation (``AnimateSpring``)
+    ///
+    /// - Tip: AnimationPlanner provides numerous animation curves through a `CAMediaTimingFunction` extension.
+    /// Type a period for the `timingFunction` parameter to see what is readily available. Have you tried `.quintOut` yet?
+    ///
+    /// - Important: Timing functions are ignored when applied to an animation using spring interpolation (``AnimateSpring``)
+    ///
     /// - Parameter function: Custom CAMediaTimingFunction or any of the avaialble static extensions
     func timingFunction(_ function: CAMediaTimingFunction) -> Self
     
@@ -37,6 +47,7 @@ extension Animate: AnimationModifiers {
 
 /// Adds spring interpolation to an existing animation
 public protocol SpringModifier {
+    /// Animation contained by ``AnimateSpring`` animation
     associatedtype SpringedAnimation: Animation
     
     /// Creates a spring-based animation with the expected damping and velocity values. Timing curves are ignored with spring animations as the spring itself should do all the interpolating.
@@ -66,7 +77,7 @@ extension Animate: SpringModifier { }
 
 /// Adds a delay to an existing animation
 public protocol DelayModifier {
-    /// Blarp
+    /// Animation contained by ``AnimateDelayed`` animation
     associatedtype DelayedAnimation: Animates
     /// Adds a delay to your animation. Only available in a ``Group`` context where animations should be performed simultaneously.
     /// - Parameter delay: Delay in seconds to add to your animation.

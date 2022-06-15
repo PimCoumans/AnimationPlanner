@@ -11,8 +11,11 @@ public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
     
     /// Creates a new animation, animating the properties updated in the ``changes`` closure
     ///
-    /// - Note: AnimationPlanner includes numerous animation curves through a `CAMediaTimingFunction` extension.
+    /// Only the `duration` parameter is required, all other properties can be added or modified using ``AnimationModifiers``.
+    ///
+    /// - Tip: AnimationPlanner provides numerous animation curves through a `CAMediaTimingFunction` extension.
     /// Type a period for the `timingFunction` parameter to see what is readily available. Have you tried `.quintOut` yet?
+    ///
     /// - Parameters:
     ///   - duration: Duration of animation, measured in seconds
     ///   - timingFunction: Optional `CAMediaTimingFunction` to interpolate animated values with.
@@ -50,28 +53,38 @@ public struct Extra: AnimatesExtra, AnimatesInSequence, AnimatesSimultaneously {
 
 // MARK: - Container
 
-/// Adds custom behaviour on top of the contained animation. Forwards all required `Animation` properties to the contained animation
+/// Adds custom behaviour on top of any contained animation. Forwards all required ``Animation`` properties
+/// to the contained animation when necessary.
 public protocol AnimationContainer {
+    /// Animation type contained by ``AnimationContainer``
     associatedtype Contained: Animates
+    /// Animation contained any animation using ``AnimationContainer``.
     var animation: Contained { get }
 }
 
 /// Forwarding ``Animation`` properties
 extension AnimationContainer where Contained: Animation {
+    /// Forwarded ``Animation`` property for ``Animate/duration``
     public var duration: TimeInterval { animation.duration }
+    /// Forwarded ``Animation`` property for ``Animation/changes``
     public var changes: () -> Void { animation.changes }
+    /// Forwarded ``Animation`` property for ``Animation/options``
     public var options: UIView.AnimationOptions? { animation.options }
+    /// Forwarded ``Animation`` property for ``Animation/timingFunction``
     public var timingFunction: CAMediaTimingFunction? { animation.timingFunction }
 }
 
 /// Forwarding ``DelayedAnimates`` properties
 extension AnimationContainer where Contained: DelayedAnimates {
+    /// Forwarded ``DelayedAnimates`` property for ``DelayedAnimates/delay``
     public var delay: TimeInterval { animation.delay }
 }
 
 /// Forwarding ``SpringAnimates`` properties
 extension AnimationContainer where Contained: SpringAnimates {
+    /// Forwarded ``SpringAnimates`` property for ``SpringAnimates/dampingRatio``
     public var dampingRatio: CGFloat { animation.dampingRatio }
+    /// Forwarded ``SpringAnimates`` property for ``SpringAnimates/initialVelocity``
     public var initialVelocity: CGFloat { animation.initialVelocity }
 }
 
@@ -93,6 +106,12 @@ public struct AnimateSpring<Springed: Animation>: SpringAnimates, AnimationConta
 }
 
 extension AnimateSpring where Springed == Animate {
+    /// Creates a spring-based animation with the expected damping and velocity values.
+    /// - Parameters:
+    ///   - damping: Value between 0 and 1, same as damping ratio used for `UIView`-based spring animations
+    ///   - initialVelocity: Relative velocity of animation, defined as full extend of animation per second
+    ///   - duration: Duration of animation, measured in seconds
+    ///   - changes: Closure executed when the animation is performed
     public init(
         duration: TimeInterval,
         dampingRatio: CGFloat,
@@ -105,17 +124,10 @@ extension AnimateSpring where Springed == Animate {
 }
 
 extension AnimateSpring: AnimatesInSequence, SequenceAnimatesConvertible where Contained: AnimatesInSequence {
-    public func asSequence() -> [AnimatesInSequence] {
-        [self]
-    }
+    public func asSequence() -> [AnimatesInSequence] { [self] }
 }
 
-extension AnimateSpring: Animation where Springed: Animation {
-    public var options: UIView.AnimationOptions? { animation.options }
-    public var timingFunction: CAMediaTimingFunction? { animation.timingFunction }
-    public var changes: () -> Void { animation.changes }
-}
-
+extension AnimateSpring: Animation where Springed: Animation { }
 extension AnimateSpring: DelayedAnimates where Springed: DelayedAnimates { }
 
 // MARK: - Delay
@@ -136,6 +148,11 @@ public struct AnimateDelayed<Delayed: Animates>: AnimationContainer, DelayedAnim
 }
 
 extension AnimateDelayed where Delayed == Animate {
+    /// Adds a delay to your animation. Can only be added in a ``Group`` context where animations should be performed simultaneously.
+    /// - Parameters:
+    ///   - delay: Delay in seconds to add to your animation
+    ///   - duration: Duration of animation, measured in seconds
+    ///   - changes: Closure executed when the animation is performed
     public init(
         delay: TimeInterval,
         duration: TimeInterval,
