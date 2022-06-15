@@ -8,7 +8,8 @@ import UIKit
 public protocol PerformsAnimations {
     /// Perform the actual animation
     /// - Parameters:
-    ///   - delay: Delay in seconds for how long to wait to actually perform animation
+    ///   - delay: Any delay accumulated (from preceding ``Wait`` structs) leading up to the animation.
+    ///   Waits for this amount of seconds before actually performing the animation
     ///   - completion: Closure called when animation completes
     func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?)
 }
