@@ -9,6 +9,14 @@ public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
     public internal(set) var options: UIView.AnimationOptions?
     public internal(set) var timingFunction: CAMediaTimingFunction?
     
+    /// Creates a new animation, animating the properties updated in the ``changes`` closure
+    ///
+    /// - Note: AnimationPlanner includes numerous animation curves through a `CAMediaTimingFunction` extension.
+    /// Type a period for the `timingFunction` parameter to see what is readily available. Have you tried `.quintOut` yet?
+    /// - Parameters:
+    ///   - duration: Duration of animation, measured in seconds
+    ///   - timingFunction: Optional `CAMediaTimingFunction` to interpolate animated values with.
+    ///   - changes: Closure executed when the animation is performed
     public init(
         duration: TimeInterval,
         timingFunction: CAMediaTimingFunction? = nil,
