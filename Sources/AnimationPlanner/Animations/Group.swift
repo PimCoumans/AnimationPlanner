@@ -8,6 +8,7 @@ public struct Group: AnimatesInSequence {
         return longestAnimation?.totalDuration ?? 0
     }
     
+    /// All animations added to the group
     public let animations: [AnimatesSimultaneously]
     
     var longestAnimation: AnimatesSimultaneously? {

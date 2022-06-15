@@ -6,6 +6,8 @@ public struct Sequence: AnimatesSimultaneously {
     public var totalDuration: TimeInterval { delay + duration }
     
     public let delay: TimeInterval
+    
+    /// All animations added to the sequence
     public let animations: [AnimatesInSequence]
     
     internal init(delay: TimeInterval, animations: [AnimatesInSequence]) {
