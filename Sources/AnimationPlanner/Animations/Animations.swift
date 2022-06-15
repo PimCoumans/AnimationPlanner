@@ -11,11 +11,11 @@ public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
     
     public init(
         duration: TimeInterval,
-        options: UIView.AnimationOptions? = [],
         timingFunction: CAMediaTimingFunction? = nil,
         changes: @escaping () -> Void = {}
     ) {
         self.duration = duration
+        self.timingFunction = timingFunction
         self.changes = changes
     }
 }
