@@ -1,6 +1,6 @@
-#if canImport(UIKit)
 import UIKit
 
+/// (Used in making animation sequences without needing ``AnimationBuilder``)
 /// This class is used to add steps to your animation sequence. When starting a sequence animation with `UIView.animateSteps(_:completion:)`, a sequence object is made available through the `addSteps` closure, From within this closure each step should be added to the sequence object.
 ///
 /// Each method on ``AnimationSequence`` returns a reference to `Self`, enabling the use of chainging each method call.
@@ -16,7 +16,7 @@ import UIKit
 public class AnimationSequence {
     
     /// All steps currently added to the sequence
-    public fileprivate(set) var steps: [Step] = []
+    public internal(set) var steps: [Step] = []
     
     /// A step for each animation in the sequence. These steps are created when using the available methods on ``AnimationSequence``.
     public enum Step {
@@ -33,7 +33,7 @@ public class AnimationSequence {
         case animation(
             duration: TimeInterval,
             delay: TimeInterval,
-            options: UIView.AnimationOptions = [],
+            options: UIView.AnimationOptions? = [],
             timingFunction: CAMediaTimingFunction? = nil,
             animations: () -> Void)
         
@@ -49,14 +49,14 @@ public class AnimationSequence {
             delay: TimeInterval,
             dampingRatio: CGFloat,
             velocity: CGFloat,
-            options: UIView.AnimationOptions = [],
+            options: UIView.AnimationOptions? = [],
             animations: () -> Void)
         
         /// A step where preparations or side-effects can be handled. Comparable to a 0-duration animation, without actually being
         /// animated in a `UIView` animation closure.
         case extra(delay: TimeInterval, handler: () -> Void)
         
-        /// Step that contains group of animation steps, all of which should be performed simultaniously
+        /// Step that contains group of animation steps, all of which should be performed simultaneously
         /// - Parameter animations: All the steps to animate at the same time
         case group(animations: [Self])
         
@@ -87,7 +87,7 @@ public protocol StepAnimatable {
     static func animateGroup(_ addAnimations: (AnimationSequence.Group) -> Void, completion: ((Bool) -> Void)?)
 }
 
-private protocol Animatable {
+internal protocol Animatable {
     var duration: TimeInterval { get }
     func animate(withDelay delay: TimeInterval, completion: ((Bool) -> Void)?)
 }
@@ -132,7 +132,7 @@ extension AnimationSequence {
         duration: TimeInterval,
         delay: TimeInterval = 0,
         damping dampingRatio: CGFloat,
-        initialVelocity velocity: CGFloat,
+        initialVelocity velocity: CGFloat = 0,
         options: UIView.AnimationOptions = [],
         animations: @escaping () -> Void
     ) -> Self {
@@ -169,11 +169,11 @@ extension AnimationSequence {
 
 extension AnimationSequence {
     
-    /// Group of animation steps, all of which should be performed simultaniously
+    /// Group of animation steps, all of which should be performed simultaneously
     public class Group {
         
         /// All animations currently added to the sequence
-        public private(set) var animations: [Step] = []
+        public internal(set) var animations: [Step] = []
         
         /// Adds an animation to the animation group with all the available options.
         ///
@@ -296,7 +296,7 @@ extension AnimationSequence.Step: Animatable {
     /// - Parameters:
     ///   - delay: Time in seconds to wait to perform the animation
     ///   - completion: Closure to be executed when animation has finished
-    fileprivate func animate(
+    func animate(
         withDelay leadingDelay: TimeInterval,
         completion: ((Bool) -> Void)?
     ) {
@@ -306,7 +306,7 @@ extension AnimationSequence.Step: Animatable {
                 UIView.animate(
                     withDuration: duration,
                     delay: leadingDelay + delay,
-                    options: options,
+                    options: options ?? [],
                     animations: animations,
                     completion: completion
                 )
@@ -329,7 +329,7 @@ extension AnimationSequence.Step: Animatable {
                 delay: leadingDelay + delay,
                 usingSpringWithDamping: dampingRatio,
                 initialSpringVelocity: velocity,
-                options: options,
+                options: options ?? [],
                 animations: animations,
                 completion: completion
             )
@@ -375,7 +375,7 @@ extension AnimationSequence: Animatable {
         steps.reduce(0, { $0 + $1.duration })
     }
     
-    fileprivate func animate(withDelay delay: TimeInterval, completion: ((Bool) -> Void)?) {
+    internal func animate(withDelay delay: TimeInterval, completion: ((Bool) -> Void)?) {
         UIView.animate(remainingSteps: steps, startingDelay: delay, completion: completion)
     }
 }
@@ -404,7 +404,7 @@ extension StepAnimatable {
 /// Applying ``StepAnimatable``  to `UIView`
 extension UIView: StepAnimatable { }
 
-fileprivate extension StepAnimatable {
+extension StepAnimatable {
     
     /// Recursive method that calls itself with less remaining steps each time
     /// - Parameters:
@@ -471,4 +471,3 @@ fileprivate extension StepAnimatable {
         }
     }
 }
-#endif

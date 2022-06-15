@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		3E5C6DA52848B09000720FE8 /* AnimationPlanner in Frameworks */ = {isa = PBXBuildFile; productRef = 3E5C6DA42848B09000720FE8 /* AnimationPlanner */; };
-		3E5C6DA72848C27B00720FE8 /* CAMediaTimingFunction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5C6DA62848C27B00720FE8 /* CAMediaTimingFunction.swift */; };
 		3EF52D5D2848AEC7000F8222 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF52D5C2848AEC7000F8222 /* AppDelegate.swift */; };
 		3EF52D5F2848AEC7000F8222 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF52D5E2848AEC7000F8222 /* SceneDelegate.swift */; };
 		3EF52D612848AEC7000F8222 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF52D602848AEC7000F8222 /* ViewController.swift */; };
@@ -164,7 +163,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3E5C6DA72848C27B00720FE8 /* CAMediaTimingFunction.swift in Sources */,
 				3EF52D612848AEC7000F8222 /* ViewController.swift in Sources */,
 				3EF52D5D2848AEC7000F8222 /* AppDelegate.swift in Sources */,
 				3EF52D5F2848AEC7000F8222 /* SceneDelegate.swift in Sources */,

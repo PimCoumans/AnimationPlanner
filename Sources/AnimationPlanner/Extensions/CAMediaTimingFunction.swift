@@ -1,10 +1,6 @@
-//
-//  CAMediaTimingFunction.swift
-//  from: https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c
-
 import QuartzCore
-
-extension CAMediaTimingFunction {
+// from @warpling‘s https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c
+public extension CAMediaTimingFunction {
 
     static let linear     = CAMediaTimingFunction(name: .linear)
     static let easeOut    = CAMediaTimingFunction(name: .easeOut)
