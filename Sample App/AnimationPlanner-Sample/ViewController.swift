@@ -213,34 +213,9 @@ extension ViewController {
     }
 }
 
-extension AnimationSequence {
-    /// Adds a custom shake animation on the provided view
-    /// - Parameter view: View to which the transform should be applied
-    /// - Returns: Extension methods ideally should return `Self` so each method call can be chained
-    func shake(_ view: UIView) -> Self {
-        var baseTransform: CGAffineTransform = .identity
-        extra {
-            // Get the current transform of the view right before applying random offset
-            baseTransform = view.transform
-        }
-        let count = 50
-        let maxRadius: CGFloat = 4
-        for index in 0..<count {
-            let radius = CGFloat(index) / CGFloat(count) * maxRadius
-            add(duration: 0.015, timingFunction: .quintInOut) {
-                view.transform = baseTransform
-                    .translatedBy(
-                        x:CGFloat.random(in: -radius...radius),
-                        y: CGFloat.random(in: -radius...radius)
-                    )
-            }
-        }
-        return self
-    }
-}
-
 extension UIView {
     func sneakyCopy() -> Self? {
+        // 🫣🫣🫣
         do {
             let archiver = NSKeyedArchiver(requiringSecureCoding: false)
             archiver.encodeRootObject(self)
