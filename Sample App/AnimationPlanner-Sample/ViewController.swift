@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         view.addSubview(subview)
     }
 
-    let performComplexAnimation: Bool = true // Set to true to run a more complex animation
+    let performComplexAnimation: Bool = false // Set to true to run a more complex animation
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -52,7 +52,7 @@ extension ViewController {
         let view = setInitialSubviewState()
         AnimationPlanner.plan {
             Wait(0.35) // A delay waits for the given amount of seconds to start the next step
-            AnimateSpring(duration: 0.5, dampingRatio: 0.79) {
+            Animate(duration: 0.32, timingFunction: .quintOut) {
                 view.alpha = 1
                 view.center.y = self.view.bounds.midY
             }
