@@ -47,7 +47,7 @@ The above code creates the following animation. For more examples see the Sample
     <img src="Assets/sample-app.gif" width="293" height="634" />
 </p>
 
-_**Note:** The example shows the custom extension methods for `CAMediaTimingFunction` mentioned in the intro_
+_**Note:** The example shows usage of custom extension methods on `CAMediaTimingFunction` available in the framework_
 
 ## Installation
 
