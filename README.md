@@ -5,11 +5,12 @@
  
 # AnimationPlanner
 
-⛓ Chain multiple `UIView` animations without endless closure nesting. Clear, consize syntax on the same indentation level with a convenient result builders API.
+⛓ Chain multiple `UIView` animations without endless closure nesting. Create your animation sequence using as clear, concise syntax all on the same indentation level.
 
-🆗 AnimationBuilder is used in all exuberant animations seen in the [OK Video](https://okvideo.app/download) app.
+🤹 Used for all exuberant animations in [OK Video](https://okvideo.app/download).app 
 
 📖 Check out the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get up to speed, or read on to see a little example.
+
 
 ## How do I plan my animations?
 
@@ -17,7 +18,6 @@
 
 ```swift
 AnimationPlanner.plan {
-    Wait(0.35)
     Animate(duration: 0.32, timingFunction: .quintOut) {
         view.alpha = 1
         view.center.y = self.view.bounds.midY
@@ -45,12 +45,12 @@ AnimationPlanner.plan {
 }
 ```
 
-The above code results in the following animation. For more examples see the [Sample App](Sample%20App/AnimationPlanner-Sample/ViewController.swift) available when cloning the repo.
+The above code results in the following animation sequence. For more examples see the [Sample App](Sample%20App/AnimationPlanner-Sample/ViewController.swift) available when cloning the repo.
 <p align="center">
     <img src="Assets/sample-app.gif" width="293" height="634" />
 </p>
 
-_**Note:** The example shows usage of custom extension methods on `CAMediaTimingFunction` available in the framework_
+_**Note:** The example uses [custom extension methods](Sources/Extensions/CAMediaTimingFunction.swift) on `CAMediaTimingFunction`, included with the framework_
 
 ## Installation
 
@@ -75,9 +75,8 @@ And updating your target‘s dependencies property with `dependencies: ["Animati
 ## 🔮 Future plans
  
 While this API removes a lot of unwanted nesting in completion closures when using traditional `UIView.animate...` calls, a project is never finished and for future versions I have the following plans:
- - Cancel running animation sequences. Current idea is returning a `RunningAnimation` object with a `cancel()` method and information about the state of the animation sequence.
- - Remove usage of inaccurate `DispatchQueue.main.asyncAfter` for manually adding delays where needed.
- - Tidy the API even more by using Swift‘s builder pattern, like we see used in SwiftUI. In practice this would mean removing one more indent in your code! (Currently work in progress: see [Result builders](https://github.com/PimCoumans/AnimationPlanner/pull/10) to see what‘s going on)
+ - Cancel running animation sequences. Current idea is returning a `RunningAnimation` object with information about the state of the running sequence and a `cancel()` method.
+ - Remove usage of inaccurate `DispatchQueue.main.asyncAfter`, currently used to add delays for non-`UIView` animations of bridge gaps between steps.
  - Maybe even allow this package to be used with SwiftUI? No idea how that would work.
  
 Got any feedback or suggestions? Please let me know! ✌🏻
