@@ -1,7 +1,7 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FPimCoumans%2FAnimationPlanner%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/PimCoumans/AnimationPlanner)
  [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FPimCoumans%2FAnimationPlanner%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/PimCoumans/AnimationPlanner)
 
-!["Animation Planner logo"]["Assets/AnimationPlanner.png"]
+![Animation Planner logo](Assets/AnimationPlanner.png)
  
 # AnimationPlanner
 
