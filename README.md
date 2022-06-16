@@ -1,20 +1,23 @@
 [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FPimCoumans%2FAnimationPlanner%2Fbadge%3Ftype%3Dswift-versions)](https://swiftpackageindex.com/PimCoumans/AnimationPlanner)
  [![](https://img.shields.io/endpoint?url=https%3A%2F%2Fswiftpackageindex.com%2Fapi%2Fpackages%2FPimCoumans%2FAnimationPlanner%2Fbadge%3Ftype%3Dplatforms)](https://swiftpackageindex.com/PimCoumans/AnimationPlanner)
- 
+
+![Animation Planner logo](Assets/AnimationPlanner.png)
  
 # AnimationPlanner
 
-⛓ Chain multiple `UIView` animations without endlessly nesting in completion closures, but using a clear declarative syntax. Create all your animations in the same indentation level with a convenient API leveraging the magic of Swift result builders.
-AnimationBuilder is used in most of the superfluous animations seen in the [OK Video](https://okvideo.app/download) app.
+⛓ Chain multiple `UIView` animations without endless closure nesting. Create your animation sequence all on the same indentation level using a clear, concise syntax. 
 
-📖 Read the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get you up to speed, or read on to see a little example.
+🤹 Used for all exuberant animations in [OK Video 📲](https://okvideo.app/download) 
 
-## How do I do this?
-📦 Add `AnimationPlanner` to your project (only SPM is currently officially supported) and start typing `AnimationPlanner.plan` to embark on your animation journey, like what‘s happening in the code below.
+📖 Check out the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get up to speed, or read on to see a little example.
+
+
+## How do I plan my animations?
+
+📦 Add `AnimationPlanner` to your project (using Swift Package manager) and start typing `AnimationPlanner.plan` to embark on your animation journey. Like what‘s happening in the code below.
 
 ```swift
 AnimationPlanner.plan {
-    Wait(0.35)
     Animate(duration: 0.32, timingFunction: .quintOut) {
         view.alpha = 1
         view.center.y = self.view.bounds.midY
@@ -42,12 +45,12 @@ AnimationPlanner.plan {
 }
 ```
 
-The above code creates the following animation. For more examples see the Sample App available when cloning the repo.
+The above code results in the following animation sequence. For more examples see the [Sample App](Sample%20App/AnimationPlanner-Sample/ViewController.swift) available when cloning the repo.
 <p align="center">
-    <img src="Assets/sample-app.gif" width="293" height="634" />
+    <img src="Assets/sample-app.gif" width="293" height="443" />
 </p>
 
-_**Note:** The example shows usage of custom extension methods on `CAMediaTimingFunction` available in the framework_
+_**Note:** The example uses [custom extension methods](Sources/AnimationPlanner/Extensions/CAMediaTimingFunction.swift) on `CAMediaTimingFunction`, included with the framework_
 
 ## Installation
 
@@ -72,9 +75,8 @@ And updating your target‘s dependencies property with `dependencies: ["Animati
 ## 🔮 Future plans
  
 While this API removes a lot of unwanted nesting in completion closures when using traditional `UIView.animate...` calls, a project is never finished and for future versions I have the following plans:
- - Cancel running animation sequences. Current idea is returning a `RunningAnimation` object with a `cancel()` method and information about the state of the animation sequence.
- - Remove usage of inaccurate `DispatchQueue.main.asyncAfter` for manually adding delays where needed.
- - Tidy the API even more by using Swift‘s builder pattern, like we see used in SwiftUI. In practice this would mean removing one more indent in your code! (Currently work in progress: see [Result builders](https://github.com/PimCoumans/AnimationPlanner/pull/10) to see what‘s going on)
+ - Cancel running animation sequences. Current idea is returning a `RunningAnimation` object with information about the state of the running sequence and a `cancel()` method.
+ - Remove usage of inaccurate `DispatchQueue.main.asyncAfter`, currently used to add delays for non-`UIView` animations or bridging gaps between steps.
  - Maybe even allow this package to be used with SwiftUI? No idea how that would work.
  
 Got any feedback or suggestions? Please let me know! ✌🏻
