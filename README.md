@@ -47,7 +47,7 @@ AnimationPlanner.plan {
 
 The above code results in the following animation sequence. For more examples see the [Sample App](Sample%20App/AnimationPlanner-Sample/ViewController.swift) available when cloning the repo.
 <p align="center">
-    <img src="Assets/sample-app.gif" width="293" height="634" />
+    <img src="Assets/sample-app.gif" width="293" height="443" />
 </p>
 
 _**Note:** The example uses [custom extension methods](Sources/Extensions/CAMediaTimingFunction.swift) on `CAMediaTimingFunction`, included with the framework_
