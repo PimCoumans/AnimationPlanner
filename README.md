@@ -50,7 +50,7 @@ The above code results in the following animation sequence. For more examples se
     <img src="Assets/sample-app.gif" width="293" height="443" />
 </p>
 
-_**Note:** The example uses [custom extension methods](Sources/Extensions/CAMediaTimingFunction.swift) on `CAMediaTimingFunction`, included with the framework_
+_**Note:** The example uses [custom extension methods](Sources/AnimationPlanner/Extensions/CAMediaTimingFunction.swift) on `CAMediaTimingFunction`, included with the framework_
 
 ## Installation
 
