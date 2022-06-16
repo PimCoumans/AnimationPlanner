@@ -45,7 +45,7 @@ AnimationPlanner.plan {
 }
 ```
 
-The above code creates the following animation. For more examples see the Sample App available when cloning the repo.
+The above code results in the following animation. For more examples see the [Sample App](Sample%20App/AnimationPlanner-Sample/ViewController.swift) available when cloning the repo.
 <p align="center">
     <img src="Assets/sample-app.gif" width="293" height="634" />
 </p>
