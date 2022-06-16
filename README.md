@@ -5,13 +5,15 @@
  
 # AnimationPlanner
 
-⛓ Chain multiple `UIView` animations without endlessly nesting in completion closures, but using a clear declarative syntax. Create all your animations in the same indentation level with a convenient API leveraging the magic of Swift result builders.
-AnimationBuilder is used in most of the superfluous animations seen in the [OK Video](https://okvideo.app/download) app.
+⛓ Chain multiple `UIView` animations without endless closure nesting. Clear, consize syntax on the same indentation level with a convenient result builders API.
 
-📖 Read the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get you up to speed, or read on to see a little example.
+🆗 AnimationBuilder is used in all exuberant animations seen in the [OK Video](https://okvideo.app/download) app.
 
-## How do I do this?
-📦 Add `AnimationPlanner` to your project (only SPM is currently officially supported) and start typing `AnimationPlanner.plan` to embark on your animation journey, like what‘s happening in the code below.
+📖 Check out the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get up to speed, or read on to see a little example.
+
+## How do I plan my animations?
+
+📦 Add `AnimationPlanner` to your project (using Swift Package manager) and start typing `AnimationPlanner.plan` to embark on your animation journey. Like what‘s happening in the code below.
 
 ```swift
 AnimationPlanner.plan {
