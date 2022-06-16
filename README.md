@@ -5,9 +5,9 @@
  
 # AnimationPlanner
 
-⛓ Chain multiple `UIView` animations without endless closure nesting. Create your animation sequence using as clear, concise syntax all on the same indentation level.
+⛓ Chain multiple `UIView` animations without endless closure nesting. Create your animation sequence all on the same indentation level using as clear, concise syntax. 
 
-🤹 Used for all exuberant animations in [OK Video](https://okvideo.app/download).app 
+🤹 Used for all exuberant animations in [OK Video](https://okvideo.app/download) 📲 
 
 📖 Check out the [documentation](https://swiftpackageindex.com/PimCoumans/AnimationPlanner/main/documentation/animationplanner) to get up to speed, or read on to see a little example.
 
