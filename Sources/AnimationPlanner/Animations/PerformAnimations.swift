@@ -16,6 +16,13 @@ public protocol PerformsAnimations {
 
 extension Animate: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
+        let duration: TimeInterval
+        if let delayed = self as? DelayedAnimates {
+            duration = delayed.originalDuration
+        } else {
+            duration = self.duration
+        }
+        
         let createAnimations: (((Bool) -> Void)?) -> Void = { completion in
             UIView.animate(
                 withDuration: duration,
@@ -56,7 +63,15 @@ extension Extra: PerformsAnimations {
 
 extension AnimateSpring: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        let delay = (self as? DelayedAnimates)?.delay ?? 0
+        let duration: TimeInterval
+        let delay: TimeInterval
+        if let delayed = self as? DelayedAnimates {
+            duration = delayed.originalDuration
+            delay = delayed.delay
+        } else {
+            duration = self.duration
+            delay = 0
+        }
         UIView.animate(
             withDuration: duration,
             delay: leadingDelay + delay,
@@ -69,7 +84,7 @@ extension AnimateSpring: PerformsAnimations {
     }
 }
 
-extension AnimateDelayed: Animation, PerformsAnimations where Contained: Animation {
+extension AnimateDelayed: PerformsAnimations where Contained: Animation {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         animation.animate(delay: delay + leadingDelay, completion: completion)
     }

@@ -5,7 +5,7 @@ public struct Group: AnimatesInSequence {
     
     /// Duration of a simultaneous group is the longest `totalAnimation` (which should include its delay)
     public var duration: TimeInterval {
-        return longestAnimation?.totalDuration ?? 0
+        return longestAnimation?.duration ?? 0
     }
     
     /// All animations added to the group
@@ -15,7 +15,7 @@ public struct Group: AnimatesInSequence {
     
     internal init(animations: [AnimatesSimultaneously]) {
         self.animations = animations
-        self.longestAnimation = self.animations.max { $0.totalDuration < $1.totalDuration }
+        self.longestAnimation = self.animations.max { $0.duration < $1.duration }
     }
     
     /// Creates a new `Group` providing a way to perform multiple animations simultaneously, meaning all animations run at the same time.
@@ -26,10 +26,10 @@ public struct Group: AnimatesInSequence {
 }
 
 extension Group: PerformsAnimations {
+    
     public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) {
-        
         var sortedAnimations = animations
-            .sorted { $0.totalDuration < $1.totalDuration }
+            .sorted { $0.duration < $1.duration }
             .compactMap { $0 as? PerformsAnimations }
         
         guard !sortedAnimations.isEmpty else {
@@ -37,7 +37,7 @@ extension Group: PerformsAnimations {
             return
         }
         
-        let longestAnimation = sortedAnimations.removeFirst()
+        let longestAnimation = sortedAnimations.removeLast()
         
         sortedAnimations.forEach { animation in
             animation.animate(delay: delay, completion: nil)

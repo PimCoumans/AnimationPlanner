@@ -19,10 +19,10 @@ class BuilderTests: AnimationPlannerTests {
         
         let simplerSpring = AnimateSpring(duration: 1, dampingRatio: 2)
         XCTAssertEqual(spring.dampingRatio, simplerSpring.dampingRatio)
-        XCTAssertEqual(spring.duration, simplerSpring.totalDuration)
+        XCTAssertEqual(spring.duration, simplerSpring.duration)
         
         let delay = spring.delayed(3)
-        XCTAssertEqual(delay.totalDuration, spring.duration + delay.delay)
+        XCTAssertEqual(delay.duration, spring.duration + delay.delay)
         
         let options: UIView.AnimationOptions = .allowAnimatedContent
         let editedDelay = delay.options(options)
@@ -42,7 +42,25 @@ class BuilderTests: AnimationPlannerTests {
             .delayed(6)
             .spring(damping: 7)
         XCTAssertEqual(ridiculousAnimation.delay, 6)
+        XCTAssertEqual(ridiculousAnimation.duration, 1 + 6)
+        XCTAssertEqual(ridiculousAnimation.delayed(6).delay, 6)
+        XCTAssertEqual(ridiculousAnimation.delayed(6).duration, 1 + 6)
         XCTAssertEqual(ridiculousAnimation.dampingRatio, 7)
+    }
+    
+    func testGroupDuration() {
+        
+        let group = Group {
+            Animate(duration: 1)
+            Animate(duration: 1)
+                .spring(damping: 0.5)
+                .delayed(0.5)
+            Animate(duration: 1)
+                .delayed(1)
+                .spring(damping: 0.5)
+        }
+        XCTAssert(group.duration == 1 + 1)
+        
     }
     
     func testBuilder() {
@@ -61,7 +79,7 @@ class BuilderTests: AnimationPlannerTests {
                     self.performRandomAnimation()
                 }
                 .spring(damping: 0.8)
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
         }
@@ -85,7 +103,7 @@ class BuilderTests: AnimationPlannerTests {
                     self.performRandomAnimation()
                 }
                 .options(.allowAnimatedContent)
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
         }
@@ -104,7 +122,7 @@ class BuilderTests: AnimationPlannerTests {
                 }
                 .spring(damping: 0.82)
                 .options(.allowUserInteraction)
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
             
@@ -144,7 +162,7 @@ class BuilderTests: AnimationPlannerTests {
                 Animate(duration: duration) {
                     self.performRandomAnimation()
                 }
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
             
@@ -163,8 +181,8 @@ class BuilderTests: AnimationPlannerTests {
                 }
                 .spring(damping: 0.82)
                 .delayed(delay)
-            } completion: { finised in
-                completion(finised)
+            }.onCompletion { finished in
+                completion(finished)
             }
             
         }
@@ -174,6 +192,15 @@ class BuilderTests: AnimationPlannerTests {
         let duration: TimeInterval = 0.5
         let delay: TimeInterval = 0.25
         let totalDuration = delay + duration
+        
+        let animation = Animate(duration: duration) {
+            self.performRandomAnimation()
+        }
+        .delayed(delay)
+        .spring(damping: 0.82)
+        
+        XCTAssertEqual(animation.duration, totalDuration)
+        
         runAnimationTest(duration: totalDuration) { completion, _, _ in
             
             AnimationPlanner.group {
@@ -182,7 +209,7 @@ class BuilderTests: AnimationPlannerTests {
                 }
                 .delayed(delay)
                 .spring(damping: 0.82)
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
             
@@ -204,7 +231,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }
                 }
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
             
@@ -223,7 +250,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }
                 }
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
             
@@ -242,7 +269,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }
                 }
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
             
@@ -262,7 +289,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }.delayed(animations[index].delay)
                 }
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
             
@@ -282,7 +309,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }.delayed(animation.delay)
                 }
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
             
@@ -302,7 +329,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }.delayed(animation.delay)
                 }
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
             
@@ -324,7 +351,7 @@ class BuilderTests: AnimationPlannerTests {
                         }
                     }
                 }
-            } completion: { finished in
+            }.onCompletion { finished in
                 completion(finished)
             }
         }

@@ -27,7 +27,7 @@ public struct Loop<Looped> {
         if Looped.self == AnimatesInSequence.self, let animations = animations as? [AnimatesInSequence] {
             duration = animations.reduce(0, { $0 + $1.duration })
         } else if Looped.self == AnimatesSimultaneously.self, let animations = animations as? [AnimatesSimultaneously] {
-            duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
+            duration = animations.max(by: { $0.duration < $1.duration }).map(\.duration) ?? 0
         } else {
             fatalError("Animations provided through Loop don’t comform to any animatable type")
         }
@@ -42,6 +42,7 @@ public struct Loop<Looped> {
 }
 
 extension Loop: SequenceAnimatesConvertible where Looped == AnimatesInSequence {
+    
     public func asSequence() -> [AnimatesInSequence] {
         animations
     }
@@ -70,14 +71,8 @@ extension Loop: SequenceAnimatesConvertible where Looped == AnimatesInSequence {
     }
 }
 
-extension Loop: PerformsAnimations where Looped == AnimatesInSequence {
-    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        // FIXME: Sequence Loops don't animate yet, should be implemeted in Phase 2
-        fatalError("Sequence animation not yet implemented")
-    }
-}
-
 extension Loop: SimultaneouslyAnimatesConvertible where Looped == AnimatesSimultaneously {
+    
     public func asGroup() -> [AnimatesSimultaneously] {
         animations
     }

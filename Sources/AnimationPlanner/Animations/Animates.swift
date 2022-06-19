@@ -24,10 +24,7 @@ extension AnimatesInSequence {
 }
 
 /// Animation that can be used in a ``Group`` and be performed simultaneously, meaning all animations run at the same time.
-public protocol AnimatesSimultaneously: Animates, SimultaneouslyAnimatesConvertible {
-    /// Duration in seconds including any potential delays used before running animation
-    var totalDuration: TimeInterval { get }
-}
+public protocol AnimatesSimultaneously: Animates, SimultaneouslyAnimatesConvertible { }
 
 extension AnimatesSimultaneously {
     public func asGroup() -> [AnimatesSimultaneously] { [self] }
@@ -37,6 +34,8 @@ extension AnimatesSimultaneously {
 public protocol DelayedAnimates: AnimatesSimultaneously {
     /// Delay in seconds after which the animation should start
     var delay: TimeInterval { get }
+    /// Duration of animation without delay applied
+    var originalDuration: TimeInterval { get }
 }
 
 /// Performs an animation with spring-based parameters
@@ -58,7 +57,4 @@ public protocol AnimatesExtra: Animates {
 }
 extension AnimatesExtra {
     public var duration: TimeInterval { 0 }
-}
-extension AnimatesExtra where Self: AnimatesSimultaneously {
-    public var totalDuration: TimeInterval { duration }
 }

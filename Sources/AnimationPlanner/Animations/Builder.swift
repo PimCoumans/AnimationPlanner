@@ -30,13 +30,14 @@ public struct AnimationPlanner {
     /// - Parameters:
     ///   - animations: Add each animation using this closure. Animation added to a sequence should conform to ``AnimatesSimultaneously``.
     ///   - completion: Called when the animation sequence has finished
+    /// - Returns: Instance of ``RunningAnimation`` to keep track of and cancel animations
+    @discardableResult
     public static func plan(
-        @AnimationBuilder animations builder: () -> [AnimatesInSequence],
-        completion: ((Bool) -> Void)? = nil
-    ) {
-        let sequence = AnimationSequence()
-        sequence.steps = builder().steps()
-        sequence.animate(withDelay: 0, completion: completion)
+        @AnimationBuilder animations builder: () -> [AnimatesInSequence]
+    ) -> RunningSequence {
+        let running = RunningSequence(animations: builder())
+        running.animate()
+        return running
     }
     
     /// Start a new group animation where animations added will be performed simultaneously, meaning all animations run at the same time.
@@ -55,13 +56,14 @@ public struct AnimationPlanner {
     /// - Parameters:
     ///   - animations: Add each animation using this closure. Animation added to a group should conform to ``AnimatesSimultaneously``.
     ///   - completion: Called when the animation sequence has finished
+    /// - Returns: Instance of ``RunningAnimation`` to keep track of and cancel animations
+    @discardableResult
     public static func group(
-        @AnimationBuilder animations builder: () -> [AnimatesSimultaneously],
-        completion: ((Bool) -> Void)? = nil
-    ) {
-        plan(animations: {
+        @AnimationBuilder animations builder: () -> [AnimatesSimultaneously]
+    ) -> RunningSequence {
+        plan {
             Group(animations: builder)
-        }, completion: completion)
+        }
     }
 }
 
@@ -122,64 +124,5 @@ extension AnimationBuilder {
     }
     public static func buildEither(second component: SimultaneouslyAnimatesConvertible) -> [AnimatesSimultaneously] {
         component.asGroup()
-    }
-}
-
-// MARK: - Converting to ``AnimationSequence.Step``
-
-fileprivate extension Array where Element == AnimatesInSequence {
-    func steps() -> [AnimationSequence.Step] {
-        compactMap(\.toStep)
-    }
-}
-
-fileprivate extension Array where Element == AnimatesSimultaneously {
-    func steps() -> [AnimationSequence.Step] {
-        compactMap(\.toStep)
-    }
-}
-
-fileprivate extension Animates {
-    var toStep: AnimationSequence.Step? {
-        var delay: TimeInterval = 0
-        if let delayed = self as? DelayedAnimates {
-            // Grab delay if animation has a delay
-            delay = delayed.delay
-        }
-        switch self {
-        case let spring as SpringAnimates & Animation:
-            return .springAnimation(
-                duration: spring.duration,
-                delay: delay,
-                dampingRatio: spring.dampingRatio,
-                velocity: spring.initialVelocity,
-                options: spring.options,
-                animations: spring.changes)
-        case let extra as AnimatesExtra:
-            return .extra(delay: delay, handler: extra.perform)
-        case let animation as Animation:
-            return .animation(
-                duration: animation.duration,
-                delay: delay,
-                options: animation.options,
-                timingFunction: animation.timingFunction,
-                animations: animation.changes
-            )
-        case let delay as Wait:
-            return .delay(duration: delay.duration)
-        case let group as Group:
-            return .group(animations: group.animations.steps())
-        case let sequence as Sequence:
-            return .sequence(sequence: AnimationSequence(steps: sequence.animations.steps()))
-        default:
-            return nil
-        }
-    }
-}
-
-fileprivate extension AnimationSequence {
-    convenience init(steps: [Step]) {
-        self.init()
-        self.steps = steps
     }
 }

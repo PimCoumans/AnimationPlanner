@@ -4,7 +4,6 @@ import UIKit
 /// even a `CAMediaTimingFunction` to apply to the interpolation of the animated values changed in the ``changes`` closure.
 public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
     public let duration: TimeInterval
-    public var totalDuration: TimeInterval { duration }
     
     public internal(set) var changes: () -> Void
     public internal(set) var options: UIView.AnimationOptions?
@@ -78,7 +77,14 @@ extension AnimationContainer where Contained: Animation {
 /// Forwarding ``DelayedAnimates`` properties
 extension AnimationContainer where Contained: DelayedAnimates {
     /// Forwarded ``DelayedAnimates`` property for ``DelayedAnimates/delay``
-    public var delay: TimeInterval { animation.delay }
+    public var delay: TimeInterval {
+        animation.delay
+    }
+    
+    /// Forwarded ``DelayedAnimates`` property for ``DelayedAnimates/originalDuration``
+    public var originalDuration: TimeInterval {
+        animation.originalDuration
+    }
 }
 
 /// Forwarding ``SpringAnimates`` properties
@@ -93,8 +99,8 @@ extension AnimationContainer where Contained: SpringAnimates {
 
 /// Performs an animation with spring dampening applied, using the same values as UIView spring animations
 public struct AnimateSpring<Springed: Animation>: SpringAnimates, AnimationContainer, AnimatesSimultaneously {
+    
     public internal(set) var animation: Springed
-    public var totalDuration: TimeInterval { duration }
     
     public let dampingRatio: CGFloat
     public let initialVelocity: CGFloat
@@ -137,14 +143,29 @@ extension AnimateSpring: DelayedAnimates where Springed: DelayedAnimates { }
 public struct AnimateDelayed<Delayed: Animates>: AnimationContainer, DelayedAnimates, AnimatesSimultaneously {
     
     public internal(set) var animation: Delayed
-    public var duration: TimeInterval { animation.duration }
-    public var totalDuration: TimeInterval { delay + animation.duration }
+    
+    public var duration: TimeInterval {
+        return delay + originalDuration
+    }
+    
+    public var originalDuration: TimeInterval {
+        if let delayed = animation as? DelayedAnimates {
+            return delayed.originalDuration
+        }
+        return animation.duration
+    }
     
     public let delay: TimeInterval
     
     internal init(delay: TimeInterval, animation: Delayed) {
         self.animation = animation
         self.delay = delay
+    }
+}
+
+extension AnimateDelayed where Delayed: DelayedAnimates {
+    public var duration: TimeInterval {
+        delay + animation.originalDuration
     }
 }
 
@@ -164,4 +185,5 @@ extension AnimateDelayed where Delayed == Animate {
     }
 }
 
+extension AnimateDelayed: Animation where Delayed: Animation { }
 extension AnimateDelayed: SpringAnimates where Delayed: SpringAnimates { }
