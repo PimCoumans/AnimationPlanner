@@ -1,7 +1,7 @@
 import UIKit
 
 /// Provides an sequence animation to a ``Group``, creating the ability to run multiple sequences in parallel.  Add each animation through the `animations` closure in the initializer.
-public struct Sequence: DelayedAnimates {
+public struct Sequence: DelayedAnimatable {
     
     public var duration: TimeInterval { delay + originalDuration }
     public var originalDuration: TimeInterval { runningSequence.duration }

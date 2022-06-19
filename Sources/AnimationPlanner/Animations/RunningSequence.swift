@@ -5,7 +5,7 @@ public class RunningSequence {
     public let duration: TimeInterval
     public let animations: [SequenceAnimatable]
     
-    var remainingAnimations: [Animates] = []
+    var remainingAnimations: [Animatable] = []
     var currentAnimation: PerformsAnimations?
     
     var completionHandlers: [(Bool) -> Void] = []

@@ -78,7 +78,7 @@ extension Animate: SpringModifier { }
 /// Adds a delay to an existing animation
 public protocol DelayModifier {
     /// Animation contained by ``AnimateDelayed`` animation
-    associatedtype DelayedAnimation: Animates
+    associatedtype DelayedAnimation: Animatable
     /// Adds a delay to your animation. Only available in a ``Group`` context where animations should be performed simultaneously.
     /// - Parameter delay: Delay in seconds to add to your animation.
     /// - Returns: `AnimateDelayed`-contained animation adding a delay the modified animation

@@ -17,7 +17,7 @@ public protocol PerformsAnimations {
 extension Animate: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         let duration: TimeInterval
-        if let delayed = self as? DelayedAnimates {
+        if let delayed = self as? DelayedAnimatable {
             duration = delayed.originalDuration
         } else {
             duration = self.duration
@@ -65,7 +65,7 @@ extension AnimateSpring: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         let duration: TimeInterval
         let delay: TimeInterval
-        if let delayed = self as? DelayedAnimates {
+        if let delayed = self as? DelayedAnimatable {
             duration = delayed.originalDuration
             delay = delayed.delay
         } else {

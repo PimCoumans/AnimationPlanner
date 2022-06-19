@@ -42,7 +42,7 @@ public struct Wait: SequenceAnimatable {
 
 /// Perfoms the provided handler in between your actual animations.
 /// Typically used for setting up state before an animation or creating side-effects like haptic feedback.
-public struct Extra: AnimatesExtra, SequenceAnimatable, GroupAnimatable {
+public struct Extra: SequenceAnimatable, GroupAnimatable {
     public let duration: TimeInterval = 0
     
     public var perform: () -> Void
@@ -57,7 +57,7 @@ public struct Extra: AnimatesExtra, SequenceAnimatable, GroupAnimatable {
 /// to the contained animation when necessary.
 public protocol AnimationContainer {
     /// Animation type contained by ``AnimationContainer``
-    associatedtype Contained: Animates
+    associatedtype Contained: Animatable
     /// Animation contained any animation using ``AnimationContainer``.
     var animation: Contained { get }
 }
@@ -75,7 +75,7 @@ extension AnimationContainer where Contained: Animation {
 }
 
 /// Forwarding ``DelayedAnimates`` properties
-extension AnimationContainer where Contained: DelayedAnimates {
+extension AnimationContainer where Contained: DelayedAnimatable {
     /// Forwarded ``DelayedAnimates`` property for ``DelayedAnimates/delay``
     public var delay: TimeInterval {
         animation.delay
@@ -88,7 +88,7 @@ extension AnimationContainer where Contained: DelayedAnimates {
 }
 
 /// Forwarding ``SpringAnimates`` properties
-extension AnimationContainer where Contained: SpringAnimates {
+extension AnimationContainer where Contained: SpringAnimatable {
     /// Forwarded ``SpringAnimates`` property for ``SpringAnimates/dampingRatio``
     public var dampingRatio: CGFloat { animation.dampingRatio }
     /// Forwarded ``SpringAnimates`` property for ``SpringAnimates/initialVelocity``
@@ -98,7 +98,7 @@ extension AnimationContainer where Contained: SpringAnimates {
 // MARK: - Spring
 
 /// Performs an animation with spring dampening applied, using the same values as UIView spring animations
-public struct AnimateSpring<Springed: Animation>: SpringAnimates, AnimationContainer, GroupAnimatable {
+public struct AnimateSpring<Springed: Animation>: SpringAnimatable, AnimationContainer, GroupAnimatable {
     
     public internal(set) var animation: Springed
     
@@ -135,12 +135,12 @@ extension AnimateSpring: SequenceAnimatable, SequenceConvertible where Contained
 }
 
 extension AnimateSpring: Animation where Springed: Animation { }
-extension AnimateSpring: DelayedAnimates where Springed: DelayedAnimates { }
+extension AnimateSpring: DelayedAnimatable where Springed: DelayedAnimatable { }
 
 // MARK: - Delay
 
 /// Performs an animation after a delay, only to be used in a context where other animations are run simultaneously
-public struct AnimateDelayed<Delayed: Animates>: AnimationContainer, DelayedAnimates, GroupAnimatable {
+public struct AnimateDelayed<Delayed: Animatable>: AnimationContainer, DelayedAnimatable, GroupAnimatable {
     
     public internal(set) var animation: Delayed
     
@@ -149,7 +149,7 @@ public struct AnimateDelayed<Delayed: Animates>: AnimationContainer, DelayedAnim
     }
     
     public var originalDuration: TimeInterval {
-        if let delayed = animation as? DelayedAnimates {
+        if let delayed = animation as? DelayedAnimatable {
             return delayed.originalDuration
         }
         return animation.duration
@@ -163,7 +163,7 @@ public struct AnimateDelayed<Delayed: Animates>: AnimationContainer, DelayedAnim
     }
 }
 
-extension AnimateDelayed where Delayed: DelayedAnimates {
+extension AnimateDelayed where Delayed: DelayedAnimatable {
     public var duration: TimeInterval {
         delay + animation.originalDuration
     }
@@ -186,4 +186,4 @@ extension AnimateDelayed where Delayed == Animate {
 }
 
 extension AnimateDelayed: Animation where Delayed: Animation { }
-extension AnimateDelayed: SpringAnimates where Delayed: SpringAnimates { }
+extension AnimateDelayed: SpringAnimatable where Delayed: SpringAnimatable { }
