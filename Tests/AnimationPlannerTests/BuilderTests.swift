@@ -79,7 +79,7 @@ class BuilderTests: AnimationPlannerTests {
                     self.performRandomAnimation()
                 }
                 .spring(damping: 0.8)
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
         }
@@ -103,7 +103,7 @@ class BuilderTests: AnimationPlannerTests {
                     self.performRandomAnimation()
                 }
                 .options(.allowAnimatedContent)
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
         }
@@ -122,7 +122,7 @@ class BuilderTests: AnimationPlannerTests {
                 }
                 .spring(damping: 0.82)
                 .options(.allowUserInteraction)
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -162,7 +162,7 @@ class BuilderTests: AnimationPlannerTests {
                 Animate(duration: duration) {
                     self.performRandomAnimation()
                 }
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -181,7 +181,7 @@ class BuilderTests: AnimationPlannerTests {
                 }
                 .spring(damping: 0.82)
                 .delayed(delay)
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -209,7 +209,7 @@ class BuilderTests: AnimationPlannerTests {
                 }
                 .delayed(delay)
                 .spring(damping: 0.82)
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -231,7 +231,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }
                 }
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -250,7 +250,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }
                 }
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -269,7 +269,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }
                 }
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -289,7 +289,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }.delayed(animations[index].delay)
                 }
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -309,7 +309,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }.delayed(animation.delay)
                 }
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -329,7 +329,7 @@ class BuilderTests: AnimationPlannerTests {
                         self.performRandomAnimation()
                     }.delayed(animation.delay)
                 }
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
             
@@ -351,7 +351,7 @@ class BuilderTests: AnimationPlannerTests {
                         }
                     }
                 }
-            }.onCompletion { finished in
+            }.onComplete { finished in
                 completion(finished)
             }
         }

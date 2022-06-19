@@ -11,12 +11,10 @@ public class RunningSequence {
     var completionHandlers: [(Bool) -> Void] = []
     
     func cancel() {
-        print("Cancelling animations")
-        
-        if let peform = (currentAnimation as? Animation)?.changes {
+        if let animatingChanges = (currentAnimation as? Animation)?.changes {
             
             // 1. Perform animation again to stop animation
-            peform()
+            animatingChanges()
         }
         
         // 2. Clear remaining
@@ -34,8 +32,11 @@ public class RunningSequence {
 }
 
 public extension RunningSequence {
+    /// Adds completion handler to running sequence. The closure is called when the sequence has completed
+    /// - Parameter handler: Closure to be executed when sequence has finished
+    /// - Returns: Returns `Self` so this method can be added directly after creation an animation sequence
     @discardableResult
-    func onCompletion(_ handler: @escaping (_ finished: Bool) -> Void) -> Self {
+    func onComplete(_ handler: @escaping (_ finished: Bool) -> Void) -> Self {
         completionHandlers.append(handler)
         return self
     }

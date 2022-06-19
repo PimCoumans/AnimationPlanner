@@ -28,7 +28,7 @@ public struct Sequence: DelayedAnimatable {
 extension Sequence: PerformsAnimations {
     public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) {
         runningSequence
-            .onCompletion { finished in
+            .onComplete { finished in
                 completion?(finished)
             }
             .animate(delay: delay)
