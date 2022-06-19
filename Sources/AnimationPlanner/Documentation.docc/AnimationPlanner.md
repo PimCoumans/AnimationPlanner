@@ -96,6 +96,6 @@ the ``Loop`` struct.
 
 ### Running sequence
 
-Calling the main `AnimationPlanner` methods ``AnimationPlanner/AnimationPlanner/plan(animations:)`` and ``AnimationPlanner/AnimationPlanner/group(animations:)`` retuns in a ``RunningSequence`` object. This class allows you to add a completion handler (``RunningSequence/onComplete(_:)``) and even stop the animations with ``RunningSequence/stopAnimations()``
+Calling the main `AnimationPlanner` methods ``AnimationPlanner/AnimationPlanner/plan(animations:)`` and ``AnimationPlanner/AnimationPlanner/group(animations:)`` retuns in a ``RunningSequence`` object. This class allows you to add a completion handler with ``RunningSequence/onComplete(_:)`` and even stop the animations with ``RunningSequence/stopAnimations()``.
 
 - ``RunningSequence``
