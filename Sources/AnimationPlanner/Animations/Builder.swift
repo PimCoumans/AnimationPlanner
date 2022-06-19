@@ -9,8 +9,8 @@ public struct AnimationBuilder { }
 /// Start by typing `AnimationPlanner.plan` and  provide all of your animations from the `animations` closure.
 ///
 /// Begin planning your animation by using either of the following static methods:
-/// - ``plan(animations:completion:)`` start a sequence animation where all animations are performed in order.
-/// - ``group(animations:completion:)`` start a group animation where all animations are performed simultaneously.
+/// - ``plan(animations:)`` start a sequence animation where all animations are performed in order.
+/// - ``group(animations:)`` start a group animation where all animations are performed simultaneously.
 ///
 /// - Tip:  To get started,  read <doc:creating-basic-animation-sequence> and get up to speed on how to use AnimationPlanner,
 /// or go through the whole documentation on ``AnimationPlanner`` to get an overview of all the available functionalities.
@@ -29,8 +29,7 @@ public struct AnimationPlanner {
     /// ```
     /// - Parameters:
     ///   - animations: Add each animation using this closure. Animation added to a sequence should conform to ``GroupAnimatable``.
-    ///   - completion: Called when the animation sequence has finished
-    /// - Returns: Instance of ``RunningAnimation`` to keep track of and cancel animations
+    /// - Returns: Instance of ``RunningSequence`` to keep track of and stop animations
     @discardableResult
     public static func plan(
         @AnimationBuilder animations builder: () -> [SequenceAnimatable]
@@ -55,8 +54,7 @@ public struct AnimationPlanner {
     ///
     /// - Parameters:
     ///   - animations: Add each animation using this closure. Animation added to a group should conform to ``GroupAnimatable``.
-    ///   - completion: Called when the animation sequence has finished
-    /// - Returns: Instance of ``RunningAnimation`` to keep track of and cancel animations
+    /// - Returns: Instance of ``RunningSequence`` to keep track of and stop animations
     @discardableResult
     public static func group(
         @AnimationBuilder animations builder: () -> [GroupAnimatable]

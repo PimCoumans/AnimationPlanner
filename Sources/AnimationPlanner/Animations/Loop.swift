@@ -2,7 +2,7 @@ import UIKit
 
 /// Loop through a sequence or for a specified repeat count to easily repeat multiple animation.
 ///
-/// Either create a `Loop` with the default initializer where you set `repeatCount` or use the static method ``through(_:animations:)-3pcny`` to loop through an existing array.
+/// Either create a `Loop` with the default initializer where you set `repeatCount` or use the static method ``through(_:animations:)-sb44`` to loop through an existing array.
 ///
 /// ```swift
 /// Loop(for: numberOfLoops) { index in

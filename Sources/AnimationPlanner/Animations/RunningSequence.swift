@@ -1,5 +1,6 @@
 import UIKit
 
+/// Maintains state about running animations and provides ways to add a completion handler or stop the animations
 public class RunningSequence {
     
     public let duration: TimeInterval
@@ -10,7 +11,8 @@ public class RunningSequence {
     
     var completionHandlers: [(Bool) -> Void] = []
     
-    func cancel() {
+    /// Stops the currently running animation and stops any upcoming animations
+    public func stopAnimations() {
         if let animatingChanges = (currentAnimation as? Animation)?.changes {
             
             // 1. Perform animation again to stop animation
@@ -68,7 +70,6 @@ extension RunningSequence {
         }
         remainingAnimations = Array(nextAnimations.dropFirst())
         
-        print("Delay: \(leadingDelay), Animating: \(animation)")
         animation.animate(delay: leadingDelay) { finished in
             guard finished else {
                 self.complete(finished: finished)

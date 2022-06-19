@@ -40,7 +40,7 @@ AnimationPlanner.plan {
         view.transform = .identity
         view.frame.origin.y = self.view.bounds.maxY
     }.timingFunction(.circIn)
-} completion: { finished in
+}.onComplete { finished in
     view.removeFromSuperview()
 }
 ```
@@ -75,7 +75,7 @@ And updating your target‘s dependencies property with `dependencies: ["Animati
 ## 🔮 Future plans
  
 While this API removes a lot of unwanted nesting in completion closures when using traditional `UIView.animate...` calls, a project is never finished and for future versions I have the following plans:
- - Cancel running animation sequences. Current idea is returning a `RunningAnimation` object with information about the state of the running sequence and a `cancel()` method.
+ - Stop running animation sequences. Current idea is returning a `RunningAnimation` object with information about the state of the running sequence and a `stop()` method.
  - Remove usage of inaccurate `DispatchQueue.main.asyncAfter`, currently used to add delays for non-`UIView` animations or bridging gaps between steps.
  - Maybe even allow this package to be used with SwiftUI? No idea how that would work.
  
