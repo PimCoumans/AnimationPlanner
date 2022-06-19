@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         view.addSubview(subview)
     }
 
-    let performComplexAnimation: Bool = false // Set to true to run a more complex animation
+    let performComplexAnimation: Bool = true // Set to true to run a more complex animation
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -74,7 +74,7 @@ extension ViewController {
                 view.transform = .identity
                 view.frame.origin.y = self.view.bounds.maxY
             }.timingFunction(.circIn)
-        } completion: { finished in
+        }.onComplete { finished in
             // Just to keep the flow going, let‘s run the animation again
             self.runSimpleBuilderAnimation()
         }
@@ -182,7 +182,7 @@ extension ViewController {
                 view.transform = view.transform.translatedBy(x: 0, y: quarterHeight)
                 sneakyCopy?.transform = view.transform.translatedBy(x: 0, y: quarterHeight)
             }
-        } completion: { finished in
+        }.onComplete { finished in
             self.runComplexBulderAnimation()
         }
     }
