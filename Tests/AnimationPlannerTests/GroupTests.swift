@@ -13,7 +13,7 @@ class GroupTests: AnimationPlannerTests {
                 sequence.addGroup { group in
                     for duration in durations {
                         group.animate(duration: duration) {
-                            self.performRandomAnimationOnNewView()
+                            self.performRandomAnimation()
                         }
                     }
                 }
@@ -35,7 +35,7 @@ class GroupTests: AnimationPlannerTests {
                 sequence.addGroup { group in
                     animations.forEach { animation in
                         group.animate(duration: animation.duration, delay: animation.delay) {
-                            self.performRandomAnimationOnNewView()
+                            self.performRandomAnimation()
                         }
                     }
                 }
@@ -68,7 +68,7 @@ class GroupTests: AnimationPlannerTests {
             UIView.animateGroup { group in
                 for duration in durations {
                     group.animate(duration: duration) {
-                        self.performRandomAnimationOnNewView()
+                        self.performRandomAnimation()
                     }
                 }
             } completion: { finished in

@@ -59,6 +59,21 @@ func assertDifference(startTime: CFTimeInterval, duration: TimeInterval, precisi
     print("** DIFFERENCE: \(difference), (precision: \(precision))")
 }
 
+fileprivate extension CGFloat {
+    
+    private static let colorRange: Range<Self> = 0.1..<1.0
+    private static let tinyRange: Range<Self> = 0.8..<1.2
+    private static let smallRange: Range<Self> = 4..<6
+    private static let mediumRange: Range<Self> = 8..<12
+    private static let largeRange: Range<Self> = 200..<400
+    
+    static var color: Self { Self.random(in: colorRange) }
+    static var tiny: Self { Self.random(in: tinyRange) }
+    static var small: Self { Self.random(in: smallRange) }
+    static var medium: Self { Self.random(in: mediumRange) }
+    static var large: Self { Self.random(in: largeRange) }
+}
+
 extension AnimationPlannerTests {
     
     class var randomDuration: TimeInterval { TimeInterval.random(in: 0.2...0.8) }
@@ -89,10 +104,6 @@ extension AnimationPlannerTests {
         return view
     }
     
-    func performRandomAnimationOnNewView() {
-        performRandomAnimation(on: newView())
-    }
-    
     func performRandomAnimation(on view: UIView) {
         enum RandomAnimation: CaseIterable {
             case smallFrame
@@ -101,32 +112,18 @@ extension AnimationPlannerTests {
             case transformTranslate
             case backgroundColor
         }
+        
         switch RandomAnimation.allCases.randomElement()! {
         case .smallFrame:
-            view.frame = [
-                CGRect(x: 10, y: 10, width: 10, height: 10),
-                CGRect(x: 11, y: 11, width: 11, height: 11)
-            ].first(where: {$0 != view.frame })!
+            view.frame = CGRect(x: .small, y: .small, width: .medium, height: .medium)
         case .largeFrame:
-            view.frame = [
-                CGRect(x: 5, y: 5, width: 200, height: 600),
-                CGRect(x: 4, y: 4, width: 202, height: 602)
-            ].first(where: {$0 != view.frame })!
+            view.frame = CGRect(x: .small, y: .small, width: .large, height: .large)
         case .transformScale:
-            view.transform = [
-                CGAffineTransform(scaleX: 1.5, y: 1.5),
-                CGAffineTransform(scaleX: 1.7, y: 1.7)
-            ].first(where: {$0 != view.transform })!
+            view.transform = CGAffineTransform(scaleX: .tiny, y: .tiny)
         case .transformTranslate:
-            view.transform = [
-                CGAffineTransform(translationX: 20, y: 20),
-                CGAffineTransform(translationX: 100, y: 100)
-            ].first(where: {$0 != view.transform })!
+            view.transform = CGAffineTransform(translationX: .medium, y: .medium)
         case .backgroundColor:
-            view.backgroundColor = [
-                .systemBlue,
-                .systemPink
-            ].first(where: { $0 != view.backgroundColor })
+            view.backgroundColor = UIColor(red: .color, green: .color, blue: .color, alpha: .color)
         }
     }
 }
