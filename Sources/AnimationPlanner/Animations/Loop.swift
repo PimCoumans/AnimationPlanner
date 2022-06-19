@@ -50,7 +50,7 @@ extension Loop: SequenceConvertible where Looped == SequenceAnimatable {
     /// Creates a new Loop that repeats for the given amount of times.
     /// - Parameters:
     ///   - repeatCount: How many times the loop should repeat. The index of each loop is provided as a argument in the `animations` closure
-    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesInSequence``
+    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``SequenceAnimatable``
     public init(
         for repeatCount: Int,
         @AnimationBuilder animations builder: (_ index: Int) -> [SequenceAnimatable]
@@ -61,7 +61,7 @@ extension Loop: SequenceConvertible where Looped == SequenceAnimatable {
     /// Loop through a sequence of values, like objects in an array or a range of numbers
     /// - Parameters:
     ///   - sequence: Sequence to loop through, each element will be handled in the `animations` closure
-    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesInSequence``
+    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``SequenceAnimatable``
     /// - Returns: Sequence of all animations created in the `animation` closure
     public static func through<S: Swift.Sequence>(
         _ sequence: S,
@@ -80,7 +80,7 @@ extension Loop: GroupConvertible where Looped == GroupAnimatable {
     /// Creates a new Loop that repeats for the given amount of times.
     /// - Parameters:
     ///   - repeatCount: How many times the loop should repeat. The index of each loop is provided as a argument in the `animations` closure
-    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesSimultaneously``
+    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``GroupAnimatable``
     public init(
         for repeatCount: Int,
         @AnimationBuilder animations builder: (_ index: Int) -> [GroupAnimatable]
@@ -91,7 +91,7 @@ extension Loop: GroupConvertible where Looped == GroupAnimatable {
     /// Loop through a sequence of values, like objects in an array or a range of numbers
     /// - Parameters:
     ///   - sequence: Sequence to loop through, each element will be handled in the `animations` closure
-    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesSimultaneously``
+    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``GroupAnimatable``
     /// - Returns: Group of all animations created in the `animation` closure
     public static func through<S: Swift.Sequence>(
         _ sequence: S,
@@ -109,7 +109,7 @@ extension Loop where Looped == GroupAnimatable {
 
 extension Swift.Sequence {
     /// Maps values from the sequence to animations
-    /// - Parameter animations: Add each animation from within this closure. Animations should conform to ``AnimatesSimultaneously``
+    /// - Parameter animations: Add each animation from within this closure. Animations should conform to ``GroupAnimatable``
     /// - Returns: Sequence of all animations created in the `animation` closure
     public func mapAnimations(
         @AnimationBuilder animations builder: (Element) -> [SequenceAnimatable]
@@ -118,7 +118,7 @@ extension Swift.Sequence {
     }
     
     /// Maps values from the sequence to animations
-    /// - Parameter animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesSimultaneously``
+    /// - Parameter animations: Add each animation from within this closure. Animations added to this loop should conform to ``GroupAnimatable``
     /// - Returns: Group of all animations created in the `animation` closure
     public func mapAnimations(
         @AnimationBuilder animations builder: (Element) -> [GroupAnimatable]

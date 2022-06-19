@@ -193,7 +193,7 @@ extension ViewController {
     /// - Parameter view: View to which the transform should be applied
     /// - Returns: Animations to be added to the sequence
     @AnimationBuilder
-    func addShakeSequence(shaking view: UIView) -> [AnimatesInSequence] {
+    func addShakeSequence(shaking view: UIView) -> [SequenceAnimatable] {
         var baseTransform: CGAffineTransform = .identity
         
         let count = 50

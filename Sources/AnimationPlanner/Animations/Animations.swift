@@ -74,24 +74,24 @@ extension AnimationContainer where Contained: Animation {
     public var timingFunction: CAMediaTimingFunction? { animation.timingFunction }
 }
 
-/// Forwarding ``DelayedAnimates`` properties
+/// Forwarding ``DelayedAnimatable`` properties
 extension AnimationContainer where Contained: DelayedAnimatable {
-    /// Forwarded ``DelayedAnimates`` property for ``DelayedAnimates/delay``
+    /// Forwarded ``DelayedAnimatable`` property for ``DelayedAnimatable/delay``
     public var delay: TimeInterval {
         animation.delay
     }
     
-    /// Forwarded ``DelayedAnimates`` property for ``DelayedAnimates/originalDuration``
+    /// Forwarded ``DelayedAnimatable`` property for ``DelayedAnimatable/originalDuration``
     public var originalDuration: TimeInterval {
         animation.originalDuration
     }
 }
 
-/// Forwarding ``SpringAnimates`` properties
+/// Forwarding ``SpringAnimatable`` properties
 extension AnimationContainer where Contained: SpringAnimatable {
-    /// Forwarded ``SpringAnimates`` property for ``SpringAnimates/dampingRatio``
+    /// Forwarded ``SpringAnimatable`` property for ``SpringAnimatable/dampingRatio``
     public var dampingRatio: CGFloat { animation.dampingRatio }
-    /// Forwarded ``SpringAnimates`` property for ``SpringAnimates/initialVelocity``
+    /// Forwarded ``SpringAnimatable`` property for ``SpringAnimatable/initialVelocity``
     public var initialVelocity: CGFloat { animation.initialVelocity }
 }
 

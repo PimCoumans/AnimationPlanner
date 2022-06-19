@@ -1,7 +1,7 @@
 import UIKit
 
 /// Result builder through which either sequence or group animations can be created. Add `@AnimationBuilder` to a closure or method to provide your own animations.
-/// The result of your builder function should be an `Array` of either ``AnimatesInSequence`` or ``AnimatesSimultaneously``.
+/// The result of your builder function should be an `Array` of either ``SequenceAnimatable`` or ``GroupAnimatable``.
 @resultBuilder
 public struct AnimationBuilder { }
 
@@ -28,7 +28,7 @@ public struct AnimationPlanner {
     /// }
     /// ```
     /// - Parameters:
-    ///   - animations: Add each animation using this closure. Animation added to a sequence should conform to ``AnimatesSimultaneously``.
+    ///   - animations: Add each animation using this closure. Animation added to a sequence should conform to ``GroupAnimatable``.
     ///   - completion: Called when the animation sequence has finished
     /// - Returns: Instance of ``RunningAnimation`` to keep track of and cancel animations
     @discardableResult
@@ -54,7 +54,7 @@ public struct AnimationPlanner {
     /// ```
     ///
     /// - Parameters:
-    ///   - animations: Add each animation using this closure. Animation added to a group should conform to ``AnimatesSimultaneously``.
+    ///   - animations: Add each animation using this closure. Animation added to a group should conform to ``GroupAnimatable``.
     ///   - completion: Called when the animation sequence has finished
     /// - Returns: Instance of ``RunningAnimation`` to keep track of and cancel animations
     @discardableResult
@@ -69,12 +69,12 @@ public struct AnimationPlanner {
 
 // MARK: - Building sequences
 
-/// Provides a way to create a uniform sequence from all animations conforming to ``AnimatesInSequence``
+/// Provides a way to create a uniform sequence from all animations conforming to ``SequenceAnimatable``
 public protocol SequenceConvertible {
     func asSequence() -> [SequenceAnimatable]
 }
 
-/// Provides a way to group toghether animations conforming to ``AnimatesSimultaneously``
+/// Provides a way to group toghether animations conforming to ``GroupAnimatable``
 public protocol GroupConvertible {
     func asGroup() -> [GroupAnimatable]
 }

@@ -19,7 +19,7 @@ public struct Group: SequenceAnimatable {
     }
     
     /// Creates a new `Group` providing a way to perform multiple animations simultaneously, meaning all animations run at the same time.
-    /// - Parameter animations: Add each animation from within this closure. Animations added to a group should conform to ``AnimatesSimultaneously``.
+    /// - Parameter animations: Add each animation from within this closure. Animations added to a group should conform to ``GroupAnimatable``.
     public init(@AnimationBuilder animations builder: () -> [GroupAnimatable]) {
         self.init(animations: builder())
     }
