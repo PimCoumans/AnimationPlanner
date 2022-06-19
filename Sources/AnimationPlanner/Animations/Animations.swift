@@ -2,7 +2,7 @@ import UIKit
 
 /// Performs an animation with the provided duration in seconds. Includes properties to set `UIView.AnimationOptions` and
 /// even a `CAMediaTimingFunction` to apply to the interpolation of the animated values changed in the ``changes`` closure.
-public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
+public struct Animate: Animation, SequenceAnimatable, GroupAnimatable {
     public let duration: TimeInterval
     
     public internal(set) var changes: () -> Void
@@ -32,7 +32,7 @@ public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
 }
 
 /// Pauses the sequence for the given amount of seconds before performing the next animation.
-public struct Wait: AnimatesInSequence {
+public struct Wait: SequenceAnimatable {
     public let duration: TimeInterval
     
     public init(_ duration: TimeInterval) {
@@ -42,7 +42,7 @@ public struct Wait: AnimatesInSequence {
 
 /// Perfoms the provided handler in between your actual animations.
 /// Typically used for setting up state before an animation or creating side-effects like haptic feedback.
-public struct Extra: AnimatesExtra, AnimatesInSequence, AnimatesSimultaneously {
+public struct Extra: AnimatesExtra, SequenceAnimatable, GroupAnimatable {
     public let duration: TimeInterval = 0
     
     public var perform: () -> Void
@@ -98,7 +98,7 @@ extension AnimationContainer where Contained: SpringAnimates {
 // MARK: - Spring
 
 /// Performs an animation with spring dampening applied, using the same values as UIView spring animations
-public struct AnimateSpring<Springed: Animation>: SpringAnimates, AnimationContainer, AnimatesSimultaneously {
+public struct AnimateSpring<Springed: Animation>: SpringAnimates, AnimationContainer, GroupAnimatable {
     
     public internal(set) var animation: Springed
     
@@ -130,8 +130,8 @@ extension AnimateSpring where Springed == Animate {
     }
 }
 
-extension AnimateSpring: AnimatesInSequence, SequenceAnimatesConvertible where Contained: AnimatesInSequence {
-    public func asSequence() -> [AnimatesInSequence] { [self] }
+extension AnimateSpring: SequenceAnimatable, SequenceConvertible where Contained: SequenceAnimatable {
+    public func asSequence() -> [SequenceAnimatable] { [self] }
 }
 
 extension AnimateSpring: Animation where Springed: Animation { }
@@ -140,7 +140,7 @@ extension AnimateSpring: DelayedAnimates where Springed: DelayedAnimates { }
 // MARK: - Delay
 
 /// Performs an animation after a delay, only to be used in a context where other animations are run simultaneously
-public struct AnimateDelayed<Delayed: Animates>: AnimationContainer, DelayedAnimates, AnimatesSimultaneously {
+public struct AnimateDelayed<Delayed: Animates>: AnimationContainer, DelayedAnimates, GroupAnimatable {
     
     public internal(set) var animation: Delayed
     

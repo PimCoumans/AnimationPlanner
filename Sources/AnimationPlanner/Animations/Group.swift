@@ -1,7 +1,7 @@
 import UIKit
 
 /// Contain multiple animations that should be performed at the same time. Add each animation through the `animations` closure in the initializer.
-public struct Group: AnimatesInSequence {
+public struct Group: SequenceAnimatable {
     
     /// Duration of a simultaneous group is the longest `totalAnimation` (which should include its delay)
     public var duration: TimeInterval {
@@ -9,18 +9,18 @@ public struct Group: AnimatesInSequence {
     }
     
     /// All animations added to the group
-    public let animations: [AnimatesSimultaneously]
+    public let animations: [GroupAnimatable]
     
-    let longestAnimation: AnimatesSimultaneously?
+    let longestAnimation: GroupAnimatable?
     
-    internal init(animations: [AnimatesSimultaneously]) {
+    internal init(animations: [GroupAnimatable]) {
         self.animations = animations
         self.longestAnimation = self.animations.max { $0.duration < $1.duration }
     }
     
     /// Creates a new `Group` providing a way to perform multiple animations simultaneously, meaning all animations run at the same time.
     /// - Parameter animations: Add each animation from within this closure. Animations added to a group should conform to ``AnimatesSimultaneously``.
-    public init(@AnimationBuilder animations builder: () -> [AnimatesSimultaneously]) {
+    public init(@AnimationBuilder animations builder: () -> [GroupAnimatable]) {
         self.init(animations: builder())
     }
 }

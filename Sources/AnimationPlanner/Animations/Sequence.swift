@@ -9,18 +9,18 @@ public struct Sequence: DelayedAnimates {
     public let delay: TimeInterval
     
     /// All animations added to the sequence
-    public var animations: [AnimatesInSequence] { runningSequence.animations }
+    public var animations: [SequenceAnimatable] { runningSequence.animations }
     
     let runningSequence: RunningSequence
     
-    internal init(delay: TimeInterval, animations: [AnimatesInSequence]) {
+    internal init(delay: TimeInterval, animations: [SequenceAnimatable]) {
         self.delay = delay
         self.runningSequence = RunningSequence(animations: animations)
     }
     
     /// Creates a new `Sequence` providing a way to perform a sequence animation from withing a group. Each animation is perform in in order, meaning each subsequent animation starts right after the previous completes.
     /// - Parameter animations: Add each animation from within this closure. Animations added to a sequence should conform to ``AnimatesInSequence``.
-    public init(@AnimationBuilder animations builder: () -> [AnimatesInSequence]) {
+    public init(@AnimationBuilder animations builder: () -> [SequenceAnimatable]) {
         self.init(delay: 0, animations: builder())
     }
 }

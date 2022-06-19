@@ -17,21 +17,21 @@ public protocol Animation: Animates, PerformsAnimations {
 }
 
 /// Animation that can be performed in a sequence, meaning each subsequent animation starts right after the previous completes
-public protocol AnimatesInSequence: Animates, SequenceAnimatesConvertible { }
+public protocol SequenceAnimatable: Animates, SequenceConvertible { }
 
-extension AnimatesInSequence {
-    public func asSequence() -> [AnimatesInSequence] { [self] }
+extension SequenceAnimatable {
+    public func asSequence() -> [SequenceAnimatable] { [self] }
 }
 
 /// Animation that can be used in a ``Group`` and be performed simultaneously, meaning all animations run at the same time.
-public protocol AnimatesSimultaneously: Animates, SimultaneouslyAnimatesConvertible { }
+public protocol GroupAnimatable: Animates, GroupConvertible { }
 
-extension AnimatesSimultaneously {
-    public func asGroup() -> [AnimatesSimultaneously] { [self] }
+extension GroupAnimatable {
+    public func asGroup() -> [GroupAnimatable] { [self] }
 }
 
 /// Adds a delay to the animation
-public protocol DelayedAnimates: AnimatesSimultaneously {
+public protocol DelayedAnimates: GroupAnimatable {
     /// Delay in seconds after which the animation should start
     var delay: TimeInterval { get }
     /// Duration of animation without delay applied

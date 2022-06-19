@@ -85,7 +85,7 @@ public protocol DelayModifier {
     func delayed(_ delay: TimeInterval) -> AnimateDelayed<DelayedAnimation>
 }
 
-extension DelayModifier where Self: AnimatesSimultaneously {
+extension DelayModifier where Self: GroupAnimatable {
     public func delayed(_ delay: TimeInterval) -> AnimateDelayed<Self> {
         // By default, all structs conforming to `AnimatesSimultaneously` should be able to animate with a delay
         AnimateDelayed(delay: delay, animation: self)

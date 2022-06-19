@@ -33,7 +33,7 @@ public struct AnimationPlanner {
     /// - Returns: Instance of ``RunningAnimation`` to keep track of and cancel animations
     @discardableResult
     public static func plan(
-        @AnimationBuilder animations builder: () -> [AnimatesInSequence]
+        @AnimationBuilder animations builder: () -> [SequenceAnimatable]
     ) -> RunningSequence {
         let running = RunningSequence(animations: builder())
         running.animate()
@@ -59,7 +59,7 @@ public struct AnimationPlanner {
     /// - Returns: Instance of ``RunningAnimation`` to keep track of and cancel animations
     @discardableResult
     public static func group(
-        @AnimationBuilder animations builder: () -> [AnimatesSimultaneously]
+        @AnimationBuilder animations builder: () -> [GroupAnimatable]
     ) -> RunningSequence {
         plan {
             Group(animations: builder)
@@ -70,59 +70,59 @@ public struct AnimationPlanner {
 // MARK: - Building sequences
 
 /// Provides a way to create a uniform sequence from all animations conforming to ``AnimatesInSequence``
-public protocol SequenceAnimatesConvertible {
-    func asSequence() -> [AnimatesInSequence]
+public protocol SequenceConvertible {
+    func asSequence() -> [SequenceAnimatable]
 }
 
 /// Provides a way to group toghether animations conforming to ``AnimatesSimultaneously``
-public protocol SimultaneouslyAnimatesConvertible {
-    func asGroup() -> [AnimatesSimultaneously]
+public protocol GroupConvertible {
+    func asGroup() -> [GroupAnimatable]
 }
 
-extension Array: SequenceAnimatesConvertible where Element == AnimatesInSequence {
-    public func asSequence() -> [AnimatesInSequence] { flatMap { $0.asSequence() } }
+extension Array: SequenceConvertible where Element == SequenceAnimatable {
+    public func asSequence() -> [SequenceAnimatable] { flatMap { $0.asSequence() } }
 }
 
-extension Array: SimultaneouslyAnimatesConvertible where Element == AnimatesSimultaneously {
-    public func asGroup() -> [AnimatesSimultaneously] { flatMap { $0.asGroup() } }
+extension Array: GroupConvertible where Element == GroupAnimatable {
+    public func asGroup() -> [GroupAnimatable] { flatMap { $0.asGroup() } }
 }
 
 extension AnimationBuilder {
-    public static func buildBlock(_ components: SequenceAnimatesConvertible...) -> [AnimatesInSequence] {
+    public static func buildBlock(_ components: SequenceConvertible...) -> [SequenceAnimatable] {
         components.flatMap { $0.asSequence() }
     }
     
-    public static func buildArray(_ components: [SequenceAnimatesConvertible]) -> [AnimatesInSequence] {
+    public static func buildArray(_ components: [SequenceConvertible]) -> [SequenceAnimatable] {
         components.flatMap { $0.asSequence() }
     }
     
-    public static func buildOptional(_ component: SequenceAnimatesConvertible?) -> [AnimatesInSequence] {
+    public static func buildOptional(_ component: SequenceConvertible?) -> [SequenceAnimatable] {
         component.map { $0.asSequence() } ?? []
     }
-    public static func buildEither(first component: SequenceAnimatesConvertible) -> [AnimatesInSequence] {
+    public static func buildEither(first component: SequenceConvertible) -> [SequenceAnimatable] {
         component.asSequence()
     }
-    public static func buildEither(second component: SequenceAnimatesConvertible) -> [AnimatesInSequence] {
+    public static func buildEither(second component: SequenceConvertible) -> [SequenceAnimatable] {
         component.asSequence()
     }
 }
 
 extension AnimationBuilder {
-    public static func buildBlock(_ components: SimultaneouslyAnimatesConvertible...) -> [AnimatesSimultaneously] {
+    public static func buildBlock(_ components: GroupConvertible...) -> [GroupAnimatable] {
         components.flatMap { $0.asGroup() }
     }
     
-    public static func buildArray(_ components: [SimultaneouslyAnimatesConvertible]) -> [AnimatesSimultaneously] {
+    public static func buildArray(_ components: [GroupConvertible]) -> [GroupAnimatable] {
         components.flatMap { $0.asGroup() }
     }
     
-    public static func buildOptional(_ component: SimultaneouslyAnimatesConvertible?) -> [AnimatesSimultaneously] {
+    public static func buildOptional(_ component: GroupConvertible?) -> [GroupAnimatable] {
         component.map { $0.asGroup() } ?? []
     }
-    public static func buildEither(first component: SimultaneouslyAnimatesConvertible) -> [AnimatesSimultaneously] {
+    public static func buildEither(first component: GroupConvertible) -> [GroupAnimatable] {
         component.asGroup()
     }
-    public static func buildEither(second component: SimultaneouslyAnimatesConvertible) -> [AnimatesSimultaneously] {
+    public static func buildEither(second component: GroupConvertible) -> [GroupAnimatable] {
         component.asGroup()
     }
 }

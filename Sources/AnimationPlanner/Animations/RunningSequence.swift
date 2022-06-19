@@ -3,7 +3,7 @@ import UIKit
 public class RunningSequence {
     
     public let duration: TimeInterval
-    public let animations: [AnimatesInSequence]
+    public let animations: [SequenceAnimatable]
     
     var remainingAnimations: [Animates] = []
     var currentAnimation: PerformsAnimations?
@@ -27,7 +27,7 @@ public class RunningSequence {
         completionHandlers.removeAll()
     }
     
-    internal init(animations: [AnimatesInSequence]) {
+    internal init(animations: [SequenceAnimatable]) {
         self.animations = animations
         self.duration = animations.reduce(0, { $0 + $1.duration })
     }
