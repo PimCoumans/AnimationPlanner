@@ -21,7 +21,7 @@ class ViewController: UIViewController {
         view.addSubview(subview)
     }
 
-    let performComplexAnimation: Bool = true // Set to true to run a more complex animation
+    let performComplexAnimation: Bool = false // Set to true to run a more complex animation
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
