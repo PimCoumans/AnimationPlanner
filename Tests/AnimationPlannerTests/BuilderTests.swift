@@ -115,6 +115,20 @@ class BuilderTests: AnimationPlannerTests {
         }
     }
     
+    func testEmptyBuilder() {
+        
+        runAnimationTest(duration: 0) { completion, _, _ in
+    
+            AnimationPlanner.plan {
+                Extra {
+                    print("👋")
+                }
+            }.onComplete { finished in
+                completion(finished)
+            }
+        }
+    }
+    
     func testBuilder() {
         let totalDuration: TimeInterval = 1
         let numberOfSteps: TimeInterval = 3
