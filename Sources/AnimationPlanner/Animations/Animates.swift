@@ -30,7 +30,7 @@ extension GroupAnimatable {
     public func asGroup() -> [GroupAnimatable] { [self] }
 }
 
-/// Adds a delay to the animation
+/// Adds a delaying functionality to an animation. Delayed animations can only be added in a grouped context, where each animation is performed simultaneously. Adding a delay to a sequence animation can be done by preceding it with a ``Wait`` struct.
 public protocol DelayedAnimatable: GroupAnimatable {
     /// Delay in seconds after which the animation should start
     var delay: TimeInterval { get }
