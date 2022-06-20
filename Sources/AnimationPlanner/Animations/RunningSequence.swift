@@ -7,16 +7,16 @@ public class RunningSequence {
     public let animations: [SequenceAnimatable]
     
     var remainingAnimations: [Animatable] = []
-    var currentAnimation: PerformsAnimations?
+    var currentAnimation: Animatable?
     
     var completionHandlers: [(Bool) -> Void] = []
     
     /// Stops the currently running animation and stops any upcoming animations
     public func stopAnimations() {
-        if let animatingChanges = (currentAnimation as? Animation)?.changes {
+        if let animation = currentAnimation as? Animation {
             
             // 1. Perform animation again to stop animation
-            animatingChanges()
+            animation.changes()
         }
         
         // 2. Clear remaining
@@ -46,9 +46,11 @@ public extension RunningSequence {
 
 extension RunningSequence {
     
-    func animate(delay: TimeInterval = 0) {
+    @discardableResult
+    func animate(delay: TimeInterval = 0) -> Self {
         remainingAnimations = Array(animations)
         animateNextAnimation(initialDelay: delay)
+        return self
     }
     
     func animateNextAnimation(initialDelay: TimeInterval = 0) {
@@ -63,17 +65,43 @@ extension RunningSequence {
             }
             return false
         }
-        currentAnimation = nextAnimations.first as? PerformsAnimations
-        guard let animation = currentAnimation else {
+        currentAnimation = nextAnimations.first
+        guard let animation = currentAnimation as? PerformsAnimations else {
+            guard leadingDelay == 0 else {
+                // Wait out the remaing delay until calling completion closure
+                DispatchQueue.main.asyncAfter(deadline: .now() + leadingDelay) {
+                    self.complete(finished: true)
+                }
+                return
+            }
             complete(finished: true)
             return
         }
+        
         remainingAnimations = Array(nextAnimations.dropFirst())
+        let startTime = CACurrentMediaTime()
         
         animation.animate(delay: leadingDelay) { finished in
             guard finished else {
                 self.complete(finished: finished)
                 return
+            }
+            
+            if let duration = (animation as? Animatable)?.duration {
+                let actualDuration = CACurrentMediaTime() - startTime
+                let difference = (duration + leadingDelay) - actualDuration
+                let oneFrameDifference: TimeInterval = 1/60
+                
+                if difference > 0.1 && actualDuration < oneFrameDifference {
+                    // UIView animation probably wasn‘t executed because no actual animatable
+                    // properties were changed in animation closure. Just wait out remaining time
+                    // before moving over to the next step.
+                    let waitTime = max(0, difference - oneFrameDifference) // reduce a frame to be safe
+                    DispatchQueue.main.asyncAfter(deadline: .now() + waitTime) {
+                        self.animateNextAnimation()
+                    }
+                    return
+                }
             }
             self.animateNextAnimation()
         }
