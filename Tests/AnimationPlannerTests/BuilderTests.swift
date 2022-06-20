@@ -49,7 +49,6 @@ class BuilderTests: AnimationPlannerTests {
     }
     
     func testGroupDuration() {
-        
         let group = Group {
             Animate(duration: 1)
             Animate(duration: 1)
@@ -60,7 +59,60 @@ class BuilderTests: AnimationPlannerTests {
                 .spring(damping: 0.5)
         }
         XCTAssert(group.duration == 1 + 1)
+    }
+    
+    func testSequenceDuration() {
+        let waitStartingSequence = Sequence {
+            Wait(1)
+            Animate(duration: 1)
+        }
+        let waitEndingSequence = Sequence {
+            Animate(duration: 1)
+            Wait(1)
+        }
+        XCTAssertEqual(waitStartingSequence.duration, waitEndingSequence.duration)
+    }
+    
+    func testGroupedSequenceDuration() {
+        let animations = randomDelayedAnimations(amount: 2)
+        let longestAnimation = animations.max { $0.totalDuration < $1.totalDuration}!
+        let precision = durationPrecision * TimeInterval(animations.count)
         
+        let waitStartingGroup = Group {
+            for animation in animations {
+                Sequence {
+                    Wait(animation.delay)
+                    Animate(duration: animation.duration)
+                }
+            }
+        }
+        
+        let waitEndingGroup = Group {
+            for animation in animations {
+                Sequence {
+                    Animate(duration: animation.duration)
+                    Wait(animation.delay)
+                }
+            }
+        }
+        XCTAssertEqual(waitStartingGroup.duration, longestAnimation.totalDuration)
+        XCTAssertEqual(waitStartingGroup.duration, waitEndingGroup.duration)
+        
+        runAnimationTest(duration: longestAnimation.totalDuration, precision: precision) { completion, _, _ in
+            AnimationPlanner.plan {
+                waitStartingGroup
+            }.onComplete { finished in
+                completion(finished)
+            }
+        }
+        
+        runAnimationTest(duration: longestAnimation.totalDuration, precision: precision) { completion, _, _ in
+            AnimationPlanner.plan {
+                waitStartingGroup
+            }.onComplete { finished in
+                completion(finished)
+            }
+        }
     }
     
     func testBuilder() {
@@ -129,7 +181,7 @@ class BuilderTests: AnimationPlannerTests {
         }
     }
     
-    func testBuilderGroup() {
+    func testGroup() {
         let totalDuration: TimeInterval = 5
         let numberOfSteps: TimeInterval = 4
         let duration = totalDuration / numberOfSteps
@@ -167,6 +219,36 @@ class BuilderTests: AnimationPlannerTests {
             }
             
         }
+    }
+    
+    func testMultipleGroups() {
+        let numberOfGroups = 2
+        let numberOfSteps = 2
+        let groups = (0..<numberOfGroups).map { groupIndex in
+            self.randomDurations(amount: numberOfSteps)
+        }
+        let groupDurations = groups.compactMap { $0.max() }
+        let totalDuration: TimeInterval = groupDurations.reduce(0, +)
+        
+        runAnimationTest(duration: totalDuration) { completion, _, _ in
+            
+            AnimationPlanner.plan {
+                for group in groups {
+                    Group {
+                        let view = self.newView()
+                        for duration in group {
+                            Animate(duration: duration) {
+                                self.performRandomAnimation(on: view)
+                            }
+                        }
+                    }
+                }
+            }.onComplete { finished in
+                completion(finished)
+            }
+            
+        }
+        
     }
     
     func testDelayedSpring() {
@@ -220,7 +302,8 @@ class BuilderTests: AnimationPlannerTests {
         let duration: TimeInterval = 0.5
         let numberOfLoops: Int = 4
         let totalDuration = duration * TimeInterval(numberOfLoops)
-        runAnimationTest(duration: totalDuration) { completion, _, _ in
+        let precision = durationPrecision * TimeInterval(numberOfLoops)
+        runAnimationTest(duration: totalDuration, precision: precision) { completion, _, _ in
             
             AnimationPlanner.plan {
                 Loop(for: numberOfLoops) { index in
@@ -354,6 +437,37 @@ class BuilderTests: AnimationPlannerTests {
             }.onComplete { finished in
                 completion(finished)
             }
+        }
+    }
+    
+    func testDelayedGroupSequence() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+        
+        let delay = randomDuration
+        let views = animations.map { _ in newView() }
+        
+        let precision = durationPrecision * TimeInterval(numberOfLoops)
+        
+        runAnimationTest(duration: delay + totalDuration, precision: precision) { completion, _, _ in
+            
+            AnimationPlanner.plan {
+                Wait(delay)
+                Group {
+                    for (view, animation) in zip(views, animations) {
+                        Sequence {
+                            Wait(animation.delay)
+                            Animate(duration: animation.duration) {
+                                self.performRandomAnimation(on: view)
+                            }
+                        }
+                    }
+                }
+            }.onComplete { finished in
+                completion(finished)
+            }
+            
         }
     }
 }

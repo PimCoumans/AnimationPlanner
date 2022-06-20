@@ -85,7 +85,7 @@ extension Array where Element == TimeInterval {
 
 extension AnimationPlannerTests {
     
-    class var randomDuration: TimeInterval { TimeInterval.random(in: 0.2...0.8) }
+    class var randomDuration: TimeInterval { TimeInterval.random(in: 0.2...0.6) }
     var randomDuration: TimeInterval { Self.randomDuration }
     
     class func randomDurations(amount: Int) -> [TimeInterval] { (0..<amount).map({ _ in randomDuration }) }
