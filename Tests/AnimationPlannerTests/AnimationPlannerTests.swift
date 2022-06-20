@@ -74,9 +74,18 @@ fileprivate extension CGFloat {
     static var large: Self { Self.random(in: largeRange) }
 }
 
+extension Array where Element == TimeInterval {
+    func totalDuration() -> Element {
+        reduce(0, +)
+    }
+    func longestDuration() -> Element {
+        self.max()!
+    }
+}
+
 extension AnimationPlannerTests {
     
-    class var randomDuration: TimeInterval { TimeInterval.random(in: 0.2...0.8) }
+    class var randomDuration: TimeInterval { TimeInterval.random(in: 0.2...0.6) }
     var randomDuration: TimeInterval { Self.randomDuration }
     
     class func randomDurations(amount: Int) -> [TimeInterval] { (0..<amount).map({ _ in randomDuration }) }

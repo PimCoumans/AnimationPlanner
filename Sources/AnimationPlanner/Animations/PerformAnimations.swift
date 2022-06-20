@@ -17,6 +17,9 @@ public protocol PerformsAnimations {
 extension Animate: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         let duration: TimeInterval
+        
+        // FIXME: `DelayedAnimatable` should not be checked here
+        // Maybe parse animation delays before calling more specific method with delay and duration
         if let delayed = self as? DelayedAnimatable {
             duration = delayed.originalDuration
         } else {
@@ -65,6 +68,9 @@ extension AnimateSpring: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         let duration: TimeInterval
         let delay: TimeInterval
+        
+        // FIXME: `DelayedAnimatable` should not be checked here
+        // Maybe parse animation delays before calling more specific method with delay and duration
         if let delayed = self as? DelayedAnimatable {
             duration = delayed.originalDuration
             delay = delayed.delay
@@ -84,7 +90,7 @@ extension AnimateSpring: PerformsAnimations {
     }
 }
 
-extension AnimateDelayed: PerformsAnimations where Contained: Animation {
+extension AnimateDelayed: PerformsAnimations where Contained: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         animation.animate(delay: delay + leadingDelay, completion: completion)
     }
