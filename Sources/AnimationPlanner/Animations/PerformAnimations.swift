@@ -34,23 +34,6 @@ extension ActuallyPerformsAnimations where Self: Animatable {
     }
 }
 
-//extension PerformsAnimations where Self: Animatable {
-//    public func animate(delay leadingDelay: TimeInterval, started: (() -> Void)? = nil, completion: ((Bool) -> Void)?) {
-//        let duration: TimeInterval
-//        let delay: TimeInterval
-//
-//        if let delayed = self as? DelayedAnimatable {
-//            duration = delayed.originalDuration
-//            delay = delayed.delay
-//        } else {
-//            duration = self.duration
-//            delay = 0
-//        }
-//
-//        performAnimations(delay: delay, duration: duration, started: started ?? {}, completion: completion)
-//    }
-//}
-
 extension Animate: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         prepareAnimation(delay: leadingDelay, completion: completion)
