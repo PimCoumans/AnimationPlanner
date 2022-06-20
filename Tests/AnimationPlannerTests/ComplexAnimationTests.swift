@@ -3,6 +3,92 @@ import UIKit
 import XCTest
 
 class ComplexAnimationTest: AnimationPlannerTests {
+    
+    func testBuilderSequenceGroup() {
+        
+        let numberOfGroups = 2
+        let numberOfSequences = 2
+        let numberOfSteps = 2
+        let groups: [[[TimeInterval]]] = (0..<numberOfGroups).map { groupIndex in
+            (0..<numberOfSequences).map { sequenceIndex in
+                self.randomDurations(amount: numberOfSteps)
+            }
+        }
+        
+        let groupDurations = groups.map { $0.map({ $0.totalDuration() }).longestDuration() }
+        let totalDuration = groupDurations.totalDuration()
+        
+        print("totalDuration: \(totalDuration)")
+        let precision = durationPrecision * TimeInterval(numberOfSteps)
+        
+        runAnimationTest(duration: totalDuration, precision: precision) { completion, _, _ in
+            
+            AnimationPlanner.plan {
+                for group in groups {
+                    Group {
+                        for sequence in group {
+                            Sequence {
+                                let view = self.newView()
+                                for duration in sequence {
+                                    Animate(duration: duration) {
+                                        self.performRandomAnimation(on: view)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }.onComplete { finished in
+                completion(finished)
+            }
+            
+        }
+        
+    }
+    
+    func testNewSequenceGroup () {
+        
+        let numberOfGroups = 2
+        let numberOfSequences = 2
+        let numberOfSteps = 2
+        let groups: [[[TimeInterval]]] = (0..<numberOfGroups).map { groupIndex in
+            (0..<numberOfSequences).map { sequenceIndex in
+                self.randomDurations(amount: numberOfSteps)
+            }
+        }
+        
+        let groupDurations = groups.map { $0.map({ $0.totalDuration() }).longestDuration() }
+        let totalDuration = groupDurations.totalDuration()
+        
+        print("totalDuration: \(totalDuration)")
+        let precision = durationPrecision * TimeInterval(numberOfSteps)
+        
+        runAnimationTest(duration: totalDuration, precision: precision) { completion, _, _ in
+            
+            UIView.animateSteps { sequence in
+                for enumeratedGroup in groups {
+                    sequence.addGroup { group in
+                        for enumeratedSequence in enumeratedGroup {
+                            group.animateSteps { sequence in
+                                let view = self.newView()
+                                for duration in enumeratedSequence {
+                                    sequence.add(duration: duration) {
+                                        self.performRandomAnimation(on: view)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } completion: { finished in
+                completion(finished)
+            }
+            
+        }
+        
+
+    }
+    
     /// Creates a pretty complex animation with mutliple groups each containing multiple sequences
     /// Groups can contain sequences that perform their animations in sequence, but each sequence
     /// is running at the same time in each group
@@ -37,7 +123,7 @@ class ComplexAnimationTest: AnimationPlannerTests {
                             print("Adding \(stepCount) steps to sequence \(subSquenceIndex)")
                             
                             for stepIndex in 0..<stepCount {
-                                let duration = self.randomDuration
+                                let duration: TimeInterval = 1
                                 sequenceDuration += duration
                                 sequence.add(duration: duration) {
                                     // Yikes we‘re 9 levels deep
