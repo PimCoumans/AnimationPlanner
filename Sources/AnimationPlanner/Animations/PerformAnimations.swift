@@ -10,26 +10,58 @@ public protocol PerformsAnimations {
     /// - Parameters:
     ///   - delay: Any delay accumulated (from preceding ``Wait`` structs) leading up to the animation.
     ///   Waits for this amount of seconds before actually performing the animation
-    ///   - completion: Closure called when animation completes
-    func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?)
+    ///   - completion: Optional closure called when animation completes
+    func animate(delay leadingDelay: TimeInterval, completion: ((_ finished: Bool) -> Void)?)
 }
+
+internal protocol ActuallyPerformsAnimations {
+    func prepareAnimation(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?)
+    func performAnimations(delay totalDelay: TimeInterval, duration: TimeInterval, completion: ((Bool) -> Void)?)
+}
+
+extension ActuallyPerformsAnimations where Self: Animatable {
+    
+    func prepareAnimation(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)? = nil) {
+        var duration = self.duration
+        var delay = leadingDelay
+        
+        if let delayed = self as? DelayedAnimatable {
+            duration = delayed.originalDuration
+            delay += delayed.delay
+        }
+        
+        self.performAnimations(delay: delay, duration: duration, completion: completion)
+    }
+}
+
+//extension PerformsAnimations where Self: Animatable {
+//    public func animate(delay leadingDelay: TimeInterval, started: (() -> Void)? = nil, completion: ((Bool) -> Void)?) {
+//        let duration: TimeInterval
+//        let delay: TimeInterval
+//
+//        if let delayed = self as? DelayedAnimatable {
+//            duration = delayed.originalDuration
+//            delay = delayed.delay
+//        } else {
+//            duration = self.duration
+//            delay = 0
+//        }
+//
+//        performAnimations(delay: delay, duration: duration, started: started ?? {}, completion: completion)
+//    }
+//}
 
 extension Animate: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        let duration: TimeInterval
-        
-        // FIXME: `DelayedAnimatable` should not be checked here
-        // Maybe parse animation delays before calling more specific method with delay and duration
-        if let delayed = self as? DelayedAnimatable {
-            duration = delayed.originalDuration
-        } else {
-            duration = self.duration
-        }
-        
+        prepareAnimation(delay: leadingDelay, completion: completion)
+    }
+}
+extension Animate: ActuallyPerformsAnimations {
+    func performAnimations(delay totalDelay: TimeInterval, duration: TimeInterval, completion: ((Bool) -> Void)? = nil) {
         let createAnimations: (((Bool) -> Void)?) -> Void = { completion in
             UIView.animate(
                 withDuration: duration,
-                delay: leadingDelay,
+                delay: totalDelay,
                 options: options ?? [],
                 animations: changes,
                 completion: completion
@@ -52,35 +84,36 @@ extension Animate: PerformsAnimations {
 
 extension Extra: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        guard leadingDelay > 0 else {
-            perform()
+        prepareAnimation(delay: leadingDelay, completion: completion)
+    }
+}
+
+extension Extra: ActuallyPerformsAnimations {
+    func performAnimations(delay totalDelay: TimeInterval, duration: TimeInterval, completion: ((Bool) -> Void)? = nil) {
+        let animation: () -> Void = {
+            self.perform()
             completion?(true)
+        }
+        guard totalDelay > 0 else {
+            animation()
             return
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + leadingDelay) {
-            perform()
-            completion?(true)
+        DispatchQueue.main.asyncAfter(deadline: .now() + totalDelay) {
+            animation()
         }
     }
 }
 
 extension AnimateSpring: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        let duration: TimeInterval
-        let delay: TimeInterval
-        
-        // FIXME: `DelayedAnimatable` should not be checked here
-        // Maybe parse animation delays before calling more specific method with delay and duration
-        if let delayed = self as? DelayedAnimatable {
-            duration = delayed.originalDuration
-            delay = delayed.delay
-        } else {
-            duration = self.duration
-            delay = 0
-        }
+        prepareAnimation(delay: leadingDelay, completion: completion)
+    }
+}
+extension AnimateSpring: ActuallyPerformsAnimations {
+    func performAnimations(delay totalDelay: TimeInterval, duration: TimeInterval, completion: ((Bool) -> Void)? = nil) {
         UIView.animate(
             withDuration: duration,
-            delay: leadingDelay + delay,
+            delay: totalDelay,
             usingSpringWithDamping: dampingRatio,
             initialSpringVelocity: initialVelocity,
             options: animation.options ?? [],
