@@ -7,7 +7,7 @@ public class RunningSequence {
     public let animations: [SequenceAnimatable]
     
     var remainingAnimations: [Animatable] = []
-    var currentAnimation: PerformsAnimations?
+    var currentAnimation: (PerformsAnimations & Animatable)? // FIXME: Yikes
     
     var completionHandlers: [(Bool) -> Void] = []
     
@@ -63,16 +63,40 @@ extension RunningSequence {
             }
             return false
         }
-        currentAnimation = nextAnimations.first as? PerformsAnimations
+        currentAnimation = nextAnimations.first as? (PerformsAnimations & Animatable)
         guard let animation = currentAnimation else {
+            guard leadingDelay == 0 else {
+                // Wait out the remaing delay until calling completion closure
+                DispatchQueue.main.asyncAfter(deadline: .now() + leadingDelay) {
+                    self.complete(finished: true)
+                }
+                return
+            }
             complete(finished: true)
             return
         }
+        
         remainingAnimations = Array(nextAnimations.dropFirst())
+        let startTime = CACurrentMediaTime()
         
         animation.animate(delay: leadingDelay) { finished in
             guard finished else {
                 self.complete(finished: finished)
+                return
+            }
+            
+            let actualDuration = CACurrentMediaTime() - startTime
+            let difference = (animation.duration + leadingDelay) - actualDuration
+            let oneFrameDifference: TimeInterval = 1/60
+            
+            guard difference <= 0.1 || actualDuration > oneFrameDifference else {
+                // UIView animation probably wasn‘t executed because no actual animatable
+                // properties were changed in animation closure. Just wait out remaining time
+                // before moving over to the next step.
+                let waitTime = max(0, difference - oneFrameDifference) // reduce a frame to be safe
+                DispatchQueue.main.asyncAfter(deadline: .now() + waitTime) {
+                    self.animateNextAnimation()
+                }
                 return
             }
             self.animateNextAnimation()
