@@ -3,29 +3,30 @@ import UIKit
 /// Maintains state about running animations and provides ways to add a completion handler or stop the animations
 public class RunningSequence {
     
+    public enum State {
+        /// Sequence is ready but not yet running animations
+        case ready
+        /// Sequence is performing animations
+        case running
+        /// Sequence has completed animations have completed
+        /// - Parameter finished: Wether animations have properly finished
+        case completed(finished: Bool)
+        /// Sequence has been manually stopped
+        case stopped
+    }
+    
+    /// Total duration of all animations in sequence
     public let duration: TimeInterval
+    /// All animation to be performed in sequence
     public let animations: [SequenceAnimatable]
     
-    var remainingAnimations: [Animatable] = []
-    var currentAnimation: Animatable?
+    /// Current state of sequence
+    public private(set) var state: State = .ready
     
-    var completionHandlers: [(Bool) -> Void] = []
+    private(set) var remainingAnimations: [Animatable] = []
+    private(set) var currentAnimation: Animatable?
     
-    /// Stops the currently running animation and stops any upcoming animations
-    public func stopAnimations() {
-        if let animation = currentAnimation as? Animation {
-            
-            // 1. Perform animation again to stop animation
-            animation.changes()
-        }
-        
-        // 2. Clear remaining
-        remainingAnimations.removeAll()
-        
-        // 3. Call completion handler(s) with finished = false
-        completionHandlers.forEach { $0(false) }
-        completionHandlers.removeAll()
-    }
+    private(set) var completionHandlers: [(Bool) -> Void] = []
     
     internal init(animations: [SequenceAnimatable]) {
         self.animations = animations
@@ -39,8 +40,38 @@ public extension RunningSequence {
     /// - Returns: Returns `Self` so this method can be added directly after creation an animation sequence
     @discardableResult
     func onComplete(_ handler: @escaping (_ finished: Bool) -> Void) -> Self {
-        completionHandlers.append(handler)
+        switch state {
+            
+        case .ready: fallthrough
+        case .running:
+            completionHandlers.append(handler)
+        case .completed(finished: let finished):
+            handler(finished)
+        case .stopped:
+            handler(false)
+        }
         return self
+    }
+}
+
+public extension RunningSequence {
+    /// Stops the currently running animation and cancels any upcoming animations
+    func stopAnimations() {
+        guard case .running = state else {
+            // Only running animations can be stopped
+            return
+        }
+        
+        state = .stopped
+        if let animation = currentAnimation as? Animation {
+            // Perform animation’s changes again to stop animation
+            animation.changes()
+        }
+        
+        remainingAnimations.removeAll()
+        currentAnimation = nil
+        
+        complete(finished: false)
     }
 }
 
@@ -48,6 +79,11 @@ extension RunningSequence {
     
     @discardableResult
     func animate(delay: TimeInterval = 0) -> Self {
+        guard case .ready = state else {
+            // Don’t start animating a sequence with running, completed or stopped animations
+            return self
+        }
+        state = .running
         remainingAnimations = Array(animations)
         animateNextAnimation(initialDelay: delay)
         return self
@@ -55,7 +91,7 @@ extension RunningSequence {
     
     func animateNextAnimation(initialDelay: TimeInterval = 0) {
         var leadingDelay: TimeInterval = initialDelay
-        let nextAnimations = remainingAnimations.drop { animation in
+        let impendingAnimations = remainingAnimations.drop { animation in
             if let wait = animation as? Wait {
                 leadingDelay += wait.duration
                 return true
@@ -65,7 +101,8 @@ extension RunningSequence {
             }
             return false
         }
-        currentAnimation = nextAnimations.first
+        
+        currentAnimation = impendingAnimations.first
         guard let animation = currentAnimation as? PerformsAnimations else {
             guard leadingDelay == 0 else {
                 // Wait out the remaing delay until calling completion closure
@@ -78,7 +115,7 @@ extension RunningSequence {
             return
         }
         
-        remainingAnimations = Array(nextAnimations.dropFirst())
+        remainingAnimations = Array(impendingAnimations.dropFirst())
         let startTime = CACurrentMediaTime()
         
         animation.animate(delay: leadingDelay) { finished in
@@ -108,6 +145,9 @@ extension RunningSequence {
     }
     
     func complete(finished: Bool) {
+        if case .running = state {
+            state = .completed(finished: finished)
+        }
         completionHandlers.forEach { $0(finished) }
         completionHandlers.removeAll()
     }
