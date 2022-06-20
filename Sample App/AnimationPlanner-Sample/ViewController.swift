@@ -74,7 +74,7 @@ extension ViewController {
                 view.transform = .identity
                 view.frame.origin.y = self.view.bounds.maxY
             }.timingFunction(.circIn)
-        } completion: { finished in
+        }.onComplete { finished in
             // Just to keep the flow going, let‘s run the animation again
             self.runSimpleBuilderAnimation()
         }
@@ -182,7 +182,7 @@ extension ViewController {
                 view.transform = view.transform.translatedBy(x: 0, y: quarterHeight)
                 sneakyCopy?.transform = view.transform.translatedBy(x: 0, y: quarterHeight)
             }
-        } completion: { finished in
+        }.onComplete { finished in
             self.runComplexBulderAnimation()
         }
     }
@@ -193,7 +193,7 @@ extension ViewController {
     /// - Parameter view: View to which the transform should be applied
     /// - Returns: Animations to be added to the sequence
     @AnimationBuilder
-    func addShakeSequence(shaking view: UIView) -> [AnimatesInSequence] {
+    func addShakeSequence(shaking view: UIView) -> [SequenceAnimatable] {
         var baseTransform: CGAffineTransform = .identity
         
         let count = 50

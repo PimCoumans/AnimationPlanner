@@ -87,7 +87,7 @@ public protocol StepAnimatable {
     static func animateGroup(_ addAnimations: (AnimationSequence.Group) -> Void, completion: ((Bool) -> Void)?)
 }
 
-internal protocol Animatable {
+internal protocol AnimationStep {
     var duration: TimeInterval { get }
     func animate(withDelay delay: TimeInterval, completion: ((Bool) -> Void)?)
 }
@@ -270,7 +270,7 @@ extension AnimationSequence {
 }
 
 // MARK: - Actual animation logic
-extension AnimationSequence.Step: Animatable {
+extension AnimationSequence.Step: AnimationStep {
     
     /// Full duration for each step type, uses longest duration of animations in a group
     public var duration: TimeInterval {
@@ -345,7 +345,7 @@ extension AnimationSequence.Step: Animatable {
             } else {
                 perform()
             }
-        case .group(let steps as [Animatable]):
+        case .group(let steps):
             let sortedSteps = Array(steps.sorted(by: { $0.duration < $1.duration }))
             guard let longestStep = sortedSteps.last else {
                 // No sequences to animate, call completion
@@ -368,13 +368,13 @@ extension AnimationSequence.Step: Animatable {
     }
 }
 
-extension AnimationSequence: Animatable {
-    
+extension AnimationSequence: AnimationStep {
+
     /// Total duration of all steps in the sequence combined
     public var duration: TimeInterval {
         steps.reduce(0, { $0 + $1.duration })
     }
-    
+
     internal func animate(withDelay delay: TimeInterval, completion: ((Bool) -> Void)?) {
         UIView.animate(remainingSteps: steps, startingDelay: delay, completion: completion)
     }

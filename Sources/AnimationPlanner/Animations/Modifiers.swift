@@ -78,16 +78,16 @@ extension Animate: SpringModifier { }
 /// Adds a delay to an existing animation
 public protocol DelayModifier {
     /// Animation contained by ``AnimateDelayed`` animation
-    associatedtype DelayedAnimation: Animates
+    associatedtype DelayedAnimation: Animatable
     /// Adds a delay to your animation. Only available in a ``Group`` context where animations should be performed simultaneously.
     /// - Parameter delay: Delay in seconds to add to your animation.
     /// - Returns: `AnimateDelayed`-contained animation adding a delay the modified animation
     func delayed(_ delay: TimeInterval) -> AnimateDelayed<DelayedAnimation>
 }
 
-extension DelayModifier where Self: AnimatesSimultaneously {
+extension DelayModifier where Self: GroupAnimatable {
     public func delayed(_ delay: TimeInterval) -> AnimateDelayed<Self> {
-        // By default, all structs conforming to `AnimatesSimultaneously` should be able to animate with a delay
+        // By default, all structs conforming to `GroupAnimatable` should be able to animate with a delay
         AnimateDelayed(delay: delay, animation: self)
     }
 }

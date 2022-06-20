@@ -2,9 +2,8 @@ import UIKit
 
 /// Performs an animation with the provided duration in seconds. Includes properties to set `UIView.AnimationOptions` and
 /// even a `CAMediaTimingFunction` to apply to the interpolation of the animated values changed in the ``changes`` closure.
-public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
+public struct Animate: Animation, SequenceAnimatable, GroupAnimatable {
     public let duration: TimeInterval
-    public var totalDuration: TimeInterval { duration }
     
     public internal(set) var changes: () -> Void
     public internal(set) var options: UIView.AnimationOptions?
@@ -33,7 +32,7 @@ public struct Animate: Animation, AnimatesInSequence, AnimatesSimultaneously {
 }
 
 /// Pauses the sequence for the given amount of seconds before performing the next animation.
-public struct Wait: AnimatesInSequence {
+public struct Wait: SequenceAnimatable {
     public let duration: TimeInterval
     
     public init(_ duration: TimeInterval) {
@@ -43,7 +42,7 @@ public struct Wait: AnimatesInSequence {
 
 /// Perfoms the provided handler in between your actual animations.
 /// Typically used for setting up state before an animation or creating side-effects like haptic feedback.
-public struct Extra: AnimatesExtra, AnimatesInSequence, AnimatesSimultaneously {
+public struct Extra: SequenceAnimatable, GroupAnimatable {
     public let duration: TimeInterval = 0
     
     public var perform: () -> Void
@@ -58,7 +57,7 @@ public struct Extra: AnimatesExtra, AnimatesInSequence, AnimatesSimultaneously {
 /// to the contained animation when necessary.
 public protocol AnimationContainer {
     /// Animation type contained by ``AnimationContainer``
-    associatedtype Contained: Animates
+    associatedtype Contained: Animatable
     /// Animation contained any animation using ``AnimationContainer``.
     var animation: Contained { get }
 }
@@ -75,26 +74,33 @@ extension AnimationContainer where Contained: Animation {
     public var timingFunction: CAMediaTimingFunction? { animation.timingFunction }
 }
 
-/// Forwarding ``DelayedAnimates`` properties
-extension AnimationContainer where Contained: DelayedAnimates {
-    /// Forwarded ``DelayedAnimates`` property for ``DelayedAnimates/delay``
-    public var delay: TimeInterval { animation.delay }
+/// Forwarding ``DelayedAnimatable`` properties
+extension AnimationContainer where Contained: DelayedAnimatable {
+    /// Forwarded ``DelayedAnimatable`` property for ``DelayedAnimatable/delay``
+    public var delay: TimeInterval {
+        animation.delay
+    }
+    
+    /// Forwarded ``DelayedAnimatable`` property for ``DelayedAnimatable/originalDuration``
+    public var originalDuration: TimeInterval {
+        animation.originalDuration
+    }
 }
 
-/// Forwarding ``SpringAnimates`` properties
-extension AnimationContainer where Contained: SpringAnimates {
-    /// Forwarded ``SpringAnimates`` property for ``SpringAnimates/dampingRatio``
+/// Forwarding ``SpringAnimatable`` properties
+extension AnimationContainer where Contained: SpringAnimatable {
+    /// Forwarded ``SpringAnimatable`` property for ``SpringAnimatable/dampingRatio``
     public var dampingRatio: CGFloat { animation.dampingRatio }
-    /// Forwarded ``SpringAnimates`` property for ``SpringAnimates/initialVelocity``
+    /// Forwarded ``SpringAnimatable`` property for ``SpringAnimatable/initialVelocity``
     public var initialVelocity: CGFloat { animation.initialVelocity }
 }
 
 // MARK: - Spring
 
 /// Performs an animation with spring dampening applied, using the same values as UIView spring animations
-public struct AnimateSpring<Springed: Animation>: SpringAnimates, AnimationContainer, AnimatesSimultaneously {
+public struct AnimateSpring<Springed: Animation>: SpringAnimatable, AnimationContainer, GroupAnimatable {
+    
     public internal(set) var animation: Springed
-    public var totalDuration: TimeInterval { duration }
     
     public let dampingRatio: CGFloat
     public let initialVelocity: CGFloat
@@ -124,27 +130,42 @@ extension AnimateSpring where Springed == Animate {
     }
 }
 
-extension AnimateSpring: AnimatesInSequence, SequenceAnimatesConvertible where Contained: AnimatesInSequence {
-    public func asSequence() -> [AnimatesInSequence] { [self] }
+extension AnimateSpring: SequenceAnimatable, SequenceConvertible where Contained: SequenceAnimatable {
+    public func asSequence() -> [SequenceAnimatable] { [self] }
 }
 
 extension AnimateSpring: Animation where Springed: Animation { }
-extension AnimateSpring: DelayedAnimates where Springed: DelayedAnimates { }
+extension AnimateSpring: DelayedAnimatable where Springed: DelayedAnimatable { }
 
 // MARK: - Delay
 
 /// Performs an animation after a delay, only to be used in a context where other animations are run simultaneously
-public struct AnimateDelayed<Delayed: Animates>: AnimationContainer, DelayedAnimates, AnimatesSimultaneously {
+public struct AnimateDelayed<Delayed: Animatable>: AnimationContainer, DelayedAnimatable, GroupAnimatable {
     
     public internal(set) var animation: Delayed
-    public var duration: TimeInterval { animation.duration }
-    public var totalDuration: TimeInterval { delay + animation.duration }
+    
+    public var duration: TimeInterval {
+        return delay + originalDuration
+    }
+    
+    public var originalDuration: TimeInterval {
+        if let delayed = animation as? DelayedAnimatable {
+            return delayed.originalDuration
+        }
+        return animation.duration
+    }
     
     public let delay: TimeInterval
     
     internal init(delay: TimeInterval, animation: Delayed) {
         self.animation = animation
         self.delay = delay
+    }
+}
+
+extension AnimateDelayed where Delayed: DelayedAnimatable {
+    public var duration: TimeInterval {
+        delay + animation.originalDuration
     }
 }
 
@@ -164,4 +185,5 @@ extension AnimateDelayed where Delayed == Animate {
     }
 }
 
-extension AnimateDelayed: SpringAnimates where Delayed: SpringAnimates { }
+extension AnimateDelayed: Animation where Delayed: Animation { }
+extension AnimateDelayed: SpringAnimatable where Delayed: SpringAnimatable { }

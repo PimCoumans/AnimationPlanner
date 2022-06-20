@@ -4,7 +4,7 @@ Chain multiple `UIView` animations with a clear declarative syntax, describing e
 
 ## Overview
 
-Start by typing `AnimationPlanner.plan` and begin creating your animation sequence. Within the `animations` closure you can provide all of your animations.
+Start by typing `AnimationPlanner.plan` and begin creating your animation sequence. Within the `animations` closure you can provide all of your animations. Using the returned ``RunningSequence`` a completion handler can be added. 
 
 > Note: Any animation created with AnimationPlanner can use a `CAMediaTimingFunction` animation curve with its animations. This framework provides numerous presets (like `.quintOut`) through an custom extension.
 
@@ -26,7 +26,7 @@ AnimationPlanner.plan {
 }
 ```
 
-See ``AnimationPlanner/AnimationPlanner/plan(animations:completion:)`` on ``AnimationPlanner`` for more info on beginning your animation sequence.
+See ``AnimationPlanner/AnimationPlanner/plan(animations:)`` on ``AnimationPlanner`` for more info on beginning your animation sequence.
 
 The most often used animation types are listed below.
 
@@ -44,8 +44,8 @@ The most often used animation types are listed below.
 
 ### Starting your animations
 
-- ``AnimationPlanner/AnimationPlanner/plan(animations:completion:)``
-- ``AnimationPlanner/AnimationPlanner/group(animations:completion:)``
+- ``AnimationPlanner/AnimationPlanner/plan(animations:)``
+- ``AnimationPlanner/AnimationPlanner/group(animations:)``
 
 ### Animation structs
 
@@ -93,3 +93,9 @@ Iterating over a sequence of repeating animations for a specific amount of time 
 the ``Loop`` struct.
 
 - ``Loop``
+
+### Running sequence
+
+Calling the main `AnimationPlanner` methods ``AnimationPlanner/AnimationPlanner/plan(animations:)`` and ``AnimationPlanner/AnimationPlanner/group(animations:)`` retuns in a ``RunningSequence`` object. This class allows you to add a completion handler with ``RunningSequence/onComplete(_:)`` and even stop the animations with ``RunningSequence/stopAnimations()``.
+
+- ``RunningSequence``

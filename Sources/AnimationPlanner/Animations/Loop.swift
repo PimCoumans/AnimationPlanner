@@ -2,7 +2,7 @@ import UIKit
 
 /// Loop through a sequence or for a specified repeat count to easily repeat multiple animation.
 ///
-/// Either create a `Loop` with the default initializer where you set `repeatCount` or use the static method ``through(_:animations:)-3pcny`` to loop through an existing array.
+/// Either create a `Loop` with the default initializer where you set `repeatCount` or use the static method ``through(_:animations:)-sb44`` to loop through an existing array.
 ///
 /// ```swift
 /// Loop(for: numberOfLoops) { index in
@@ -24,10 +24,10 @@ public struct Loop<Looped> {
     ) {
         self.animations = (0..<repeatCount).flatMap(builder)
         
-        if Looped.self == AnimatesInSequence.self, let animations = animations as? [AnimatesInSequence] {
+        if Looped.self == SequenceAnimatable.self, let animations = animations as? [SequenceAnimatable] {
             duration = animations.reduce(0, { $0 + $1.duration })
-        } else if Looped.self == AnimatesSimultaneously.self, let animations = animations as? [AnimatesSimultaneously] {
-            duration = animations.max(by: { $0.totalDuration < $1.totalDuration }).map(\.totalDuration) ?? 0
+        } else if Looped.self == GroupAnimatable.self, let animations = animations as? [GroupAnimatable] {
+            duration = animations.max(by: { $0.duration < $1.duration }).map(\.duration) ?? 0
         } else {
             fatalError("Animations provided through Loop don’t comform to any animatable type")
         }
@@ -41,18 +41,19 @@ public struct Loop<Looped> {
     }
 }
 
-extension Loop: SequenceAnimatesConvertible where Looped == AnimatesInSequence {
-    public func asSequence() -> [AnimatesInSequence] {
+extension Loop: SequenceConvertible where Looped == SequenceAnimatable {
+    
+    public func asSequence() -> [SequenceAnimatable] {
         animations
     }
     
     /// Creates a new Loop that repeats for the given amount of times.
     /// - Parameters:
     ///   - repeatCount: How many times the loop should repeat. The index of each loop is provided as a argument in the `animations` closure
-    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesInSequence``
+    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``SequenceAnimatable``
     public init(
         for repeatCount: Int,
-        @AnimationBuilder animations builder: (_ index: Int) -> [AnimatesInSequence]
+        @AnimationBuilder animations builder: (_ index: Int) -> [SequenceAnimatable]
     ) {
         self.init(repeatCount: repeatCount, builder: builder)
     }
@@ -60,35 +61,29 @@ extension Loop: SequenceAnimatesConvertible where Looped == AnimatesInSequence {
     /// Loop through a sequence of values, like objects in an array or a range of numbers
     /// - Parameters:
     ///   - sequence: Sequence to loop through, each element will be handled in the `animations` closure
-    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesInSequence``
+    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``SequenceAnimatable``
     /// - Returns: Sequence of all animations created in the `animation` closure
     public static func through<S: Swift.Sequence>(
         _ sequence: S,
-        @AnimationBuilder animations builder: (S.Element) -> [AnimatesInSequence]
-    ) -> [AnimatesInSequence] {
+        @AnimationBuilder animations builder: (S.Element) -> [SequenceAnimatable]
+    ) -> [SequenceAnimatable] {
         map(sequence, with: builder)
     }
 }
 
-extension Loop: PerformsAnimations where Looped == AnimatesInSequence {
-    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        // FIXME: Sequence Loops don't animate yet, should be implemeted in Phase 2
-        fatalError("Sequence animation not yet implemented")
-    }
-}
-
-extension Loop: SimultaneouslyAnimatesConvertible where Looped == AnimatesSimultaneously {
-    public func asGroup() -> [AnimatesSimultaneously] {
+extension Loop: GroupConvertible where Looped == GroupAnimatable {
+    
+    public func asGroup() -> [GroupAnimatable] {
         animations
     }
     
     /// Creates a new Loop that repeats for the given amount of times.
     /// - Parameters:
     ///   - repeatCount: How many times the loop should repeat. The index of each loop is provided as a argument in the `animations` closure
-    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesSimultaneously``
+    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``GroupAnimatable``
     public init(
         for repeatCount: Int,
-        @AnimationBuilder animations builder: (_ index: Int) -> [AnimatesSimultaneously]
+        @AnimationBuilder animations builder: (_ index: Int) -> [GroupAnimatable]
     ) {
         self.init(repeatCount: repeatCount, builder: builder)
     }
@@ -96,17 +91,17 @@ extension Loop: SimultaneouslyAnimatesConvertible where Looped == AnimatesSimult
     /// Loop through a sequence of values, like objects in an array or a range of numbers
     /// - Parameters:
     ///   - sequence: Sequence to loop through, each element will be handled in the `animations` closure
-    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesSimultaneously``
+    ///   - animations: Add each animation from within this closure. Animations added to this loop should conform to ``GroupAnimatable``
     /// - Returns: Group of all animations created in the `animation` closure
     public static func through<S: Swift.Sequence>(
         _ sequence: S,
-        @AnimationBuilder animations builder: (S.Element) -> [AnimatesSimultaneously]
-    ) -> [AnimatesSimultaneously] {
+        @AnimationBuilder animations builder: (S.Element) -> [GroupAnimatable]
+    ) -> [GroupAnimatable] {
         map(sequence, with: builder)
     }
 }
 
-extension Loop where Looped == AnimatesSimultaneously {
+extension Loop where Looped == GroupAnimatable {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         Group(animations: animations).animate(delay: leadingDelay, completion: completion)
     }
@@ -114,20 +109,20 @@ extension Loop where Looped == AnimatesSimultaneously {
 
 extension Swift.Sequence {
     /// Maps values from the sequence to animations
-    /// - Parameter animations: Add each animation from within this closure. Animations should conform to ``AnimatesSimultaneously``
+    /// - Parameter animations: Add each animation from within this closure. Animations should conform to ``GroupAnimatable``
     /// - Returns: Sequence of all animations created in the `animation` closure
     public func mapAnimations(
-        @AnimationBuilder animations builder: (Element) -> [AnimatesInSequence]
-    ) -> [AnimatesInSequence] {
+        @AnimationBuilder animations builder: (Element) -> [SequenceAnimatable]
+    ) -> [SequenceAnimatable] {
         flatMap(builder)
     }
     
     /// Maps values from the sequence to animations
-    /// - Parameter animations: Add each animation from within this closure. Animations added to this loop should conform to ``AnimatesSimultaneously``
+    /// - Parameter animations: Add each animation from within this closure. Animations added to this loop should conform to ``GroupAnimatable``
     /// - Returns: Group of all animations created in the `animation` closure
     public func mapAnimations(
-        @AnimationBuilder animations builder: (Element) -> [AnimatesSimultaneously]
-    ) -> [AnimatesSimultaneously] {
+        @AnimationBuilder animations builder: (Element) -> [GroupAnimatable]
+    ) -> [GroupAnimatable] {
         flatMap(builder)
     }
 }

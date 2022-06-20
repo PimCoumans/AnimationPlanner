@@ -28,12 +28,12 @@ AnimationPlanner.plan {
         subview.alpha = 0
         subview.frame.origin.y = self.view.bounds.maxY
     }
-} completion: { finished in
+}.onComplete { finished in
     subview.removeFromSuperview()
 }
 ```
 
-In the code shown above, an animation sequence is started with ``AnimationPlanner/AnimationPlanner/plan(animations:completion:)`` where each animation is added. Using the structs ``Animate`` and ``Wait`` a simple animation sequence is constructed by changing properties on a `subview` object. In the `completion` handler the `subview` is removed, demonstrating how to end an animation sequence.
+In the code shown above, an animation sequence is started with ``AnimationPlanner/AnimationPlanner/plan(animations:)`` where each animation is added. Using the structs ``Animate`` and ``Wait`` a simple animation sequence is constructed by changing properties on a `subview` object. ``RunningSequence/onComplete(_:)`` is used to add a completion handler where the `subview` is removed, demonstrating how to end an animation sequence.
 
 The first two ``Animate`` structs have modifiers applied. ``AnimationModifiers/timingFunction(_:)`` changes the interpolation method of the animation by providing a `CAMediaTimingFunction`. AnimationPlanner already provides many custom available timing functions like `.quintOut` used in the code example.
 
