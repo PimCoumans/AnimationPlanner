@@ -46,7 +46,7 @@ class ComplexAnimationTest: AnimationPlannerTests {
         
     }
     
-    func testNewSequenceGroup () {
+    func testSimplifiedSequenceGroup () {
         
         let numberOfGroups = 2
         let numberOfSequences = 2
