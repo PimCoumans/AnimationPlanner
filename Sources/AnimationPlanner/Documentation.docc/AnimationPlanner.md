@@ -96,6 +96,6 @@ the ``Loop`` struct.
 
 ### Running sequence
 
-Calling the main `AnimationPlanner` methods ``AnimationPlanner/AnimationPlanner/plan(animations:)`` and ``AnimationPlanner/AnimationPlanner/group(animations:)`` returns in a ``RunningSequence`` object. This class allows you to add a completion handler with ``RunningSequence/onComplete(_:)`` and even stop the animations with ``RunningSequence/stopAnimations()``.
+Calling the main `AnimationPlanner` methods ``AnimationPlanner/AnimationPlanner/plan(animations:)`` and ``AnimationPlanner/AnimationPlanner/group(animations:)`` returns in a ``RunningSequence`` object. This class provides a ``RunningSequence/state-swift.property`` for the running sequence, allows for a completion handler to be added with ``RunningSequence/onComplete(_:)`` and even stop all its animations with ``RunningSequence/stopAnimations()``.
 
 - ``RunningSequence``
