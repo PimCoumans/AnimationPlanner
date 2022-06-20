@@ -1,6 +1,6 @@
 import UIKit
 
-/// (Used in making animation sequences without needing ``AnimationBuilder``)
+/// (Deprecated, uses intermediate classes instead of ``AnimationBuilder``)
 /// This class is used to add steps to your animation sequence. When starting a sequence animation with `UIView.animateSteps(_:completion:)`, a sequence object is made available through the `addSteps` closure, From within this closure each step should be added to the sequence object.
 ///
 /// Each method on ``AnimationSequence`` returns a reference to `Self`, enabling the use of chainging each method call.
@@ -91,7 +91,6 @@ extension AnimationSequence {
         
         if delay > 0 {
             fatalError("Delay here is not supported")
-//            steps.append(spring.delayed(delay))
         } else {
             steps.append(spring)
         }
@@ -215,7 +214,9 @@ extension AnimationSequence {
         @discardableResult public func animateSteps(_ addSteps: (AnimationSequence) -> Void) -> Self {
             let sequence = AnimationSequence()
             addSteps(sequence)
-            animations.append(contentsOf: sequence.steps.compactMap { $0 as? GroupAnimatable })
+            animations.append (
+                Sequence(delay: 0, animations: sequence.steps)
+            )
             return self
         }
     }
