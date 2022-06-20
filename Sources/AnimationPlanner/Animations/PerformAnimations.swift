@@ -84,7 +84,7 @@ extension AnimateSpring: PerformsAnimations {
     }
 }
 
-extension AnimateDelayed: PerformsAnimations where Contained: Animation {
+extension AnimateDelayed: PerformsAnimations where Contained: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         animation.animate(delay: delay + leadingDelay, completion: completion)
     }
