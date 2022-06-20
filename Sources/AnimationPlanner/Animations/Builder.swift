@@ -34,9 +34,8 @@ public struct AnimationPlanner {
     public static func plan(
         @AnimationBuilder animations builder: () -> [SequenceAnimatable]
     ) -> RunningSequence {
-        let running = RunningSequence(animations: builder())
-        running.animate()
-        return running
+        RunningSequence(animations: builder())
+            .animate()
     }
     
     /// Start a new group animation where animations added will be performed simultaneously, meaning all animations run at the same time.

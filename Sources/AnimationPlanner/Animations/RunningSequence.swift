@@ -46,9 +46,11 @@ public extension RunningSequence {
 
 extension RunningSequence {
     
-    func animate(delay: TimeInterval = 0) {
+    @discardableResult
+    func animate(delay: TimeInterval = 0) -> Self {
         remainingAnimations = Array(animations)
         animateNextAnimation(initialDelay: delay)
+        return self
     }
     
     func animateNextAnimation(initialDelay: TimeInterval = 0) {
