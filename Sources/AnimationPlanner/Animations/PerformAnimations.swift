@@ -1,10 +1,7 @@
 import UIKit
 
-/*
- * -- NOT USED YET, WILL BE IN PHASE 2 --
- */
-
-/// Creates actual `UIView` animations for all animation structs
+/// Creates actual `UIView` animations for all animation structs. Implement ``animate(delay:completion:)`` to make sure any custom animation creates an actual animation.
+/// Use the default implementation of ``timingParameters(leadingDelay:)-2swvd`` to get the most accurate timing parameters for your animation so any set delay isn't missed.
 public protocol PerformsAnimations {
     /// Perform the actual animation
     /// - Parameters:
@@ -12,39 +9,35 @@ public protocol PerformsAnimations {
     ///   Waits for this amount of seconds before actually performing the animation
     ///   - completion: Optional closure called when animation completes
     func animate(delay leadingDelay: TimeInterval, completion: ((_ finished: Bool) -> Void)?)
-}
-
-internal protocol ActuallyPerformsAnimations {
-    func prepareAnimation(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?)
-    func performAnimations(delay totalDelay: TimeInterval, duration: TimeInterval, completion: ((Bool) -> Void)?)
-}
-
-extension ActuallyPerformsAnimations where Self: Animatable {
     
-    func prepareAnimation(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)? = nil) {
-        var duration = self.duration
-        var delay = leadingDelay
+    /// Queries the animation and possible contained animations to find the correct timing values to use to create an actual animation
+    /// - Parameter leadingDelay: Delay to add before performing animation
+    /// - Returns: Tuple containing a delay and duration in seconds
+    func timingParameters(leadingDelay: TimeInterval) -> (delay: TimeInterval, duration: TimeInterval)
+}
+
+extension PerformsAnimations {
+    
+    public func timingParameters(leadingDelay: TimeInterval) -> (delay: TimeInterval, duration: TimeInterval) {
+        var parameters = (delay: leadingDelay, duration: TimeInterval(0))
         
         if let delayed = self as? DelayedAnimatable {
-            duration = delayed.originalDuration
-            delay += delayed.delay
+            parameters.delay += delayed.delay
+            parameters.duration = delayed.originalDuration
+        } else if let animation = self as? Animatable {
+            parameters.duration = animation.duration
         }
-        
-        self.performAnimations(delay: delay, duration: duration, completion: completion)
+        return parameters
     }
 }
 
 extension Animate: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        prepareAnimation(delay: leadingDelay, completion: completion)
-    }
-}
-extension Animate: ActuallyPerformsAnimations {
-    func performAnimations(delay totalDelay: TimeInterval, duration: TimeInterval, completion: ((Bool) -> Void)? = nil) {
+        let timing = timingParameters(leadingDelay: leadingDelay)
         let createAnimations: (((Bool) -> Void)?) -> Void = { completion in
             UIView.animate(
-                withDuration: duration,
-                delay: totalDelay,
+                withDuration: timing.duration,
+                delay: timing.delay,
                 options: options ?? [],
                 animations: changes,
                 completion: completion
@@ -67,21 +60,17 @@ extension Animate: ActuallyPerformsAnimations {
 
 extension Extra: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        prepareAnimation(delay: leadingDelay, completion: completion)
-    }
-}
-
-extension Extra: ActuallyPerformsAnimations {
-    func performAnimations(delay totalDelay: TimeInterval, duration: TimeInterval, completion: ((Bool) -> Void)? = nil) {
+        let timing = timingParameters(leadingDelay: leadingDelay)
+        
         let animation: () -> Void = {
             self.perform()
             completion?(true)
         }
-        guard totalDelay > 0 else {
+        guard timing.delay > 0 else {
             animation()
             return
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + totalDelay) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + timing.delay) {
             animation()
         }
     }
@@ -89,14 +78,10 @@ extension Extra: ActuallyPerformsAnimations {
 
 extension AnimateSpring: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        prepareAnimation(delay: leadingDelay, completion: completion)
-    }
-}
-extension AnimateSpring: ActuallyPerformsAnimations {
-    func performAnimations(delay totalDelay: TimeInterval, duration: TimeInterval, completion: ((Bool) -> Void)? = nil) {
+        let timing = timingParameters(leadingDelay: leadingDelay)
         UIView.animate(
-            withDuration: duration,
-            delay: totalDelay,
+            withDuration: timing.duration,
+            delay: timing.delay,
             usingSpringWithDamping: dampingRatio,
             initialSpringVelocity: initialVelocity,
             options: animation.options ?? [],
