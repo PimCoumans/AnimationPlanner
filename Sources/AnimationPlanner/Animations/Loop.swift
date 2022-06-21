@@ -101,7 +101,7 @@ extension Loop: GroupConvertible where Looped == GroupAnimatable {
     }
 }
 
-extension Loop where Looped == GroupAnimatable {
+extension Loop: PerformsAnimations where Looped == GroupAnimatable {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         Group(animations: animations).animate(delay: leadingDelay, completion: completion)
     }

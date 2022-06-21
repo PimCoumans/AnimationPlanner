@@ -1,12 +1,12 @@
 import UIKit
 
-/// Anything that can be animated in AnimationPlanner
+/// Anything that can be used to create animations in AnimationPlanner
 public protocol Animatable {
     /// Full duration of the animation
     var duration: TimeInterval { get }
 }
 
-/// Actual animation that can be used to construct `UIView` animations
+/// Animation that can be used to construct `UIView` animations
 public protocol Animation: Animatable, PerformsAnimations {
     /// Changes on views to perform animation with
     var changes: () -> Void { get }
@@ -30,7 +30,7 @@ extension GroupAnimatable {
     public func asGroup() -> [GroupAnimatable] { [self] }
 }
 
-/// Adds a delaying functionality to an animation. Delayed animations can only be added in a grouped context, where each animation is performed simultaneously. Adding a delay to a sequence animation can be done by preceding it with a ``Wait`` struct.
+/// Adds delaying functionality to an animation. Delayed animations can only be added in a ``Group`` context, where each animation is performed simultaneously. Adding a delay to a sequence animation can be done by preceding it with a ``Wait`` struct.
 public protocol DelayedAnimatable: GroupAnimatable {
     /// Delay in seconds after which the animation should start
     var delay: TimeInterval { get }
@@ -38,7 +38,7 @@ public protocol DelayedAnimatable: GroupAnimatable {
     var originalDuration: TimeInterval { get }
 }
 
-/// Performs an animation with spring-based parameters
+/// Adds spring-based animation parameters to an animation.
 public protocol SpringAnimatable: Animatable {
     /// Spring damping used for spring-based animation. To quote `UIView`’s animate documentation:
     /// “To smoothly decelerate the animation without oscillation, use a value of 1. Employ a damping ratio closer to zero to increase oscillation.”
