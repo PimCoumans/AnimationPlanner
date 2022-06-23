@@ -2,53 +2,53 @@ import AnimationPlanner
 import UIKit
 
 class SequenceTests: AnimationPlannerTests {
+    
+    /// Performs no actual animation, but should not finish earlier than duration
     func testNoopSequenceAnimation() {
-        runAnimationTest { completion, duration, _ in
-            UIView.animateSteps { sequence in
-                sequence.add(duration: duration) {
-                    print("🤫 Do nothing")
-                }
-            } completion: { finished in
-                completion(finished)
+        
+        runAnimationBuilderTest { duration, _ in
+            AnimationPlanner.plan {
+                Animate(duration: duration)
             }
         }
+        
     }
     
     /// Sequence animation with one step
     func testBasicAnimation() {
-        runAnimationTest { completion, duration, _ in
-            UIView.animateSteps { sequence in
-                sequence.add(duration: duration) {
+        runAnimationBuilderTest { duration, _ in
+            
+            AnimationPlanner.plan {
+                Animate(duration: duration) {
                     self.performRandomAnimation()
                 }
-            } completion: { finished in
-                completion(finished)
             }
+            
         }
     }
     
     /// Uses an `extra` step for the completion handler after delaying for the set random duration
     func testExtraHandler() {
-        runAnimationTest { completion, usedDuration, usedPrecision in
-            UIView.animateSteps { sequence in
-                sequence
-                    .delay(usedDuration)
-                    .extra {
-                        completion(true)
-                    }
+        runAnimationTest { completion, usedDuration, _ in
+            
+            AnimationPlanner.plan {
+                Wait(usedDuration)
+                Extra {
+                    completion(true)
+                }
             }
         }
     }
     
     func testBasicSpringAnimation() {
-        runAnimationTest { completion, usedDuration, usedPrecision in
-            UIView.animateSteps { sequence in
-                sequence.addSpring(duration: usedDuration, damping: 0.86, initialVelocity: 0.2) {
+        runAnimationBuilderTest { usedDuration, usedPrecision in
+            
+            AnimationPlanner.plan {
+                AnimateSpring(duration: usedDuration, dampingRatio: 0.86, initialVelocity: 0.2) {
                     self.performRandomAnimation()
                 }
-            } completion: { finished in
-                completion(finished)
             }
+            
         }
     }
     
@@ -57,17 +57,17 @@ class SequenceTests: AnimationPlannerTests {
         let singleDuration: TimeInterval = randomDuration
         let totalDuration = singleDuration * 2
         
-        runAnimationTest(duration: totalDuration) { completion, _, _ in
-            UIView.animateSteps { sequence in
-                sequence.add(duration: singleDuration, timingFunction: .quadOut) {
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+            
+            AnimationPlanner.plan {
+                Animate(duration: singleDuration, timingFunction: .quadOut) {
                     self.performRandomAnimation()
                 }
-                .add(duration: singleDuration, timingFunction: .quadIn) {
+                Animate(duration: singleDuration) {
                     self.performRandomAnimation()
-                }
-            } completion: { finished in
-                completion(finished)
+                }.timingFunction(.quadIn)
             }
+            
         }
     }
     
@@ -78,16 +78,16 @@ class SequenceTests: AnimationPlannerTests {
         let totalDuration = durations.reduce(0, +)
         let precision = durationPrecision * TimeInterval(numberOfSteps)
         
-        runAnimationTest(duration: totalDuration, precision: precision) { completion, _, _ in
-            UIView.animateSteps { sequence in
+        runAnimationBuilderTest(duration: totalDuration, precision: precision) { _, _ in
+            
+            AnimationPlanner.plan {
                 for duration in durations {
-                    sequence.add(duration: duration) {
+                    Animate(duration: duration) {
                         self.performRandomAnimation()
                     }
                 }
-            } completion: { finished in
-                completion(finished)
             }
+            
         }
     }
     
@@ -98,17 +98,126 @@ class SequenceTests: AnimationPlannerTests {
         let totalDuration: TimeInterval = animations.reduce(0, { $0 + $1.totalDuration })
         let precision = durationPrecision * TimeInterval(numberOfSteps)
         
-        runAnimationTest(duration: totalDuration, precision: precision) { completion, _, _ in
-            UIView.animateSteps { sequence in
-                animations.forEach { animation in
-                    sequence.add(duration: animation.duration) {
+        runAnimationBuilderTest(duration: totalDuration, precision: precision) { _, _ in
+            
+            AnimationPlanner.plan {
+                animations.mapAnimations { animation in
+                    Animate(duration: animation.duration) {
                         self.performRandomAnimation()
                     }
-                    .delay(animation.delay)
+                    Wait(animation.delay)
                 }
-            } completion: { finished in
-                completion(finished)
             }
+            
+        }
+    }
+    
+    func testSequenceCountedLoop() {
+        let duration: TimeInterval = 0.5
+        let numberOfLoops: Int = 4
+        let totalDuration = duration * TimeInterval(numberOfLoops)
+        let precision = durationPrecision * TimeInterval(numberOfLoops)
+        runAnimationBuilderTest(duration: totalDuration, precision: precision) { _, _ in
+            
+            AnimationPlanner.plan {
+                Loop(for: numberOfLoops) { index in
+                    Animate(duration: duration / 2) {
+                        self.performRandomAnimation()
+                    }
+                    Animate(duration: duration / 2) {
+                        self.performRandomAnimation()
+                    }
+                }
+            }
+            
+        }
+    }
+    
+    func testSequenceElementLoop() {
+        let numberOfLoops: Int = 4
+        let durations = randomDurations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = durations.reduce(0, +)
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+            
+            AnimationPlanner.plan {
+                Loop.through(durations) { duration in
+                    Animate(duration: duration) {
+                        self.performRandomAnimation()
+                    }
+                }
+            }
+            
+        }
+    }
+    
+    func testSequenceForLoop() {
+        let numberOfLoops: Int = 4
+        let durations = randomDurations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = durations.reduce(0, +)
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+            
+            AnimationPlanner.plan {
+                for duration in durations {
+                    Animate(duration: duration) {
+                        self.performRandomAnimation()
+                    }
+                }
+            }
+            
+        }
+    }
+    
+    func testGroupCountedLoop() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+        
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+            
+            AnimationPlanner.group {
+                Loop(for: numberOfLoops) { index in
+                    Animate(duration: animations[index].duration) {
+                        self.performRandomAnimation()
+                    }.delayed(animations[index].delay)
+                }
+            }
+            
+        }
+    }
+    
+    func testGroupElementLoop() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+        
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+            
+            AnimationPlanner.group {
+                Loop.through(animations) { animation in
+                    Animate(duration: animation.duration) {
+                        self.performRandomAnimation()
+                    }.delayed(animation.delay)
+                }
+            }
+            
+        }
+    }
+    
+    func testGroupForLoop() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+        
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+            
+            AnimationPlanner.group {
+                for animation in animations {
+                    Animate(duration: animation.duration) {
+                        self.performRandomAnimation()
+                    }.delayed(animation.delay)
+                }
+            }
+            
         }
     }
 }

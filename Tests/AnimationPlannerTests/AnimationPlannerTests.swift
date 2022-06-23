@@ -28,7 +28,7 @@ class AnimationPlannerTests: XCTestCase {
     ///   - completion: Closure to call when animations have completed
     ///   - usedDuration: Duration for animation, use this argument when no specific duration is provided
     ///   - usedPrecision: Precision for duration check, use this argument when no specific precision is provided
-    func runAnimationTest(
+    func runAnimationBuilderTest(
         duration: TimeInterval = randomDuration,
         precision: TimeInterval = durationPrecision,
         _ animations: @escaping (
@@ -71,7 +71,6 @@ func assertDifference(startTime: CFTimeInterval, duration: TimeInterval, precisi
     let finishedTime = CACurrentMediaTime() - startTime
     let difference = finishedTime - duration
     XCTAssert(abs(difference) < precision, "unexpected completion time (difference \(difference) seconds (precision \(precision))")
-    print("** DIFFERENCE: \(difference), (precision: \(precision))")
 }
 
 fileprivate extension CGFloat {
