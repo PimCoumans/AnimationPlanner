@@ -20,7 +20,7 @@ class AnimationPlannerTests: XCTestCase {
         view = nil
     }
     
-    /// Runs your animation logic, waits for completion and fails when expected duration varies from provided duration (allowing for precision). Adds the completion handler to the returned `RunningSequence` object when only using `AnimationPlanner.plan` or `.group`. Othewise make sure to end with `return nil`
+    /// Runs your animation logic, waits for completion and fails when expected duration varies from provided duration (allowing for precision). Adds the completion handler to the returned `RunningSequence` object when only using `AnimationPlanner.plan` or `.group`. Othewise use `runAnimationTest`
     /// - Parameters:
     ///   - duration: Duration of animimation, or total duration of all animation steps, defaults to random duration
     ///   - precision: Precision to use when comparing expected duration and time to complete animations
