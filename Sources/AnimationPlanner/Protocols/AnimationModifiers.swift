@@ -41,7 +41,8 @@ extension Animate: AnimationModifiers {
     }
     public func changes(_ changes: @escaping () -> Void) -> Animate {
         mutate { $0.changes = changes }
-    }}
+    }
+}
 
 // MARK: - Spring modifiers
 

@@ -1,5 +1,6 @@
 import UIKit
 import XCTest
+import AnimationPlanner
 
 class AnimationPlannerTests: XCTestCase {
     
@@ -19,7 +20,7 @@ class AnimationPlannerTests: XCTestCase {
         view = nil
     }
     
-    /// Runs your animation logic, waits for completion and fails when expected duration varies from provided duration (allowing for precision)
+    /// Runs your animation logic, waits for completion and fails when expected duration varies from provided duration (allowing for precision). Adds the completion handler to the returned `RunningSequence` object when only using `AnimationPlanner.plan` or `.group`. Othewise use `runAnimationTest`
     /// - Parameters:
     ///   - duration: Duration of animimation, or total duration of all animation steps, defaults to random duration
     ///   - precision: Precision to use when comparing expected duration and time to complete animations
@@ -27,6 +28,20 @@ class AnimationPlannerTests: XCTestCase {
     ///   - completion: Closure to call when animations have completed
     ///   - usedDuration: Duration for animation, use this argument when no specific duration is provided
     ///   - usedPrecision: Precision for duration check, use this argument when no specific precision is provided
+    func runAnimationBuilderTest(
+        duration: TimeInterval = randomDuration,
+        precision: TimeInterval = durationPrecision,
+        _ animations: @escaping (
+            _ usedDuration: TimeInterval,
+            _ usedPrecision: TimeInterval) -> RunningSequence?
+    ) {
+        runAnimationTest(duration: duration, precision: precision) { completion, usedDuration, usedPrecision in
+            let runningSequence = animations(duration, precision)
+            XCTAssertNotNil(runningSequence)
+            runningSequence?.onComplete(completion)
+        }
+    }
+    
     func runAnimationTest(
         duration: TimeInterval = randomDuration,
         precision: TimeInterval = durationPrecision,
@@ -43,7 +58,7 @@ class AnimationPlannerTests: XCTestCase {
             assertDifference(startTime: startTime, duration: duration, precision: precision)
             finishedExpectation.fulfill()
         }
-        // perform actual animation stuff
+        
         animations(completion, duration, precision)
         
         waitForExpectations(timeout: duration + precision * 2)
@@ -56,7 +71,6 @@ func assertDifference(startTime: CFTimeInterval, duration: TimeInterval, precisi
     let finishedTime = CACurrentMediaTime() - startTime
     let difference = finishedTime - duration
     XCTAssert(abs(difference) < precision, "unexpected completion time (difference \(difference) seconds (precision \(precision))")
-    print("** DIFFERENCE: \(difference), (precision: \(precision))")
 }
 
 fileprivate extension CGFloat {
