@@ -5,12 +5,6 @@ import XCTest
 
 class BuilderTests: AnimationPlannerTests {
     
-    /*
-     During phase 1 of adding result builders to AnimationPlanner, all animations created with result builders are
-     performed by the old style `UIView.animateSteps` logic. Therefore result builder tests should not be as extensive
-     as the old-style tests.
-     */
-    
     func testContainedAnimations() {
         let animation = Animate(duration: 1) {
             self.performRandomAnimation()
