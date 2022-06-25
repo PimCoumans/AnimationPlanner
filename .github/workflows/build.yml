@@ -5,13 +5,10 @@ jobs:
   documentation:
     runs-on: macos-latest
     steps:
-    - uses: fwcd/swift-docc-action@v1
-      with:
-        target: AnimationPlanner
-        output: ./docs
-        hosting-base-path: AnimationPlanner
-        disable-indexing: 'true'
-        transform-for-static-hosting: 'true'
+    - name: Generate documentation
+      run: xcodebuild docbuild -scheme AnimationPlanner -derivedDataPath DerivedData -destination 'platform=iOS Simulator,name=iPhone 13'
+    - name: Process documentation
+      run: $(xcrun --find docc) process-archive transform-for-static-hosting DerivedData/Build/Products/Debug-iphonesimulator/AnimationPlanner.doccarchive --output-path ./docs --hosting-base-path AnimationPlanner
         
   build:
     runs-on: macos-latest
