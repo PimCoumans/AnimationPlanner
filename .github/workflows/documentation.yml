@@ -1,0 +1,7 @@
+- uses: fwcd/swift-docc-action@v1
+  with:
+    target: AnimationPlanner
+    output: ./docs
+    hosting-base-path: AnimationPlanner
+    disable-indexing: 'true'
+    transform-for-static-hosting: 'true'
