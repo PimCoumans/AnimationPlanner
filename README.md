@@ -29,7 +29,7 @@ AnimationPlanner.plan {
         view.backgroundColor = .systemRed
     }.timingFunction(.quintOut)
     Wait(0.2)
-    AnimateSpring(duration: 0.25, damping: 0.52) {
+    AnimateSpring(duration: 0.25, dampingRatio: 0.52) {
         view.backgroundColor = .systemBlue
         view.layer.cornerRadius = 0
         view.transform = .identity
