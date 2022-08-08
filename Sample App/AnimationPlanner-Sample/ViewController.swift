@@ -15,6 +15,9 @@ class ViewController: UIViewController {
         view.layer.cornerCurve = .continuous
         return view
     }()
+    
+    lazy var stopButton = newStopButton()
+    lazy var resetButton = newResetButton()
 	
     // Sequence currently performing animations
     var runningSequence: RunningSequence?
@@ -245,8 +248,9 @@ extension ViewController {
     }
 }
 
-extension ViewController {
-    lazy var stopButton: UIButton = {
+private extension ViewController {
+    
+    func newStopButton() -> UIButton {
         var configuration = UIButton.Configuration.filled()
         configuration.buttonSize = .large
         configuration.baseBackgroundColor = .systemRed
@@ -256,9 +260,9 @@ extension ViewController {
             runningSequence?.stopAnimations()
             resetButton.isEnabled = true
         })
-    }()
+    }
     
-    lazy var resetButton: UIButton = {
+    func newResetButton() -> UIButton {
         var configuration = UIButton.Configuration.filled()
         configuration.buttonSize = .large
         configuration.baseBackgroundColor = .systemGreen
@@ -269,7 +273,7 @@ extension ViewController {
         })
         button.isEnabled = false
         return button
-    }()
+    }
 }
 
 extension UIView {
