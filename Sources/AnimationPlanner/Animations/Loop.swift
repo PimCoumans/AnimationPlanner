@@ -101,12 +101,6 @@ extension Loop: GroupConvertible where Looped == GroupAnimatable {
     }
 }
 
-extension Loop: PerformsAnimations where Looped == GroupAnimatable {
-    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        Group(animations: animations).animate(delay: leadingDelay, completion: completion)
-    }
-}
-
 extension Swift.Sequence {
     /// Maps values from the sequence to animations
     /// - Parameter animations: Add each animation from within this closure. Animations should conform to ``GroupAnimatable``

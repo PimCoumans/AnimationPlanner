@@ -17,7 +17,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3E5C6DA62848C27B00720FE8 /* CAMediaTimingFunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CAMediaTimingFunction.swift; sourceTree = "<group>"; };
 		3EF52D592848AEC7000F8222 /* AnimationPlanner-Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AnimationPlanner-Sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EF52D5C2848AEC7000F8222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3EF52D5E2848AEC7000F8222 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -72,7 +71,6 @@
 				3EF52D5C2848AEC7000F8222 /* AppDelegate.swift */,
 				3EF52D5E2848AEC7000F8222 /* SceneDelegate.swift */,
 				3EF52D602848AEC7000F8222 /* ViewController.swift */,
-				3E5C6DA62848C27B00720FE8 /* CAMediaTimingFunction.swift */,
 				3EF52D622848AEC7000F8222 /* Main.storyboard */,
 				3EF52D652848AEC8000F8222 /* Assets.xcassets */,
 				3EF52D672848AEC8000F8222 /* LaunchScreen.storyboard */,
