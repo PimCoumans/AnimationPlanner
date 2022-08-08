@@ -8,6 +8,10 @@ public struct Animate: Animation, SequenceAnimatable, GroupAnimatable {
     public internal(set) var changes: () -> Void
     public internal(set) var options: UIView.AnimationOptions?
     public internal(set) var timingFunction: CAMediaTimingFunction?
+    public internal(set) var allowsUserInteraction: Bool = false
+    
+    /// Animator used for actually performing the animation
+    private var propertyAnimator: UIViewPropertyAnimator?
     
     /// Creates a new animation, animating the properties updated in the ``changes`` closure
     ///
@@ -32,28 +36,33 @@ public struct Animate: Animation, SequenceAnimatable, GroupAnimatable {
 }
 
 extension Animate: PerformsAnimations {
-    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
+    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) -> PerformsAnimations {
         let timing = timingParameters(leadingDelay: leadingDelay)
-        let createAnimations: (((Bool) -> Void)?) -> Void = { completion in
-            UIView.animate(
-                withDuration: timing.duration,
-                delay: timing.delay,
-                options: options ?? [],
-                animations: changes,
-                completion: completion
-            )
-        }
-        
-        if let timingFunction = timingFunction {
-            CATransaction.begin()
-            CATransaction.setAnimationDuration(duration)
-            CATransaction.setAnimationTimingFunction(timingFunction)
-            
-            createAnimations(completion)
-            
-            CATransaction.commit()
-        } else {
-            createAnimations(completion)
-        }
+		var mutableSelf = self
+		let animator: UIViewPropertyAnimator
+		if let function = timingFunction {
+			animator = UIViewPropertyAnimator(duration: timing.duration, timingFunction: function, animations: changes)
+            animator.isUserInteractionEnabled = isUserInteractionEnabled
+			animator.addCompletion { position in
+				completion?(position == .end)
+			}
+			animator.startAnimation(afterDelay: timing.delay)
+		} else {
+			animator = UIViewPropertyAnimator.runningPropertyAnimator(
+				withDuration: timing.duration,
+				delay: timing.delay,
+				options: options ?? [],
+				animations: changes,
+				completion: { position in
+					completion?(position == .end)
+				}
+			)
+		}
+		mutableSelf.propertyAnimator = animator
+		return mutableSelf
     }
+	
+	public func stop() {
+		propertyAnimator?.stopAnimation(true)
+	}
 }

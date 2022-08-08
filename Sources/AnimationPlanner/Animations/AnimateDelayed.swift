@@ -50,7 +50,16 @@ extension AnimateDelayed: Animation where Delayed: Animation { }
 extension AnimateDelayed: SpringAnimatable where Delayed: SpringAnimatable { }
 
 extension AnimateDelayed: PerformsAnimations where Contained: PerformsAnimations {
-    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
-        animation.animate(delay: delay + leadingDelay, completion: completion)
+    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) -> PerformsAnimations {
+        let animation = animation.animate(delay: delay + leadingDelay, completion: completion)
+        if let animation = animation as? Delayed {
+            return mutate { $0.animation = animation }
+        }
+        print("Animation result of \(self.animation) is \(type(of: animation)) and can not be contained by \(self)")
+        return animation
+    }
+    
+    public func stop() {
+        animation.stop()
     }
 }

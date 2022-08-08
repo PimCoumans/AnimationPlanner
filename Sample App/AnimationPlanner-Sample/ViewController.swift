@@ -16,43 +16,62 @@ class ViewController: UIViewController {
         return view
     }()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.addSubview(subview)
-    }
-
+    lazy var stopButton = newStopButton()
+    lazy var resetButton = newResetButton()
+	
+    // Sequence currently performing animations
+    var runningSequence: RunningSequence?
+    
+    let testStopping: Bool = true // Set to true to display buttons to stop and reset animations
+    
     let performComplexAnimation: Bool = false // Set to true to run a more complex animation
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+    
+    func performAnimations() {
+        resetButton.isEnabled = false
         if performComplexAnimation {
             runComplexBulderAnimation()
         } else {
             runSimpleBuilderAnimation()
         }
     }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        performAnimations()
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.addSubview(subview)
+        
+        guard testStopping else {
+            return
+        }
+        view.addSubview(stopButton)
+        view.addSubview(resetButton)
+        stopButton.translatesAutoresizingMaskIntoConstraints = false
+        resetButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stopButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
+            stopButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            stopButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: -8),
+            resetButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor, constant: 8),
+            resetButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            resetButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+        ])
+    }
 }
 
 extension ViewController {
     
-    func setInitialSubviewState() -> UIView {
-        subview.alpha = 0
-        subview.transform = .identity
-        subview.frame.size = CGSize(width: 100, height: 100)
-        subview.center.x = view.bounds.midX
-        subview.frame.origin.y = view.bounds.minY
-        subview.backgroundColor = .systemOrange
-        subview.layer.cornerRadius = 16
-        subview.layer.borderWidth = 0
-        subview.layer.borderColor = nil
-        return subview
-    }
-    
     func runSimpleBuilderAnimation() {
         let view = setInitialSubviewState()
-        AnimationPlanner.plan {
-            Wait(0.35) // A delay waits for the given amount of seconds to start the next step
-            Animate(duration: 0.32, timingFunction: .quintOut) {
+        runningSequence = AnimationPlanner.plan {
+//            Wait(0.35) // A delay waits for the given amount of seconds to start the next step
+            Extra {
+                print("Doing absolutely nothing....")
+            }
+            Animate(duration: 2, timingFunction: .quintOut) {
                 view.alpha = 1
                 view.center.y = self.view.bounds.midY
             }
@@ -75,8 +94,10 @@ extension ViewController {
                 view.frame.origin.y = self.view.bounds.maxY
             }.timingFunction(.circIn)
         }.onComplete { finished in
-            // Just to keep the flow going, let‘s run the animation again
-            self.runSimpleBuilderAnimation()
+			if finished {
+				// Just to keep the flow going, let‘s run the animation again
+				self.runSimpleBuilderAnimation()
+			}
         }
     }
     
@@ -84,7 +105,7 @@ extension ViewController {
     func runComplexBulderAnimation() {
         var sneakyCopy: UIView! // Don‘t worry, you‘ll see later
         
-        AnimationPlanner.plan {
+        runningSequence = AnimationPlanner.plan {
             let quarterHeight = view.bounds.height / 4
             let view = setInitialSubviewState()
             
@@ -183,12 +204,29 @@ extension ViewController {
                 sneakyCopy?.transform = view.transform.translatedBy(x: 0, y: quarterHeight)
             }
         }.onComplete { finished in
-            self.runComplexBulderAnimation()
+            if finished {
+                sneakyCopy.removeFromSuperview()
+                self.runComplexBulderAnimation()
+            }
         }
     }
 }
 
 extension ViewController {
+    
+    func setInitialSubviewState() -> UIView {
+        subview.alpha = 0
+        subview.transform = .identity
+        subview.frame.size = CGSize(width: 100, height: 100)
+        subview.center.x = view.bounds.midX
+        subview.frame.origin.y = view.bounds.minY
+        subview.backgroundColor = .systemOrange
+        subview.layer.cornerRadius = 16
+        subview.layer.borderWidth = 0
+        subview.layer.borderColor = nil
+        return subview
+    }
+    
     /// Adds a custom shake animation sequence on the provided view
     /// - Parameter view: View to which the transform should be applied
     /// - Returns: Animations to be added to the sequence
@@ -210,6 +248,34 @@ extension ViewController {
                     )
             }.timingFunction(.quintOut)
         }
+    }
+}
+
+private extension ViewController {
+    
+    func newStopButton() -> UIButton {
+        var configuration = UIButton.Configuration.filled()
+        configuration.buttonSize = .large
+        configuration.baseBackgroundColor = .systemRed
+        configuration.cornerStyle = .large
+        configuration.title = "Stop"
+        return UIButton(configuration: configuration, primaryAction: UIAction { [unowned self] _ in
+            runningSequence?.stopAnimations()
+            resetButton.isEnabled = true
+        })
+    }
+    
+    func newResetButton() -> UIButton {
+        var configuration = UIButton.Configuration.filled()
+        configuration.buttonSize = .large
+        configuration.baseBackgroundColor = .systemGreen
+        configuration.cornerStyle = .large
+        configuration.title = "Reset"
+        let button = UIButton(configuration: configuration, primaryAction: UIAction { [unowned self] _ in
+            performAnimations()
+        })
+        button.isEnabled = false
+        return button
     }
 }
 

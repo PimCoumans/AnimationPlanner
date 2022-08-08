@@ -17,6 +17,8 @@ extension AnimationContainer where Contained: Animation {
     public var changes: () -> Void { animation.changes }
     /// Forwarded ``Animation`` property for ``Animation/options``
     public var options: UIView.AnimationOptions? { animation.options }
+    /// Forwarded ``Animation`` property for ``Animation/allowsUserInteraction``
+    public var allowsUserInteraction: Bool { animation.allowsUserInteraction }
     /// Forwarded ``Animation`` property for ``Animation/timingFunction``
     public var timingFunction: CAMediaTimingFunction? { animation.timingFunction }
 }

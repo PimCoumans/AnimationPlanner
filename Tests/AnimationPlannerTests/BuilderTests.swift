@@ -18,12 +18,16 @@ class BuilderTests: AnimationPlannerTests {
         let delay = spring.delayed(3)
         XCTAssertEqual(delay.duration, spring.duration + delay.delay)
         
-        let options: UIView.AnimationOptions = .allowAnimatedContent
-        let editedDelay = delay.options(options)
+        // By default this should be false
+        XCTAssertEqual(delay.allowsUserInteraction, false)
+        
+        let editedDelay = delay.allowUserInteraction()
         let containedAnimation = editedDelay.animation.animation
         let springed = editedDelay.spring(damping: 4)
         
-        XCTAssertEqual(editedDelay.options, containedAnimation.options)
+        XCTAssertEqual(editedDelay.allowsUserInteraction, true)
+        
+        XCTAssertEqual(editedDelay.allowsUserInteraction, containedAnimation.allowsUserInteraction)
         XCTAssertEqual(editedDelay.dampingRatio, spring.dampingRatio)
         XCTAssertNotEqual(springed.dampingRatio, spring.dampingRatio)
         XCTAssertEqual(springed.delay, delay.delay)
@@ -156,25 +160,23 @@ class BuilderTests: AnimationPlannerTests {
                 Animate(duration: duration) {
                     self.performRandomAnimation()
                 }
-                .options(.allowAnimatedContent)
+                .allowUserInteraction()
             }
             
         }
     }
     
     func testBuilderContainerModifiers() {
-        let totalDuration: TimeInterval = 1
-        let numberOfSteps: TimeInterval = 1
-        let duration = totalDuration / numberOfSteps
+        let duration: TimeInterval = 1
         
-        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+        runAnimationBuilderTest(duration: duration) { _, _ in
             
             AnimationPlanner.plan {
                 Animate(duration: duration) {
                     self.performRandomAnimation()
                 }
                 .spring(damping: 0.82)
-                .options(.allowUserInteraction)
+                .allowUserInteraction()
             }
             
         }

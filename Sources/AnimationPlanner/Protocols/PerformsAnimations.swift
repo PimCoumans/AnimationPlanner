@@ -8,7 +8,11 @@ public protocol PerformsAnimations {
     ///   - delay: Any delay accumulated (from preceding ``Wait`` structs) leading up to the animation.
     ///   Waits for this amount of seconds before actually performing the animation
     ///   - completion: Optional closure called when animation completes
-    func animate(delay leadingDelay: TimeInterval, completion: ((_ finished: Bool) -> Void)?)
+    @discardableResult
+    func animate(delay leadingDelay: TimeInterval, completion: ((_ finished: Bool) -> Void)?) -> PerformsAnimations
+    
+    /// Cancels any currently running animations
+    func stop()
     
     /// Queries the animation and possible contained animations to find the correct timing values to use to create an actual animation
     /// - Parameter leadingDelay: Delay to add before performing animation
