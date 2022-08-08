@@ -50,7 +50,7 @@ class StoppingTests: AnimationPlannerTests {
         let animations = randomDelayedAnimations(amount: 4)
         let totalDuration: TimeInterval = animations.reduce(0, { $0 + $1.totalDuration })
 
-        var runningSequence: RunningSequence? = nil
+        var runningSequence: RunningSequence?
         runningSequence = AnimationPlanner.plan {
             animations.mapAnimations { animation in
                 Wait(animation.delay)
@@ -59,7 +59,7 @@ class StoppingTests: AnimationPlannerTests {
                 }
             }
             
-            Extra { [weak runningSequence] in
+            Extra {
                 // Cancelling animation after planend animation
                 runningSequence?.stopAnimations()
             }
