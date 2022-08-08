@@ -22,7 +22,7 @@ class ViewController: UIViewController {
     // Sequence currently performing animations
     var runningSequence: RunningSequence?
     
-    let testStopping: Bool = false // Set to true to display buttons to stop and reset animations
+    let testStopping: Bool = true // Set to true to display buttons to stop and reset animations
     
     let performComplexAnimation: Bool = false // Set to true to run a more complex animation
     
@@ -67,8 +67,11 @@ extension ViewController {
     func runSimpleBuilderAnimation() {
         let view = setInitialSubviewState()
         runningSequence = AnimationPlanner.plan {
-            Wait(0.35) // A delay waits for the given amount of seconds to start the next step
-            Animate(duration: 0.32, timingFunction: .quintOut) {
+//            Wait(0.35) // A delay waits for the given amount of seconds to start the next step
+            Extra {
+                print("Doing absolutely nothing....")
+            }
+            Animate(duration: 2, timingFunction: .quintOut) {
                 view.alpha = 1
                 view.center.y = self.view.bounds.midY
             }

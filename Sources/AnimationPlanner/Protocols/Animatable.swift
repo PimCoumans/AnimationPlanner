@@ -12,8 +12,17 @@ public protocol Animation: Animatable, PerformsAnimations {
     var changes: () -> Void { get }
     /// Animation options to use for UIView animation
     var options: UIView.AnimationOptions? { get }
+    /// Whether user interaction is enabled on your parent views while this animation is running
+    var allowsUserInteraction: Bool { get }
     /// Timing function to apply to animation. Leads to the `UIView` animation being performed in a `CATransaction` wrapped animation
     var timingFunction: CAMediaTimingFunction? { get }
+}
+
+internal extension Animation {
+    /// Temporary method to use either ``allowsUserInteraction`` or get from deprecated animation options
+    var isUserInteractionEnabled: Bool {
+        allowsUserInteraction || options?.contains(.allowUserInteraction) == true
+    }
 }
 
 /// Animation that can be performed in a sequence, meaning each subsequent animation starts right after the previous completes

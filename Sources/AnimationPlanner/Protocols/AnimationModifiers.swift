@@ -9,9 +9,16 @@ import UIKit
 public protocol AnimationModifiers: Animation {
     /// Set the `UIView.AnimationOptions` for the animation. Will append new options to any existing options.
     ///
+    /// Deprecated as most options (like transitions and repeating) aren‘t supported for AnimationPlanner‘s use case and
+    /// using specific modifier functions for animation options reads better.
+    ///
     /// - Parameter options: OptionSet of UIView AnimationOptions
     /// - Note: Using `.repeats` will break expected behavior when used in a sequence
+    @available(*, deprecated, message: "Use the modifier functions as `allowUserinteraction` to modify your animation")
     func options(_ options: UIView.AnimationOptions) -> Self
+    
+    /// Enables interaction on your parent views while this animation is running
+    func allowUserInteraction() -> Self
     
     /// Sets a `CAMediaTimingFunction` for the animation. Overwrites possible previously set functions.
     ///
@@ -35,6 +42,9 @@ extension Animate: AnimationModifiers {
     public func options(_ options: UIView.AnimationOptions) -> Self {
         // Update options by creating a union of existing options
         mutate { $0.options = $0.options?.union(options) ?? options }
+    }
+    public func allowUserInteraction() -> Animate {
+        mutate { $0.allowsUserInteraction = true }
     }
     public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
         mutate { $0.timingFunction = function}
@@ -115,32 +125,46 @@ extension Mutable {
 }
 
 extension Animate: Mutable { }
+extension Extra: Mutable { }
 
 extension AnimateSpring: Mutable { }
 extension AnimateSpring: AnimationModifiers where Contained: AnimationModifiers {
-    func modifyAnimation(_ handler: (AnimationModifiers) -> Contained) -> Self {
+    func modifyAnimation(_ handler: (Contained) -> Contained) -> Self {
         mutate { $0.animation = handler(animation) }
     }
+    
+    @available(*, deprecated, message: "Use the modifier functions as `allowUserinteraction` to modify your animation")
     public func options(_ options: UIView.AnimationOptions) -> Self {
-        mutate { $0.animation = animation.options(options) }
+        modifyAnimation { $0.options(options) }
+    }
+    public func allowUserInteraction() -> AnimateSpring<Springed> {
+        modifyAnimation { $0.allowUserInteraction() }
     }
     public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
-        mutate { $0.animation = animation.timingFunction(function) }
+        modifyAnimation { $0.timingFunction(function) }
     }
     public func changes(_ changes: @escaping () -> Void) -> Self {
-        mutate { $0.animation = animation.changes(changes) }
+        modifyAnimation { $0.changes(changes) }
     }
 }
 
 extension AnimateDelayed: Mutable { }
 extension AnimateDelayed: AnimationModifiers where Contained: Animation & AnimationModifiers {
+    func modifyAnimation(_ handler: (Contained) -> Contained) -> Self {
+        mutate { $0.animation = handler(animation) }
+    }
+    
+    @available(*, deprecated, message: "Use the modifier functions as `allowUserinteraction` to modify your animation")
     public func options(_ options: UIView.AnimationOptions) -> Self {
-        mutate { $0.animation = animation.options(options) }
+        modifyAnimation { $0.options(options) }
+    }
+    public func allowUserInteraction() -> AnimateDelayed<Delayed> {
+        modifyAnimation { $0.allowUserInteraction() }
     }
     public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
-        mutate { $0.animation = animation.timingFunction(function) }
+        modifyAnimation { $0.timingFunction(function) }
     }
     public func changes(_ changes: @escaping () -> Void) -> Self {
-        mutate { $0.animation = animation.changes(changes) }
+        modifyAnimation { $0.changes(changes) }
     }
 }

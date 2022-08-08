@@ -8,6 +8,9 @@ public struct AnimateSpring<Springed: Animation>: SpringAnimatable, AnimationCon
     public let dampingRatio: CGFloat
     public let initialVelocity: CGFloat
     
+    /// Animator used for actually performing the animation
+    private var propertyAnimator: UIViewPropertyAnimator?
+    
     internal init(dampingRatio: CGFloat, initialVelocity: CGFloat, animation: Springed) {
         self.animation = animation
         self.dampingRatio = dampingRatio
@@ -41,16 +44,22 @@ extension AnimateSpring: Animation where Springed: Animation { }
 extension AnimateSpring: DelayedAnimatable where Springed: DelayedAnimatable { }
 
 extension AnimateSpring: PerformsAnimations {
-    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
+    public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) -> PerformsAnimations {
         let timing = timingParameters(leadingDelay: leadingDelay)
-        UIView.animate(
-            withDuration: timing.duration,
-            delay: timing.delay,
-            usingSpringWithDamping: dampingRatio,
-            initialSpringVelocity: initialVelocity,
-            options: animation.options ?? [],
-            animations: animation.changes,
-            completion: completion
-        )
+        let spring = UISpringTimingParameters(dampingRatio: dampingRatio, initialVelocity: CGVector(dx: initialVelocity, dy: initialVelocity))
+        let animator = UIViewPropertyAnimator(duration: timing.duration, timingParameters: spring)
+        animator.isUserInteractionEnabled = isUserInteractionEnabled
+        animator.addAnimations(changes)
+        animator.addCompletion { position in
+            completion?(position == .end)
+        }
+        animator.startAnimation(afterDelay: timing.delay)
+        var mutableSelf = self
+        mutableSelf.propertyAnimator = animator
+        return mutableSelf
+    }
+    
+    public func stop() {
+        propertyAnimator?.stopAnimation(true)
     }
 }

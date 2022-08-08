@@ -27,21 +27,29 @@ public struct Group: SequenceAnimatable {
 
 extension Group: PerformsAnimations {
     
-    public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) {
+    public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) -> PerformsAnimations {
         var sortedAnimations = animations
             .sorted { $0.duration < $1.duration }
             .compactMap { $0 as? PerformsAnimations }
         
         guard !sortedAnimations.isEmpty else {
             completion?(true)
-            return
+            return self
         }
         
         let longestAnimation = sortedAnimations.removeLast()
-        
-        sortedAnimations.forEach { animation in
-            animation.animate(delay: delay, completion: nil)
+        var animations = sortedAnimations.compactMap { animation in
+            animation.animate(delay: delay, completion: nil) as? GroupAnimatable
         }
-        longestAnimation.animate(delay: delay, completion: completion)
+        if let animation = longestAnimation.animate(delay: delay, completion: completion) as? GroupAnimatable {
+            animations.append(animation)
+        }
+        return Group(animations: animations)
+    }
+    
+    public func stop() {
+        animations
+            .compactMap { $0 as? PerformsAnimations }
+            .forEach { $0.stop() }
     }
 }

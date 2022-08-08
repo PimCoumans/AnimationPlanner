@@ -28,11 +28,16 @@ public struct Sequence: DelayedAnimatable {
 extension Sequence: DelayModifier { }
 
 extension Sequence: PerformsAnimations {
-    public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) {
+    public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) -> PerformsAnimations {
         runningSequence
             .onComplete { finished in
                 completion?(finished)
             }
             .animate(delay: delay)
+		return self
     }
+	
+	public func stop() {
+		runningSequence.stopAnimations()
+	}
 }
