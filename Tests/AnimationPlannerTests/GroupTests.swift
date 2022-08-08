@@ -175,4 +175,33 @@ class GroupTests: AnimationPlannerTests {
         }
     }
     
+    /// Animates multiple sequences simulatiously, each with an increasinging delay added through a delay modifier
+    func testGroupsWithDelayedSequences() {
+        let numberOfGroups: Int = 4
+        let animations = randomDurations(amount: 2)
+        let delayMultiplier: Double = 0.2
+        
+        let totalDelay: TimeInterval = Double(numberOfGroups - 1) * delayMultiplier
+        let totalDuration: TimeInterval = totalDelay + animations.reduce(0, { $0 + $1 })
+        
+        let views = (0..<numberOfGroups).map { _ in
+            newView()
+        }
+        
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+            AnimationPlanner.group {
+                Loop(for: numberOfGroups) { index in
+                    let delay = Double(index) * delayMultiplier
+                    Sequence {
+                        animations.mapAnimations { duration in
+                            Animate(duration: duration) {
+                                self.performRandomAnimation(on: views[index])
+                            }
+                        }
+                    }.delayed(delay)
+                }
+            }
+        }
+    }
+    
 }
