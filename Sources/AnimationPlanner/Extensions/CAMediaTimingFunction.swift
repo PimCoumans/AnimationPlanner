@@ -1,5 +1,5 @@
 import QuartzCore
-// from @warpling‘s https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c
+// from @warpling’s https://gist.github.com/warpling/21bef9059e47f5aad2f2955d48fd7c0c
 public extension CAMediaTimingFunction {
 
     static let linear     = CAMediaTimingFunction(name: .linear)

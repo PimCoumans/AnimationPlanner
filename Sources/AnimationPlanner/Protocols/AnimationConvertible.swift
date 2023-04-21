@@ -3,7 +3,7 @@ public protocol SequenceConvertible {
     func asSequence() -> [SequenceAnimatable]
 }
 
-/// Provides a way to group toghether animations conforming to ``GroupAnimatable``
+/// Provides a way to group together animations conforming to ``GroupAnimatable``
 public protocol GroupConvertible {
     func asGroup() -> [GroupAnimatable]
 }

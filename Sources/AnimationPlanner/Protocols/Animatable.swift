@@ -44,7 +44,7 @@ public protocol SpringAnimatable: Animatable {
     /// “To smoothly decelerate the animation without oscillation, use a value of 1. Employ a damping ratio closer to zero to increase oscillation.”
     var dampingRatio: CGFloat { get }
     
-    /// Initial velocity for spring-based animation. `UIView`‘s documentation clearly explains it with:
+    /// Initial velocity for spring-based animation. `UIView`’s documentation clearly explains it with:
     /// “A value of 1 corresponds to the total animation distance traversed in one second. For example, if the total animation distance is 200 points and you want the start of the animation to match a view velocity of 100 pt/s, use a value of 0.5.”
     var initialVelocity: CGFloat { get }
 }
