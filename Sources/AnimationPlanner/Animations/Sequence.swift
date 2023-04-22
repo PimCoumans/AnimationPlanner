@@ -20,7 +20,7 @@ public struct Sequence: DelayedAnimatable {
     
     /// Creates a new `Sequence` providing a way to perform a sequence animation from within a group. Each animation is perform in in order, meaning each subsequent animation starts right after the previous completes.
     /// - Parameter animations: Add each animation from within this closure. Animations added to a sequence should conform to ``SequenceAnimatable``.
-    public init(@AnimationBuilder animations builder: () -> [SequenceAnimatable]) {
+    public init(@SequenceBuilder animations builder: () -> [SequenceAnimatable]) {
         self.init(delay: 0, animations: builder())
     }
 }

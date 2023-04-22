@@ -10,17 +10,16 @@ class GroupTests: AnimationPlannerTests {
         let longestDuration = durations.max()!
         
         runAnimationBuilderTest(duration: longestDuration) { _, _ in
-            
+
             AnimationPlanner.plan {
                 Group {
-                    durations.mapAnimations { duration in
+                    durations.mapGroup { duration in
                         Animate(duration: duration) {
                             self.performRandomAnimation()
                         }
                     }
                 }
             }
-            
         }
     }
     
@@ -32,9 +31,9 @@ class GroupTests: AnimationPlannerTests {
         let longestDuration = durations.max()!
         
         runAnimationBuilderTest(duration: longestDuration) { _, _ in
-            
+
             AnimationPlanner.group {
-                durations.mapAnimations { duration in
+                durations.mapGroup { duration in
                     Animate(duration: duration) {
                         self.performRandomAnimation()
                     }
@@ -121,7 +120,7 @@ class GroupTests: AnimationPlannerTests {
             
             AnimationPlanner.plan {
                 Group {
-                    animations.mapAnimations { animation in
+                    animations.mapGroup { animation in
                         AnimateDelayed(delay: animation.delay, duration: animation.duration) {
                             self.performRandomAnimation()
                         }

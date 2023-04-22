@@ -101,7 +101,7 @@ class SequenceTests: AnimationPlannerTests {
         runAnimationBuilderTest(duration: totalDuration, precision: precision) { _, _ in
             
             AnimationPlanner.plan {
-                animations.mapAnimations { animation in
+                animations.mapSequence { animation in
                     Animate(duration: animation.duration) {
                         self.performRandomAnimation()
                     }

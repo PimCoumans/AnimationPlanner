@@ -20,14 +20,14 @@ public protocol Animation: Animatable, PerformsAnimations {
 public protocol SequenceAnimatable: Animatable, SequenceConvertible { }
 
 extension SequenceAnimatable {
-    public func asSequence() -> [SequenceAnimatable] { [self] }
+    public func animations() -> [SequenceAnimatable] { [self] }
 }
 
 /// Animation that can be used in a ``Group`` and be performed simultaneously, meaning all animations run at the same time.
 public protocol GroupAnimatable: Animatable, GroupConvertible { }
 
 extension GroupAnimatable {
-    public func asGroup() -> [GroupAnimatable] { [self] }
+    public func animations() -> [GroupAnimatable] { [self] }
 }
 
 /// Adds delaying functionality to an animation. Delayed animations can only be added in a ``Group`` context, where each animation is performed simultaneously. Adding a delay to a sequence animation can be done by preceding it with a ``Wait`` struct.
