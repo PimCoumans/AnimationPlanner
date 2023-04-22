@@ -1,6 +1,6 @@
 import UIKit
 
-/// Perfoms the provided handler in between your actual animations.
+/// Performs the provided handler in between your actual animations.
 /// Typically used for setting up state before an animation or creating side-effects like haptic feedback.
 public struct Extra: SequenceAnimatable, GroupAnimatable {
     public let duration: TimeInterval = 0
