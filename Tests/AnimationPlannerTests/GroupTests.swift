@@ -143,5 +143,41 @@ class GroupTests: AnimationPlannerTests {
             
         }
     }
+
+    func testGroupCountedLoop() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+
+            AnimationPlanner.group {
+                for index in 0..<numberOfLoops {
+                    Animate(duration: animations[index].duration) {
+                        self.performRandomAnimation()
+                    }.delayed(animations[index].delay)
+                }
+            }
+
+        }
+    }
+
+    func testGroupForLoop() {
+        let numberOfLoops: Int = 4
+        let animations = randomDelayedAnimations(amount: numberOfLoops)
+        let totalDuration: TimeInterval = animations.max { $0.totalDuration < $1.totalDuration }?.totalDuration ?? 0
+
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+
+            AnimationPlanner.group {
+                for animation in animations {
+                    Animate(duration: animation.duration) {
+                        self.performRandomAnimation()
+                    }.delayed(animation.delay)
+                }
+            }
+
+        }
+    }
     
 }
