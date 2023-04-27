@@ -1,6 +1,6 @@
 # Creating a basic animation sequence
 
-An example of how a typical animation sequence would look, how it‘s created and more information on the sample app available in the repository.
+An example of how a typical animation sequence would look, how it’s created and more information on the sample app available in the repository.
 
 ## Overview
 

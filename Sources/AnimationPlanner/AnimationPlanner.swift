@@ -27,7 +27,7 @@ public struct AnimationPlanner {
     /// - Returns: Instance of ``RunningSequence`` to keep track of and stop animations
     @discardableResult
     public static func plan(
-        @AnimationBuilder animations builder: () -> [SequenceAnimatable]
+        @SequenceBuilder animations builder: () -> [SequenceAnimatable]
     ) -> RunningSequence {
         RunningSequence(animations: builder())
             .animate()
@@ -51,7 +51,7 @@ public struct AnimationPlanner {
     /// - Returns: Instance of ``RunningSequence`` to keep track of and stop animations
     @discardableResult
     public static func group(
-        @AnimationBuilder animations builder: () -> [GroupAnimatable]
+        @GroupBuilder animations builder: () -> [GroupAnimatable]
     ) -> RunningSequence {
         plan {
             Group(animations: builder)

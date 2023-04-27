@@ -20,14 +20,14 @@ public protocol Animation: Animatable, PerformsAnimations {
 public protocol SequenceAnimatable: Animatable, SequenceConvertible { }
 
 extension SequenceAnimatable {
-    public func asSequence() -> [SequenceAnimatable] { [self] }
+    public func animations() -> [SequenceAnimatable] { [self] }
 }
 
 /// Animation that can be used in a ``Group`` and be performed simultaneously, meaning all animations run at the same time.
 public protocol GroupAnimatable: Animatable, GroupConvertible { }
 
 extension GroupAnimatable {
-    public func asGroup() -> [GroupAnimatable] { [self] }
+    public func animations() -> [GroupAnimatable] { [self] }
 }
 
 /// Adds delaying functionality to an animation. Delayed animations can only be added in a ``Group`` context, where each animation is performed simultaneously. Adding a delay to a sequence animation can be done by preceding it with a ``Wait`` struct.
@@ -44,7 +44,7 @@ public protocol SpringAnimatable: Animatable {
     /// “To smoothly decelerate the animation without oscillation, use a value of 1. Employ a damping ratio closer to zero to increase oscillation.”
     var dampingRatio: CGFloat { get }
     
-    /// Initial velocity for spring-based animation. `UIView`‘s documentation clearly explains it with:
+    /// Initial velocity for spring-based animation. `UIView`’s documentation clearly explains it with:
     /// “A value of 1 corresponds to the total animation distance traversed in one second. For example, if the total animation distance is 200 points and you want the start of the animation to match a view velocity of 100 pt/s, use a value of 0.5.”
     var initialVelocity: CGFloat { get }
 }

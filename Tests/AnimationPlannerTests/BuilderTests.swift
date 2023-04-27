@@ -258,7 +258,7 @@ class BuilderTests: AnimationPlannerTests {
             AnimationPlanner.plan {
                 Wait(delay)
                 Group {
-                    zip(views, animations).mapAnimations { view, animation in
+                    zip(views, animations).mapGroup { view, animation in
                         Sequence {
                             Wait(animation.delay)
                             Animate(duration: animation.duration) {

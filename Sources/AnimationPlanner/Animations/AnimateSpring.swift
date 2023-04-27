@@ -34,7 +34,7 @@ extension AnimateSpring where Springed == Animate {
 }
 
 extension AnimateSpring: SequenceAnimatable, SequenceConvertible where Contained: SequenceAnimatable {
-    public func asSequence() -> [SequenceAnimatable] { [self] }
+    public func animations() -> [SequenceAnimatable] { [self] }
 }
 
 extension AnimateSpring: Animation where Springed: Animation { }
