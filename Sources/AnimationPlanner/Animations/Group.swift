@@ -7,10 +7,10 @@ public struct Group: SequenceAnimatable {
     public var duration: TimeInterval {
         return longestAnimation?.duration ?? 0
     }
-    
+
     /// All animations added to the group
     public let animations: [GroupAnimatable]
-    
+
     let longestAnimation: GroupAnimatable?
     
     internal init(animations: [GroupAnimatable]) {

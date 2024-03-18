@@ -99,6 +99,8 @@ extension AnimateSpring: DelayModifier { }
 
 extension Extra: DelayModifier { }
 
+extension Sequence: DelayModifier { }
+
 /* -- Internal animation modifying convenience methods -- */
 
 /// Convenience protocol to let structs to change properties on themself without using `mutating`

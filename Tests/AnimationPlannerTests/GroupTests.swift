@@ -1,5 +1,6 @@
 import AnimationPlanner
 import UIKit
+import XCTest
 
 class GroupTests: AnimationPlannerTests {
     
@@ -179,5 +180,4 @@ class GroupTests: AnimationPlannerTests {
 
         }
     }
-    
 }
