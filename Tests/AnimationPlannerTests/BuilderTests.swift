@@ -14,6 +14,10 @@ class BuilderTests: AnimationPlannerTests {
         let simplerSpring = AnimateSpring(duration: 1, dampingRatio: 2)
         XCTAssertEqual(spring.dampingRatio, simplerSpring.dampingRatio)
         XCTAssertEqual(spring.duration, simplerSpring.duration)
+        let springOptions = spring.options ?? []
+        XCTAssertFalse(springOptions.contains(.allowUserInteraction))
+        let editedOptions = spring.allowUserInteraction().options ?? []
+        XCTAssertTrue(editedOptions.contains(.allowUserInteraction))
         
         let delay = spring.delayed(3)
         XCTAssertEqual(delay.duration, spring.duration + delay.delay)

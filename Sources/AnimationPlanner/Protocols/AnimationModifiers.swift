@@ -13,6 +13,9 @@ public protocol AnimationModifiers: Animation {
     /// - Note: Using `.repeats` will break expected behavior when used in a sequence
     func options(_ options: UIView.AnimationOptions) -> Self
     
+    /// Enables interaction on your parent views while this animation is running
+    func allowUserInteraction() -> Self
+    
     /// Sets a `CAMediaTimingFunction` for the animation. Overwrites possible previously set functions.
     ///
     /// Overrides any animation curves previously set with ``timingFunction(_:)``
@@ -35,6 +38,9 @@ extension Animate: AnimationModifiers {
     public func options(_ options: UIView.AnimationOptions) -> Self {
         // Update options by creating a union of existing options
         mutate { $0.options = $0.options?.union(options) ?? options }
+    }
+    public func allowUserInteraction() -> Animate {
+        mutate { $0.options = ($0.options ?? []).union(.allowUserInteraction) }
     }
     public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
         mutate { $0.timingFunction = function}
@@ -127,6 +133,9 @@ extension AnimateSpring: AnimationModifiers where Contained: AnimationModifiers 
     public func options(_ options: UIView.AnimationOptions) -> Self {
         mutate { $0.animation = animation.options(options) }
     }
+    public func allowUserInteraction() -> AnimateSpring<Springed> {
+        mutate { $0.animation = animation.allowUserInteraction() }
+    }
     public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
         mutate { $0.animation = animation.timingFunction(function) }
     }
@@ -139,6 +148,9 @@ extension AnimateDelayed: Mutable { }
 extension AnimateDelayed: AnimationModifiers where Contained: Animation & AnimationModifiers {
     public func options(_ options: UIView.AnimationOptions) -> Self {
         mutate { $0.animation = animation.options(options) }
+    }
+    public func allowUserInteraction() -> AnimateDelayed<Delayed> {
+        mutate { $0.animation = animation.allowUserInteraction() }
     }
     public func timingFunction(_ function: CAMediaTimingFunction) -> Self {
         mutate { $0.animation = animation.timingFunction(function) }
