@@ -3,6 +3,7 @@ import UIKit
 /// Performs the provided handler in between your actual animations.
 /// Typically used for setting up state before an animation or creating side-effects like haptic feedback.
 public struct Extra: SequenceAnimatable, GroupAnimatable {
+    private let id = UUID()
     public let duration: TimeInterval = 0
     
     public var perform: () -> Void
@@ -11,12 +12,21 @@ public struct Extra: SequenceAnimatable, GroupAnimatable {
     }
 }
 
+extension Extra {
+    private static var allowedAnimations: Set<UUID> = []
+}
+
 extension Extra: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         let timing = timingParameters(leadingDelay: leadingDelay)
-        
+        Self.allowedAnimations.insert(id)
         let animation: () -> Void = {
+            guard Self.allowedAnimations.contains(id) else {
+                completion?(false)
+                return
+            }
             self.perform()
+            Self.allowedAnimations.remove(id)
             completion?(true)
         }
         guard timing.delay > 0 else {
@@ -29,8 +39,6 @@ extension Extra: PerformsAnimations {
     }
     
     public func stop() {
-        // No-op:
-        // 1. Either fires immediately so can’t be stopped
-        // 2. Is invoked with a delay and queue can’t be stopped
+        Self.allowedAnimations.remove(id)
     }
 }
