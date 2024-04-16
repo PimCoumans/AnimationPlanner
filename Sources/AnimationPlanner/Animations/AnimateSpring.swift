@@ -53,4 +53,8 @@ extension AnimateSpring: PerformsAnimations {
             completion: completion
         )
     }
+    
+    public func stop() {
+        animation.stop()
+    }
 }

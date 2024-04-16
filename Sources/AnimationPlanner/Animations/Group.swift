@@ -44,4 +44,10 @@ extension Group: PerformsAnimations {
         }
         longestAnimation.animate(delay: delay, completion: completion)
     }
+    
+    public func stop() {
+        for animation in animations.compactMap({ $0 as? PerformsAnimations }) {
+            animation.stop()
+        }
+    }
 }

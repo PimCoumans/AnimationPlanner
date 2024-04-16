@@ -56,4 +56,9 @@ extension Animate: PerformsAnimations {
             createAnimations(completion)
         }
     }
+    
+    public func stop() {
+        /// Just run animation again but ridiculously short and from current state
+        UIView.animate(withDuration: 0.001, delay: 0, options: .beginFromCurrentState, animations: changes)
+    }
 }

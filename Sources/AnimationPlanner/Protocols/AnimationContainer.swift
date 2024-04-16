@@ -1,6 +1,6 @@
 import UIKit
 
-/// Adds custom behaviour on top of any contained animation. Forwards all required ``Animation`` properties
+/// Adds custom behavior on top of any contained animation. Forwards all required ``Animation`` properties
 /// to the contained animation when necessary.
 public protocol AnimationContainer {
     /// Animation type contained by ``AnimationContainer``

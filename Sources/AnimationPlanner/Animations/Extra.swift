@@ -27,4 +27,10 @@ extension Extra: PerformsAnimations {
             animation()
         }
     }
+    
+    public func stop() {
+        // No-op:
+        // 1. Either fires immediately so can’t be stopped
+        // 2. Is invoked with a delay and queue can’t be stopped
+    }
 }
