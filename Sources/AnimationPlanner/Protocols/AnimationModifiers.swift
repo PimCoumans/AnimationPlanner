@@ -117,6 +117,7 @@ extension Mutable {
 }
 
 extension Animate: Mutable { }
+extension Extra: Mutable { }
 
 extension AnimateSpring: Mutable { }
 extension AnimateSpring: AnimationModifiers where Contained: AnimationModifiers {

@@ -86,9 +86,9 @@ class StoppingTests: AnimationPlannerTests {
     }
     
     func testGroupStopping() {
-        // Runs a number of sequences in parallel with each a specific number of animations.
+        // Runs a number of sequences in parallel with each a specific number of animations
         // Then halfway through the expected duration of the animations, the animations are
-        // stopped. Each Extra that is executed after animations that should be stopped triggers
+        // stopped. Each animation that is executed after animations should be stopped triggers
         // a failure.
         
         let numberOfSequences = 4
@@ -110,10 +110,8 @@ class StoppingTests: AnimationPlannerTests {
                     for animation in animations {
                         Wait(animation.delay)
                         Animate(duration: animation.duration) {
-                            self.performRandomAnimation(on: view)
-                        }
-                        Extra {
                             XCTAssert(CACurrentMediaTime() < (pauseOffset + durationPrecision))
+                            self.performRandomAnimation(on: view)
                         }
                     }
                 }

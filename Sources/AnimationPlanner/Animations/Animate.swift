@@ -9,6 +9,9 @@ public struct Animate: Animation, SequenceAnimatable, GroupAnimatable {
     public internal(set) var options: UIView.AnimationOptions?
     public internal(set) var timingFunction: CAMediaTimingFunction?
     
+    /// Class that  holds stopped state
+    private let stopper: Stopper
+    
     /// Creates a new animation, animating the properties updated in the ``changes`` closure
     ///
     /// Only the `duration` parameter is required, all other properties can be added or modified using ``AnimationModifiers``.
@@ -25,10 +28,19 @@ public struct Animate: Animation, SequenceAnimatable, GroupAnimatable {
         timingFunction: CAMediaTimingFunction? = nil,
         changes: @escaping () -> Void = {}
     ) {
+        let stopper = Stopper()
         self.duration = duration
         self.timingFunction = timingFunction
-        self.changes = changes
+        self.changes = { [weak stopper] in
+            guard stopper?.isStopped == false else { return }
+            changes()
+        }
+        self.stopper = stopper
     }
+}
+
+internal class Stopper {
+    var isStopped: Bool = false
 }
 
 extension Animate: PerformsAnimations {
@@ -58,7 +70,6 @@ extension Animate: PerformsAnimations {
     }
     
     public func stop() {
-        /// Just run animation again but ridiculously short and from current state
-        UIView.animate(withDuration: 0.001, delay: 0, options: .beginFromCurrentState, animations: changes)
+        stopper.isStopped = true
     }
 }
