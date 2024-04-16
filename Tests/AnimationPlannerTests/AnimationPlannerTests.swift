@@ -79,7 +79,7 @@ class AnimationPlannerTests: XCTestCase {
         
         animations(completion, duration, precision)
         
-        waitForExpectations(timeout: duration + precision * 2)
+        wait(for: [finishedExpectation], timeout: duration + precision * 2)
     }
 }
 

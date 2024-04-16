@@ -26,21 +26,28 @@ class StoppingTests: AnimationPlannerTests {
     func testExtraStopping() {
         let duration = randomDuration
         let runningSequence = AnimationPlanner.plan {
-            Wait(duration)
+            Wait(duration / 2)
             Extra {
                 XCTFail("Extra should never be called")
             }
+            Wait(duration / 2)
         }
         
-        let stopDelay = duration - durationPrecision
+        let stopDelay = duration / 2 - durationPrecision
         
         DispatchQueue.main.asyncAfter(deadline: .now() + stopDelay) {
             runningSequence.stopAnimations()
         }
         
-        runAnimationBuilderTest(duration: duration, expectFinished: false) { usedDuration, usedPrecision in
+        let expectation = expectation(description: "Sequence fully executed")
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            expectation.fulfill()
+        }
+        
+        runAnimationBuilderTest(duration: stopDelay, expectFinished: false) { usedDuration, usedPrecision in
             runningSequence
         }
+        wait(for: [expectation])
     }
     
     func testBasicStopping() {
@@ -79,9 +86,9 @@ class StoppingTests: AnimationPlannerTests {
     }
     
     func testGroupStopping() {
-        // Runs a number of sequences in parallel with each a specific number of animations
+        // Runs a number of sequences in parallel with each a specific number of animations.
         // Then halfway through the expected duration of the animations, the animations are
-        // stopped. Each animation that is executed after animations should be stopped trigger
+        // stopped. Each Extra that is executed after animations that should be stopped triggers
         // a failure.
         
         let numberOfSequences = 4
@@ -103,8 +110,10 @@ class StoppingTests: AnimationPlannerTests {
                     for animation in animations {
                         Wait(animation.delay)
                         Animate(duration: animation.duration) {
-                            XCTAssert(CACurrentMediaTime() < (pauseOffset + durationPrecision))
                             self.performRandomAnimation(on: view)
+                        }
+                        Extra {
+                            XCTAssert(CACurrentMediaTime() < (pauseOffset + durationPrecision))
                         }
                     }
                 }
