@@ -9,7 +9,7 @@ class AnimationPlannerTests: XCTestCase {
     
     override func setUp() {
         window = UIWindow(frame: UIScreen.main.bounds)
-        view = UIView(frame: window.bounds.insetBy(dx: 100, dy: 100))
+        view = newView()
         window.addSubview(view)
     }
     
@@ -20,10 +20,11 @@ class AnimationPlannerTests: XCTestCase {
         view = nil
     }
     
-    /// Runs your animation logic, waits for completion and fails when expected duration varies from provided duration (allowing for precision). Adds the completion handler to the returned `RunningSequence` object when only using `AnimationPlanner.plan` or `.group`. Othewise use `runAnimationTest`
+    /// Runs your animation logic, waits for completion and fails when expected duration varies from provided duration (allowing for precision). Adds a default completion handler to the returned `RunningSequence`.
     /// - Parameters:
-    ///   - duration: Duration of animimation, or total duration of all animation steps, defaults to random duration
+    ///   - duration: Duration of animation, or total duration of all animation steps, defaults to random duration
     ///   - precision: Precision to use when comparing expected duration and time to complete animations
+    ///   - expectFinished: Whether the animation are expected to be properly finished
     ///   - animations: Closure where animations should be performed with completion closure to call when completed
     ///   - completion: Closure to call when animations have completed
     ///   - usedDuration: Duration for animation, use this argument when no specific duration is provided
@@ -31,20 +32,31 @@ class AnimationPlannerTests: XCTestCase {
     func runAnimationBuilderTest(
         duration: TimeInterval = randomDuration,
         precision: TimeInterval = durationPrecision,
+        expectFinished: Bool = true,
         _ animations: @escaping (
             _ usedDuration: TimeInterval,
             _ usedPrecision: TimeInterval) -> RunningSequence?
     ) {
-        runAnimationTest(duration: duration, precision: precision) { completion, usedDuration, usedPrecision in
+        runAnimationTest(duration: duration, precision: precision, expectFinished: expectFinished) { completion, usedDuration, usedPrecision in
             let runningSequence = animations(duration, precision)
             XCTAssertNotNil(runningSequence)
             runningSequence?.onComplete(completion)
         }
     }
     
+    /// Runs your animation logic, waits for completion and fails when expected duration varies from provided duration (allowing for precision). Add the completion handler to the returned `RunningSequence` object when only using `AnimationPlanner.plan` or `.group`. Otherwise use `runAnimationTest`
+    /// - Parameters:
+    ///   - duration: Duration of animation, or total duration of all animation steps, defaults to random duration
+    ///   - precision: Precision to use when comparing expected duration and time to complete animations
+    ///   - expectFinished: Whether the animation are expected to be properly finished
+    ///   - animations: Closure where animations should be performed with completion closure to call when completed
+    ///   - completion: Closure to call when animations have completed
+    ///   - usedDuration: Duration for animation, use this argument when no specific duration is provided
+    ///   - usedPrecision: Precision for duration check, use this argument when no specific precision is provided
     func runAnimationTest(
         duration: TimeInterval = randomDuration,
         precision: TimeInterval = durationPrecision,
+        expectFinished: Bool = true,
         _ animations: @escaping (
             _ completion: @escaping (Bool) -> Void,
             _ usedDuration: TimeInterval,
@@ -54,7 +66,13 @@ class AnimationPlannerTests: XCTestCase {
         let startTime = CACurrentMediaTime()
         
         let completion: (Bool) -> Void = { finished in
-            XCTAssert(finished, "Animation not finished")
+            if finished != expectFinished {
+                if expectFinished {
+                    XCTFail("Animations should complete finished")
+                } else {
+                    XCTFail("Animations should complete interrupted")
+                }
+            }
             assertDifference(startTime: startTime, duration: duration, precision: precision)
             finishedExpectation.fulfill()
         }
@@ -110,6 +128,7 @@ extension AnimationPlannerTests {
         let duration: TimeInterval
         var totalDuration: TimeInterval { delay + duration }
     }
+    
     func randomDelayedAnimations(amount: Int) -> [RandomAnimation] {
         zip(
             randomDurations(amount: amount),
@@ -122,7 +141,12 @@ extension AnimationPlannerTests {
     }
     
     func newView() -> UIView {
-        let view = UIView()
+        let view = UIView(frame: CGRect(
+            x: .large,
+            y: .large,
+            width: .large,
+            height: .large
+        ))
         window.addSubview(view)
         return view
     }

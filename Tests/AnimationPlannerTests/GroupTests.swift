@@ -180,4 +180,63 @@ class GroupTests: AnimationPlannerTests {
 
         }
     }
+    
+    /// Animates multiple sequences simultaneously, each with an increasing offset in their contained animations
+    func testGroupsWithOffsetSequenceAnimations() {
+        let numberOfGroups: Int = 4
+        let animations = randomDurations(amount: 2)
+        let delayMultiplier: Double = 0.2
+        
+        let totalDelay: TimeInterval = Double(numberOfGroups - 1) * delayMultiplier
+        let totalDuration: TimeInterval = totalDelay + animations.reduce(0, { $0 + $1 })
+        
+        let views = (0..<numberOfGroups).map { _ in
+            newView()
+        }
+        
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+            AnimationPlanner.group {
+                for index in 0..<numberOfGroups {
+                    let delay = Double(index) * delayMultiplier
+                    Sequence {
+                        Wait(delay)
+                        for duration in animations {
+                            Animate(duration: duration) {
+                                self.performRandomAnimation(on: views[index])
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /// Animates multiple sequences simultaneously, each with an increasing delay added through a delay modifier
+    func testGroupsWithDelayedSequences() {
+        let numberOfGroups: Int = 4
+        let animations = randomDurations(amount: 2)
+        let delayMultiplier: Double = 0.2
+        
+        let totalDelay: TimeInterval = Double(numberOfGroups - 1) * delayMultiplier
+        let totalDuration: TimeInterval = totalDelay + animations.reduce(0, { $0 + $1 })
+        
+        let views = (0..<numberOfGroups).map { _ in
+            newView()
+        }
+        
+        runAnimationBuilderTest(duration: totalDuration) { _, _ in
+            AnimationPlanner.group {
+                for index in 0..<numberOfGroups {
+                    let delay = Double(index) * delayMultiplier
+                    Sequence {
+                        for duration in animations {
+                            Animate(duration: duration) {
+                                self.performRandomAnimation(on: views[index])
+                            }
+                        }
+                    }.delayed(delay)
+                }
+            }
+        }
+    }
 }

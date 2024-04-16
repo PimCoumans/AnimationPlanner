@@ -9,7 +9,7 @@ public class RunningSequence {
         /// Sequence is performing animations
         case running
         /// Sequence has completed animations have completed
-        /// - Parameter finished: Wether animations have properly finished
+        /// - Parameter finished: Whether animations have properly finished
         case completed(finished: Bool)
         /// Sequence has been manually stopped
         case stopped
