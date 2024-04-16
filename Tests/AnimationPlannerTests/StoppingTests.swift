@@ -60,7 +60,7 @@ class StoppingTests: AnimationPlannerTests {
             }
             
             Extra {
-                // Cancelling animation after planen animation
+                // Cancelling animation after planned animation
                 runningSequence?.stopAnimations()
             }
             Wait(randomDuration)
