@@ -17,7 +17,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3E5C6DA62848C27B00720FE8 /* CAMediaTimingFunction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CAMediaTimingFunction.swift; sourceTree = "<group>"; };
 		3EF52D592848AEC7000F8222 /* AnimationPlanner-Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AnimationPlanner-Sample.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3EF52D5C2848AEC7000F8222 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3EF52D5E2848AEC7000F8222 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -72,7 +71,6 @@
 				3EF52D5C2848AEC7000F8222 /* AppDelegate.swift */,
 				3EF52D5E2848AEC7000F8222 /* SceneDelegate.swift */,
 				3EF52D602848AEC7000F8222 /* ViewController.swift */,
-				3E5C6DA62848C27B00720FE8 /* CAMediaTimingFunction.swift */,
 				3EF52D622848AEC7000F8222 /* Main.storyboard */,
 				3EF52D652848AEC8000F8222 /* Assets.xcassets */,
 				3EF52D672848AEC8000F8222 /* LaunchScreen.storyboard */,
@@ -120,7 +118,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1340;
-				LastUpgradeCheck = 1340;
+				LastUpgradeCheck = 1520;
 				TargetAttributes = {
 					3EF52D582848AEC7000F8222 = {
 						CreatedOnToolsVersion = 13.4;
@@ -227,6 +225,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -287,6 +286,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
