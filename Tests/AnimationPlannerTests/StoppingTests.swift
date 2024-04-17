@@ -47,7 +47,7 @@ class StoppingTests: AnimationPlannerTests {
         runAnimationBuilderTest(duration: stopDelay, expectFinished: false) { usedDuration, usedPrecision in
             runningSequence
         }
-        wait(for: [expectation])
+        wait(for: [expectation], timeout: duration + durationPrecision)
     }
     
     func testBasicStopping() {
