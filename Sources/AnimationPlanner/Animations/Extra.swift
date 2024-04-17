@@ -24,7 +24,7 @@ extension Extra: PerformsAnimations {
         }
         
         workItem.notify(queue: .main) { [weak workItem] in
-            let isFinished = workItem?.isCancelled != false
+            let isFinished = workItem?.isCancelled != true
             completion?(isFinished)
         }
         
