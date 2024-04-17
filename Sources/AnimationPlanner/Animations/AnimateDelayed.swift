@@ -53,4 +53,8 @@ extension AnimateDelayed: PerformsAnimations where Contained: PerformsAnimations
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         animation.animate(delay: delay + leadingDelay, completion: completion)
     }
+    
+    public func stop() {
+        animation.stop()
+    }
 }

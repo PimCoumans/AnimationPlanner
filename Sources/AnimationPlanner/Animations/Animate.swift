@@ -9,6 +9,9 @@ public struct Animate: Animation, SequenceAnimatable, GroupAnimatable {
     public internal(set) var options: UIView.AnimationOptions?
     public internal(set) var timingFunction: CAMediaTimingFunction?
     
+    /// Class that  holds stopped state
+    internal let stopper: Stopper
+    
     /// Creates a new animation, animating the properties updated in the ``changes`` closure
     ///
     /// Only the `duration` parameter is required, all other properties can be added or modified using ``AnimationModifiers``.
@@ -25,9 +28,25 @@ public struct Animate: Animation, SequenceAnimatable, GroupAnimatable {
         timingFunction: CAMediaTimingFunction? = nil,
         changes: @escaping () -> Void = {}
     ) {
+        let stopper = Stopper()
         self.duration = duration
         self.timingFunction = timingFunction
-        self.changes = changes
+        self.changes = { [weak stopper] in
+            guard stopper?.isStopped == false else {
+                return
+            }
+            stopper?.isRunning = true
+            changes()
+        }
+        self.stopper = stopper
+    }
+}
+
+extension Animate {
+    internal class Stopper {
+        var isRunning: Bool = false
+        var isStopped: Bool = false
+        var stopHandler: (() -> Void)?
     }
 }
 
@@ -55,5 +74,22 @@ extension Animate: PerformsAnimations {
         } else {
             createAnimations(completion)
         }
+    }
+    
+    public func stop() {
+        if stopper.isRunning {
+            UIView.animate(
+                withDuration: 0,
+                delay: 0,
+                options: [
+                    .beginFromCurrentState,
+                    .overrideInheritedDuration,
+                    .overrideInheritedOptions
+                ],
+                animations: changes
+            )
+            stopper.stopHandler?()
+        }
+        stopper.isStopped = true
     }
 }

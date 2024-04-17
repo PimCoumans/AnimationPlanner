@@ -10,6 +10,9 @@ public protocol PerformsAnimations {
     ///   - completion: Optional closure called when animation completes
     func animate(delay leadingDelay: TimeInterval, completion: ((_ finished: Bool) -> Void)?)
     
+    /// Cancels any currently running animations
+    func stop()
+    
     /// Queries the animation and possible contained animations to find the correct timing values to use to create an actual animation
     /// - Parameter leadingDelay: Delay to add before performing animation
     /// - Returns: Tuple containing a delay and duration in seconds

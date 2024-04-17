@@ -33,4 +33,8 @@ extension Sequence: PerformsAnimations {
             }
             .animate(delay: delay)
     }
+    
+    public func stop() {
+        runningSequence.stopAnimations()
+    }
 }

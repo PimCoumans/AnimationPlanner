@@ -4,7 +4,7 @@ import XCTest
 
 class ComplexAnimationTest: AnimationPlannerTests {
     
-    /// Creates a pretty complex animation with mutliple groups each containing multiple sequences
+    /// Creates a pretty complex animation with multiple groups each containing multiple sequences
     /// Groups can contain sequences that perform their animations in sequence, but each sequence
     /// is running at the same time in each group
     func testSequenceGroup() {

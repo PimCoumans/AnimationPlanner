@@ -5,9 +5,11 @@ import UIKit
 public struct Extra: SequenceAnimatable, GroupAnimatable {
     public let duration: TimeInterval = 0
     
-    public var perform: () -> Void
+    /// Work item used for actually executing the closure
+    private let workItem: DispatchWorkItem
+    
     public init(perform: @escaping () -> Void) {
-        self.perform = perform
+        workItem = DispatchWorkItem(block: perform)
     }
 }
 
@@ -15,16 +17,21 @@ extension Extra: PerformsAnimations {
     public func animate(delay leadingDelay: TimeInterval, completion: ((Bool) -> Void)?) {
         let timing = timingParameters(leadingDelay: leadingDelay)
         
-        let animation: () -> Void = {
-            self.perform()
-            completion?(true)
-        }
         guard timing.delay > 0 else {
-            animation()
+            workItem.perform()
+            completion?(true)
             return
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + timing.delay) {
-            animation()
+        
+        workItem.notify(queue: .main) { [weak workItem] in
+            let isFinished = workItem?.isCancelled != true
+            completion?(isFinished)
         }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + timing.delay, execute: workItem)
+    }
+    
+    public func stop() {
+        workItem.cancel()
     }
 }
