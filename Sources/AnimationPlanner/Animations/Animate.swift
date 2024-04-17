@@ -88,8 +88,8 @@ extension Animate: PerformsAnimations {
                 ],
                 animations: changes
             )
+            stopper.stopHandler?()
         }
-        stopper.stopHandler?()
         stopper.isStopped = true
     }
 }
