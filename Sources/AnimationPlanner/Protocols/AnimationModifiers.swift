@@ -25,13 +25,20 @@ public protocol AnimationModifiers: Animation {
     ///
     /// - Important: Timing functions are ignored when applied to an animation using spring interpolation (``AnimateSpring``)
     ///
-    /// - Parameter function: Custom CAMediaTimingFunction or any of the avaialble static extensions
+    /// - Parameter function: Custom CAMediaTimingFunction or any of the available static extensions
     func timingFunction(_ function: CAMediaTimingFunction) -> Self
     
     /// Sets the ``Animation/changes`` to be performed for your animation. Could be used when it‘s convenient to add your animation changes at a later state, e.g., after applying other modifiers to your ``Animate`` struct.
     /// - Parameter changes: Change properties to animate in this closure
     /// - Note: This replaces any previous animation changes set
     func changes(_ changes: @escaping () -> Void) -> Self
+    
+    /// Adds a handler to be called when the animation is stopped. This handler is only called for the animations that are currently being run.
+    ///
+    /// Calling `view.layer.removeAllAnimations()`  immediately stops  animations for all views updated with this animation,
+    /// - Parameter stopHandler: Closure called when animation is stopped
+    /// - Note: This method is only useful for long-running or repeating animations, as these are usually not stopped by stopping the running sequence.
+    func onStopped(_ stopHandler: @escaping () -> Void) -> Self
 }
 
 extension Animate: AnimationModifiers {
@@ -47,6 +54,9 @@ extension Animate: AnimationModifiers {
     }
     public func changes(_ changes: @escaping () -> Void) -> Animate {
         mutate { $0.changes = changes }
+    }
+    public func onStopped(_ stopHandler: @escaping () -> Void) -> Animate {
+        mutate { $0.stopper.stopHandler = stopHandler }
     }
 }
 
@@ -127,9 +137,6 @@ extension Extra: Mutable { }
 
 extension AnimateSpring: Mutable { }
 extension AnimateSpring: AnimationModifiers where Contained: AnimationModifiers {
-    func modifyAnimation(_ handler: (AnimationModifiers) -> Contained) -> Self {
-        mutate { $0.animation = handler(animation) }
-    }
     public func options(_ options: UIView.AnimationOptions) -> Self {
         mutate { $0.animation = animation.options(options) }
     }
@@ -141,6 +148,9 @@ extension AnimateSpring: AnimationModifiers where Contained: AnimationModifiers 
     }
     public func changes(_ changes: @escaping () -> Void) -> Self {
         mutate { $0.animation = animation.changes(changes) }
+    }
+    public func onStopped(_ stopHandler: @escaping () -> Void) -> AnimateSpring<Springed> {
+        mutate { $0.animation = animation.onStopped(stopHandler) }
     }
 }
 
@@ -157,5 +167,8 @@ extension AnimateDelayed: AnimationModifiers where Contained: Animation & Animat
     }
     public func changes(_ changes: @escaping () -> Void) -> Self {
         mutate { $0.animation = animation.changes(changes) }
+    }
+    public func onStopped(_ stopHandler: @escaping () -> Void) -> AnimateDelayed<Delayed> {
+        mutate { $0.animation = animation.onStopped(stopHandler) }
     }
 }
