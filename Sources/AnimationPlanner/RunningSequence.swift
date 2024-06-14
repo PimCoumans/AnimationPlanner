@@ -111,7 +111,7 @@ extension RunningSequence {
         }
         
         remainingAnimations = Array(impendingAnimations.dropFirst())
-        let duration = (animation as? Animatable)?.duration ?? 0
+        let duration = animation.duration
         let completionDuration = duration + leadingDelay
         
         let startTime = CACurrentMediaTime()
