@@ -28,21 +28,21 @@ public struct Group: SequenceAnimatable {
 extension Group: PerformsAnimations {
     
     public func animate(delay: TimeInterval, completion: ((Bool) -> Void)?) {
-        var sortedAnimations = animations
-            .sorted { $0.duration < $1.duration }
-            .compactMap { $0 as? PerformsAnimations }
-        
-        guard !sortedAnimations.isEmpty else {
+        let animations = animations.compactMap { $0 as? PerformsAnimations }
+        guard let longestDuration = animations.map(\.duration).max() else {
             completion?(true)
             return
         }
+        var hasAddedCompletionHandler: Bool = false
         
-        let longestAnimation = sortedAnimations.removeLast()
-        
-        sortedAnimations.forEach { animation in
-            animation.animate(delay: delay, completion: nil)
+        for animation in animations {
+            if animation.duration >= longestDuration, !hasAddedCompletionHandler {
+                hasAddedCompletionHandler = true
+                animation.animate(delay: delay, completion: completion)
+            } else {
+                animation.animate(delay: delay, completion: nil)
+            }
         }
-        longestAnimation.animate(delay: delay, completion: completion)
     }
     
     public func stop() {
