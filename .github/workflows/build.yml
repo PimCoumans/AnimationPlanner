@@ -2,6 +2,15 @@ name: Swift
 on: [push]
 
 jobs:
+  documentation:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Generate documentation
+      run: xcodebuild docbuild -scheme AnimationPlanner -derivedDataPath DerivedData -destination 'platform=iOS Simulator,name=iPhone 13'
+    - name: Process documentation
+      run: $(xcrun --find docc) process-archive transform-for-static-hosting DerivedData/Build/Products/Debug-iphonesimulator/AnimationPlanner.doccarchive --output-path ./docs --hosting-base-path AnimationPlanner
+        
   build:
     runs-on: macos-latest
     steps:
